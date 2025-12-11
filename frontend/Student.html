@@ -1,0 +1,26 @@
+<!-- Student.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>TTMS - Student</title>
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+</head>
+<body>
+  <div class="w3-sidebar w3-bar-block" style="width:200px;">
+    <a href="#" class="w3-bar-item w3-button w3-blue">Student Dashboard</a>
+    <a href="StudentTimetable.html" class="w3-bar-item w3-button">My Timetable</a>
+    <!-- ... -->
+  </div>
+  <div style="margin-left:200px">
+    <h1>Student View</h1>
+    <!-- content -->
+  </div>
+
+  <script>
+    // Check session
+    if (!localStorage.getItem("TTMSFC_userSession")) {
+      window.location.replace("index.html");
+    }
+  </script>
+</body>
+</html>

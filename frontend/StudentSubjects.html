@@ -1,0 +1,125 @@
+<div class="w3-container">
+  <h3>My Subjects</h3>
+  
+  <!-- Dropdown to select session/semester -->
+  <div class="w3-margin-bottom">
+    <label for="sessionSelect">Select Session/Semester:</label>
+    <select id="sessionSelect" class="w3-select" onchange="showSelectedSubjects()">
+      <option value="">Loading...</option>
+    </select>
+  </div>
+
+  <!-- Container to display subjects for the selected session -->
+  <div id="subjectsContent">
+    <p>Select a session/semester to view your subjects.</p>
+  </div>
+</div>
+
+<script>
+  let allSubjects = []; // Store raw data globally for filtering
+
+  (function() {
+    var userSession = localStorage.getItem("TTMSFC_userSession");
+    if (!userSession) {
+      $("#subjectsContent").html("<p class='w3-text-red'>Session expired. Please login again.</p>");
+      $("#sessionSelect").html("<option>Not logged in</option>");
+      return;
+    }
+    
+    var user = JSON.parse(userSession);
+    var matricNo = user.login_name;
+    
+    console.log("Fetching subjects for:", matricNo);
+    var url = "http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar_subjek&no_matrik=" + matricNo;
+
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          allSubjects = data;
+          populateSessionDropdown(data);
+          // Optionally auto-select the latest session
+          const latestKey = Object.keys(groupSubjects(data))[0];
+          if (latestKey) {
+            document.getElementById("sessionSelect").value = latestKey;
+            showSelectedSubjects();
+          }
+        } else {
+          $("#sessionSelect").html("<option>No sessions available</option>");
+          $("#subjectsContent").html("<div class='w3-panel w3-pale-yellow w3-border'><p>No subjects found.</p></div>");
+        }
+      })
+      .catch(err => {
+        console.error("Error loading subjects:", err);
+        $("#sessionSelect").html("<option>Error loading</option>");
+        $("#subjectsContent").html("<div class='w3-panel w3-pale-red w3-border'><p>Failed to load subjects.</p></div>");
+      });
+  })();
+
+  function groupSubjects(data) {
+    const grouped = {};
+    data.forEach(item => {
+      const key = (item.sesi || 'Unknown') + ' - Sem ' + (item.semester || 'N/A');
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(item);
+    });
+    return grouped;
+  }
+
+  function populateSessionDropdown(data) {
+    const grouped = groupSubjects(data);
+    const select = document.getElementById("sessionSelect");
+    let options = '<option value="">-- All Sessions --</option>';
+    
+    // Sort keys chronologically if possible (optional improvement)
+    const sortedKeys = Object.keys(grouped).sort().reverse(); // e.g., newest first
+
+    sortedKeys.forEach(key => {
+      options += `<option value="${key}">${key}</option>`;
+    });
+    
+    select.innerHTML = options;
+  }
+
+  function showSelectedSubjects() {
+    const selectedKey = document.getElementById("sessionSelect").value;
+    const grouped = groupSubjects(allSubjects);
+    
+    if (!selectedKey) {
+      // Show all sessions (original view)
+      let html = '';
+      for (let key in grouped) {
+        html += buildSubjectTable(key, grouped[key]);
+      }
+      $("#subjectsContent").html(html || "<p>No subjects to display.</p>");
+    } else if (grouped[selectedKey]) {
+      $("#subjectsContent").html(buildSubjectTable(selectedKey, grouped[selectedKey]));
+    } else {
+      $("#subjectsContent").html("<p>No subjects found for this session.</p>");
+    }
+  }
+
+  function buildSubjectTable(title, subjects) {
+    let html = `<div class="w3-panel w3-card-4" style="margin-bottom:20px;">`;
+    html += `<header class="w3-container w3-blue"><h4>${title}</h4></header>`;
+    html += `<table class="w3-table-all w3-hoverable">`;
+    html += `<thead><tr class="w3-light-blue">
+               <th>Course Code</th>
+               <th>Course Name</th>
+               <th>Section</th>
+             </tr></thead><tbody>`;
+
+    subjects.forEach(item => {
+      html += `<tr>
+                 <td>${item.kod_subjek || 'N/A'}</td>
+                 <td>${item.nama_subjek || 'N/A'}</td>
+                 <td>${item.seksyen || 'N/A'}</td>
+               </tr>`;
+    });
+
+    html += `</tbody></table>`;
+    html += `<div class="w3-container"><p><b>Total Subjects:</b> ${subjects.length}</p></div>`;
+    html += `</div>`;
+    return html;
+  }
+</script>

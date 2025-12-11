@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Class Schedule</title>
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+</head>
+<body>
+
+<div class="w3-container">
+  <h3>My Class Schedule</h3>
+
+  <!-- Session / Semester Selection -->
+  <div class="w3-row-padding w3-margin-bottom">
+    <div class="w3-third">
+      <label>Select Session:</label>
+      <select id="sessionSelect" class="w3-select">
+        <option value="2024/2025">2024/2025</option>
+        <option value="2025/2026" selected>2025/2026</option>
+      </select>
+    </div>
+
+    <div class="w3-third">
+      <label>Select Semester:</label>
+      <select id="semesterSelect" class="w3-select">
+        <option value="1" selected>Semester 1</option>
+        <option value="2">Semester 2</option>
+      </select>
+    </div>
+
+    <div class="w3-third">
+      <label>&nbsp;</label>
+      <button class="w3-button w3-blue w3-block" onclick="loadTimetable()">
+        Load Timetable
+      </button>
+    </div>
+  </div>
+
+  <div id="timetableContent">
+    <p>Please select a session & semester.</p>
+  </div>
+</div>
+
+<script>
+async function loadTimetable() {
+  var userSession = localStorage.getItem("TTMSFC_userSession");
+  if (!userSession) {
+    document.getElementById("timetableContent").innerHTML =
+      "<p class='w3-text-red'>Session expired. Please login again.</p>";
+    return;
+  }
+
+  var user = JSON.parse(userSession);
+  var studentId = user.login_name;
+
+  var sesi = document.getElementById("sessionSelect").value;
+  var semester = document.getElementById("semesterSelect").value;
+
+  document.getElementById("timetableContent").innerHTML =
+    "<p>Loading timetable...</p>";
+
+  try {
+    // Step 1: Get enrolled subjects with section
+    const urlPelajar =
+      `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar_subjek&no_matrik=${studentId}`;
+    const resPelajar = await fetch(urlPelajar);
+    const dataPelajar = await resPelajar.json();
+
+    if (!Array.isArray(dataPelajar) || dataPelajar.length === 0) {
+      document.getElementById("timetableContent").innerHTML =
+        "<div class='w3-panel w3-pale-yellow w3-border'>" +
+        "<p>No enrolled subjects found.</p></div>";
+      return;
+    }
+
+// Step 2: Fetch lecturer info
+const urlSubjekSeksyen =
+  `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=subjek_seksyen&sesi=${sesi}&semester=${semester}`;
+const resSubjekSeksyen = await fetch(urlSubjekSeksyen);
+const dataSubjekSeksyen = await resSubjekSeksyen.json();
+
+// Build lecturer map from seksyen_list
+const lecturerMap = {};
+if (Array.isArray(dataSubjekSeksyen)) {
+  dataSubjekSeksyen.forEach(subject => {
+    const kod = subject.kod_subjek;
+    if (Array.isArray(subject.seksyen_list)) {
+      subject.seksyen_list.forEach(sec => {
+        const key = `${kod}-${sec.seksyen}`;
+        lecturerMap[key] = (sec.pensyarah || '—').trim();
+      });
+    }
+  });
+}
+
+    // Step 3: Fetch timetable for each course-section
+const timetablePromises = dataPelajar.map(async (subjek) => {
+  const urlJadual = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=jadual_subjek&sesi=${sesi}&semester=${semester}&kod_subjek=${subjek.kod_subjek}&seksyen=${subjek.seksyen}`;
+  const res = await fetch(urlJadual);
+  const data = await res.json();
+
+  // Filter out invalid entries (hari=0 or masa=0)
+  const validEntries = (Array.isArray(data) ? data : [])
+    .filter(entry => 
+      entry.hari && parseInt(entry.hari) > 0 && 
+      entry.masa && parseInt(entry.masa) > 0
+    );
+
+  // Attach course name and lecturer to valid entries
+  return validEntries.map(entry => ({
+    ...entry,
+    course_name: subjek.nama_subjek || '—',
+    lecturer_name: lecturerMap[`${subjek.kod_subjek}-${subjek.seksyen}`] || '—'
+  }));
+});
+
+    const timetableArrays = await Promise.all(timetablePromises);
+    const allTimetableEntries = timetableArrays.flat();
+
+    if (allTimetableEntries.length === 0) {
+      document.getElementById("timetableContent").innerHTML =
+        "<div class='w3-panel w3-pale-yellow w3-border'>" +
+        "<p>No timetable data found for your sections in this session/semester.</p></div>";
+      return;
+    }
+
+    displayTimetable(allTimetableEntries);
+  } catch (err) {
+    console.error(err);
+    document.getElementById("timetableContent").innerHTML =
+      "<div class='w3-panel w3-pale-red w3-border'>" +
+      "<p>Error loading timetable.</p><p>" + (err.message || err.toString()) + "</p></div>";
+  }
+}
+
+function displayTimetable(data) {
+  // Helper: Map hari number to day name
+  const hariMap = {
+    2: "Monday",
+    3: "Tuesday",
+    4: "Wednesday",
+    5: "Thursday",
+    6: "Friday",
+    7: "Saturday",
+    8: "Sunday"
+  };
+
+  // Helper: Map masa to time range (based on UTM standard)
+  const masaMap = {
+    2: "08:00 - 09:00",
+    3: "09:00 - 10:00",
+    4: "10:00 - 11:00",
+    5: "11:00 - 12:00",
+    6: "12:00 - 13:00",
+    7: "13:00 - 14:00",
+    8: "14:00 - 15:00",
+    9: "15:00 - 16:00",
+    10: "16:00 - 17:00"
+  };
+
+  let html = `
+    <table class="w3-table-all w3-hoverable w3-card-4">
+      <thead>
+        <tr class="w3-blue">
+          <th>Course Code</th>
+          <th>Course Name</th>
+          <th>Section</th>
+          <th>Day</th>
+          <th>Time</th>
+          <th>Room</th>
+          <th>Lecturer</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  data.forEach(item => {
+    const course_code = item.kod_subjek || '—';
+    const course_name = item.course_name || '—';
+    const section = item.seksyen || '—';
+    const hariNum = parseInt(item.hari) || 0;
+    const day = hariMap[hariNum] || `Day ${hariNum}`;
+    const masaNum = parseInt(item.masa) || 0;
+    const timeRange = masaMap[masaNum] || `Slot ${masaNum}`;
+    
+    const roomObj = item.ruang || {};
+    const roomCode = roomObj.kod_ruang || '—';
+    const roomShort = roomObj.nama_ruang_singkatan || '—';
+    const roomDisplay = `${roomCode} (${roomShort})`;
+
+    const lecturer_name = item.lecturer_name || '—';
+
+    html += `
+      <tr>
+        <td>${course_code}</td>
+        <td>${course_name}</td>
+        <td>${section}</td>
+        <td>${day}</td>
+        <td>${timeRange}</td>
+        <td>${roomDisplay}</td>
+        <td>${lecturer_name}</td>
+      </tr>
+    `;
+  });
+
+  html += `
+      </tbody>
+    </table>
+    <div class="w3-panel w3-pale-green w3-border" style="margin-top:20px;">
+      <p><b>Total Classes:</b> ${data.length}</p>
+    </div>
+  `;
+
+  document.getElementById("timetableContent").innerHTML = html;
+}
+</script>
+
+</body>
+</html>

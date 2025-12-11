@@ -1,66 +1,117 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>TimeTable Management System</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-  <!-- Optional: jQuery (not needed with Vue, but included per request) -->
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <title>TTMS - Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+  <style>
+    body { background: #f0f5ff; padding-top: 80px; }
+    .login-box { max-width: 320px; margin: auto; background: white; padding: 28px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .w3-btn { width: 100%; margin-top: 20px; padding: 10px; }
+    .error { color: #d32f2f; margin-top: 10px; text-align: center; }
+  </style>
 </head>
 <body>
-  <div id="app">
-    <h1 v-if="!user">UTM TimeTable System</h1>
-
-    <!-- Login Form -->
-    <div v-if="!user" class="login-container">
-      <input v-model="login.id" placeholder="Matric / Staff ID" />
-      <input v-model="login.password" type="password" placeholder="Password" />
-      <select v-model="login.role">
-        <option value="student">Student</option>
-        <option value="lecturer">Lecturer</option>
-        <option value="admin">Admin</option>
-      </select>
-      <button @click="handleLogin">Login</button>
-      <p v-if="error" class="error">{{ error }}</p>
-    </div>
-
-    <!-- Dashboard -->
-    <div v-else>
-      <h2>Welcome, {{ user.name }} ({{ user.role }})</h2>
-      <button @click="logout">Logout</button>
-
-      <!-- Student View -->
-      <div v-if="user.role === 'student'">
-        <h3>Your Timetable</h3>
-        <div v-if="loading">Loading...</div>
-        <div v-else>
-          <div v-for="session in timetable" :key="session.course" class="session-card">
-            <strong>{{ session.course }}</strong><br/>
-            {{ session.day }}, {{ session.start }}–{{ session.end }}<br/>
-            Venue: {{ session.venue }}
-          </div>
-        </div>
-      </div>
-
-      <!-- Lecturer View -->
-      <div v-else-if="user.role === 'lecturer'">
-        <h3>Your Teaching Schedule</h3>
-        <p>View-only (updates require admin approval)</p>
-        <!-- Same timetable display -->
-      </div>
-
-      <!-- Admin View -->
-      <div v-else-if="user.role === 'admin'">
-        <h3>Room Utilization Report</h3>
-        <p>Aggregated data from UTM service (simulated)</p>
-        <div class="report-card">N28-03: 72% utilized</div>
-        <div class="report-card">N28-05: 60% utilized</div>
-      </div>
-    </div>
+  <div class="login-box">
+    <h2 class="w3-center"><b>FC-UTM</b><br>TimeTable System</h2>
+    
+    <label class="w3-text-blue"><b>Matric / Staff ID</b></label>
+    <input class="w3-input w3-border" type="text" id="login" placeholder="e.g. A23CS0086" required>
+    
+    <label class="w3-text-blue"><b>Password (NRIC)</b></label>
+    <input class="w3-input w3-border" type="password" id="password" placeholder="e.g. 991231011234" required>
+    
+    <button class="w3-btn w3-blue" id="btnLogin">Login</button>
+    
+    <p id="msg" class="error" style="min-height: 22px;"></p>
   </div>
 
-  <script src="app.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script>
+  // Redirect if already logged in
+  const session = localStorage.getItem("TTMSFC_userSession");
+  if (session) {
+    const user = JSON.parse(session);
+    const role = user.inferredRole || "student"; // fallback
+
+    if (role === "lecturer") {
+      window.location.replace("Lecturer.html");
+    } else if (role === "admin") {
+      window.location.replace("Admin.html");
+    } else {
+      window.location.replace("Main.html");
+    }
+  }
+
+  $("#btnLogin").click(function() {
+    const login = $("#login").val().trim();
+    const password = $("#password").val().trim();
+
+    if (!login || !password) {
+      alert("Please fill in both fields.");
+      return;
+    }
+
+    const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=authentication&login=${encodeURIComponent(login)}&password=${encodeURIComponent(password)}`;
+
+    fetch(url)
+      .then(res => {
+        if (!res.ok) throw new Error("Network or server error");
+        return res.json();
+      })
+      .then(jsonInst => {
+        if (!Array.isArray(jsonInst) || jsonInst.length === 0) {
+          throw new Error("Invalid credentials");
+        }
+
+        const user = jsonInst[0]; // raw user data from API
+
+        // 🔍 INFER ROLE FROM LOGIN ID
+        let inferredRole = "student"; // default
+
+        if (/^[AB]\d/i.test(login)) {
+          // Starts with A or B → Student
+          inferredRole = "student";
+        } else if (/^\d+$/.test(login)) {
+          // All digits → Lecturer (or Staff)
+          inferredRole = "lecturer";
+
+          // Optional: if you know admin IDs (e.g., < 1000), handle it:
+          // if (parseInt(login) < 1000) inferredRole = "admin";
+        } else {
+          // Unknown format
+          throw new Error("Unrecognized user ID format");
+        }
+
+        // Save user + inferred role
+        const sessionData = {
+          ...user,
+          login: login,
+          inferredRole: inferredRole
+        };
+
+        localStorage.setItem("TTMSFC_userSession", JSON.stringify(sessionData));
+        alert("Login successful!");
+
+        // Redirect based on inferred role
+        if (inferredRole === "lecturer") {
+          window.location.replace("Lecturer.html");
+        } else if (inferredRole === "admin") {
+          window.location.replace("Admin.html");
+        } else {
+          window.location.replace("Main.html");
+        }
+      })
+      .catch(err => {
+        console.error("Login failed:", err);
+        alert("Login failed! Invalid ID, password, or unsupported user type.");
+      });
+  });
+
+  // Enter key support
+  $("#password").keypress(function(e) {
+    if (e.which === 13) $("#btnLogin").click();
+  });
+</script>
 </body>
 </html>

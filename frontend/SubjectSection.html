@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Subject Sections</title>
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <style>
+    .search-container { margin: 15px 0; }
+    .search-container input {
+      padding: 8px;
+      width: 100%;
+      max-width: 500px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .loading { color: #1976D2; font-style: italic; }
+  </style>
+</head>
+<body>
+
+<div class="w3-container">
+  <h3>Subject Sections – With Class Schedule</h3>
+
+  <!-- Session / Semester -->
+  <div class="w3-row-padding w3-margin-bottom">
+    <div class="w3-third">
+      <label>Select Session:</label>
+      <select id="sessionSelect" class="w3-select">
+        <option value="2024/2025">2024/2025</option>
+        <option value="2025/2026" selected>2025/2026</option>
+      </select>
+    </div>
+    <div class="w3-third">
+      <label>Select Semester:</label>
+      <select id="semesterSelect" class="w3-select">
+        <option value="1" selected>Semester 1</option>
+        <option value="2">Semester 2</option>
+        <option value="3">Semester 3</option>
+      </select>
+    </div>
+    <div class="w3-third">
+      <label>&nbsp;</label>
+      <button class="w3-button w3-blue w3-block" onclick="loadSubjectSections()">
+        Load Sections
+      </button>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div id="searchContainer" class="search-container" style="display:none;">
+    <input type="text" id="searchInput" placeholder="Search by course code, subject name, or lecturer..." onkeyup="filterSections()">
+  </div>
+
+  <div id="sectionsContent">
+    <p>Please select session & semester, then click <strong>Load Sections</strong>.</p>
+  </div>
+</div>
+
+<script>
+// === Time/day mappings (exactly as in your timetable) ===
+const hariMap = {
+  2: "Monday", 3: "Tuesday", 4: "Wednesday",
+  5: "Thursday", 6: "Friday", 7: "Saturday", 8: "Sunday"
+};
+
+const masaMap = {
+  2: "08:00 - 09:00", 3: "09:00 - 10:00", 4: "10:00 - 11:00",
+  5: "11:00 - 12:00", 6: "12:00 - 13:00", 7: "13:00 - 14:00",
+  8: "14:00 - 15:00", 9: "15:00 - 16:00", 10: "16:00 - 17:00"
+};
+// =======================================================
+
+let globalEnrichedData = [];
+
+async function loadSubjectSections() {
+  const userSession = localStorage.getItem("TTMSFC_userSession");
+  if (!userSession) {
+    document.getElementById("sectionsContent").innerHTML =
+      "<p class='w3-text-red'>Session expired. Please log in again.</p>";
+    document.getElementById("searchContainer").style.display = "none";
+    return;
+  }
+
+  const sesi = document.getElementById("sessionSelect").value;
+  const semester = document.getElementById("semesterSelect").value;
+
+  document.getElementById("sectionsContent").innerHTML = 
+    "<p class='loading'>Loading subjects... (parallel fetch)</p>";
+  document.getElementById("searchContainer").style.display = "none";
+
+  try {
+    // Fetch all offered subjects
+    const urlSections = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=subjek_seksyen&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}`;
+    const resSec = await fetch(urlSections);
+    const sectionData = await resSec.json();
+
+    if (!Array.isArray(sectionData) || sectionData.length === 0) {
+      document.getElementById("sectionsContent").innerHTML =
+        `<div class='w3-panel w3-pale-yellow w3-border'>
+          <p>No subjects offered for ${sesi} Semester ${semester}.</p>
+        </div>`;
+      return;
+    }
+
+    // Build parallel requests for all sections
+    const fetchPromises = [];
+
+    sectionData.forEach(subj => {
+      const kod = (subj.kod_subjek || '').trim();
+      const nama = (subj.nama_subjek || '').trim();
+
+      if (!subj.seksyen_list || !Array.isArray(subj.seksyen_list)) return;
+
+      subj.seksyen_list.forEach(sec => {
+        const seksyen = (sec.seksyen || '').trim();
+        const lecturer = (sec.pensyarah || '').trim();
+        const enrolled = sec.bil_pelajar || 0;
+
+        // Build normalized searchable string (for later)
+        const searchable = [kod, nama, lecturer]
+          .filter(x => x) // remove empty
+          .join(' ')
+          .toLowerCase();
+
+        const promise = (async () => {
+          try {
+            const urlJadual = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=jadual_subjek&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}&kod_subjek=${encodeURIComponent(kod)}&seksyen=${encodeURIComponent(seksyen)}`;
+            const res = await fetch(urlJadual);
+            const jadualList = await res.json();
+
+            const scheduleEntries = (Array.isArray(jadualList) ? jadualList : [])
+              .filter(e => e.hari && e.masa)
+              .map(e => ({
+                day: hariMap[e.hari] || `Day ${e.hari}`,
+                time: masaMap[e.masa] || `Slot ${e.masa}`,
+                room: (e.ruang?.kod_ruang) || '—'
+              }));
+
+            return { kod, nama, seksyen, lecturer, enrolled, scheduleEntries, searchable };
+          } catch (err) {
+            return { kod, nama, seksyen, lecturer, enrolled, scheduleEntries: [], searchable };
+          }
+        })();
+
+        fetchPromises.push(promise);
+      });
+    });
+
+    const enrichedData = await Promise.all(fetchPromises);
+
+    // Group by course code
+    const grouped = {};
+    enrichedData.forEach(item => {
+      const key = item.kod || 'UNKNOWN';
+      if (!grouped[key]) {
+        grouped[key] = { kod: item.kod, nama: item.nama, sections: [] };
+      }
+      grouped[key].sections.push(item);
+    });
+
+    globalEnrichedData = enrichedData;
+    renderSections(Object.values(grouped), sesi, semester);
+    document.getElementById("searchContainer").style.display = "block";
+  } catch (err) {
+    console.error(err);
+    document.getElementById("sectionsContent").innerHTML =
+      `<div class='w3-panel w3-pale-red w3-border'>
+        <p><strong>Error loading sections.</strong></p>
+        <p>${err.message || 'Unknown error'}</p>
+      </div>`;
+  }
+}
+
+function renderSections(groups, sesi, semester) {
+  let html = `<h4>Subjects Offered – ${sesi} Semester ${semester}</h4>`;
+
+  groups.forEach(group => {
+    // Combine searchable text from all sections
+    const allSearchable = group.sections
+      .map(s => s.searchable)
+      .join(' ')
+      .replace(/"/g, '&quot;') // escape quotes for HTML attribute
+
+    html += `
+      <div class="w3-panel w3-card-4 subject-item" data-search="${allSearchable}" style="margin-bottom:20px;">
+        <header class="w3-container w3-teal">
+          <h5>${group.kod || '—'} – ${group.nama || 'Unnamed Subject'}</h5>
+        </header>
+        <table class="w3-table-all w3-hoverable">
+          <thead>
+            <tr class="w3-light-grey">
+              <th>Section</th>
+              <th>Lecturer</th>
+              <th>Enrolled</th>
+              <th>Schedule (Day – Time – Room)</th>
+            </tr>
+          </thead>
+          <tbody>`;
+
+    group.sections.forEach(sec => {
+      let scheduleHtml = '';
+      if (sec.scheduleEntries.length > 0) {
+        sec.scheduleEntries.forEach(entry => {
+          scheduleHtml += `${entry.day} – ${entry.time} – ${entry.room}<br>`;
+        });
+      } else {
+        scheduleHtml = '<span class="w3-text-gray">No schedule</span>';
+      }
+
+      html += `
+        <tr>
+          <td><strong>${sec.seksyen || '—'}</strong></td>
+          <td>${sec.lecturer || 'TBA'}</td>
+          <td>${sec.enrolled}</td>
+          <td>${scheduleHtml}</td>
+        </tr>`;
+    });
+
+    html += `
+          </tbody>
+        </table>
+        <div class="w3-container"><p><b>Total Sections:</b> ${group.sections.length}</p></div>
+      </div>`;
+  });
+
+  html += `
+    <div class="w3-panel w3-pale-green w3-border">
+      <p><b>Total Sections Loaded:</b> ${globalEnrichedData.length}</p>
+    </div>`;
+
+  document.getElementById("sectionsContent").innerHTML = html;
+}
+
+// ✅ FIXED SEARCH: supports "mobile app", "nor erne", "MCST1013", etc.
+function filterSections() {
+  const input = document.getElementById("searchInput").value.trim();
+  const items = document.querySelectorAll(".subject-item");
+
+  if (!input) {
+    items.forEach(item => item.style.display = "");
+    return;
+  }
+
+  // Split query into words and normalize
+  const queryWords = input
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(word => word.length > 0);
+
+  items.forEach(item => {
+    const searchableText = (item.getAttribute("data-search") || "").toLowerCase();
+    // Only show if ALL query words are found
+    const matches = queryWords.every(word => searchableText.includes(word));
+    item.style.display = matches ? "" : "none";
+  });
+}
+</script>
+</body>
+</html>

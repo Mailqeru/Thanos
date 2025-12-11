@@ -1,0 +1,51 @@
+<div class="w3-container">
+  <h2>My Teaching Schedule</h2>
+  <div id="lecturerTimetable">
+    <p>Loading your schedule...</p>
+  </div>
+  <div class="w3-panel w3-yellow w3-margin-top">
+    <h3>⚠️ Update Request</h3>
+    <p>To change your class time or venue, please contact Faculty Admin at <b>admin@fc.utm.my</b>.</p>
+  </div>
+</div>
+
+<script>
+$(document).ready(function() {
+  const user = JSON.parse(localStorage.getItem("TTMSFC_userSession"));
+  const staffId = user.login;
+
+  const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=timetable&lecturer=${encodeURIComponent(staffId)}`;
+
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      if (!Array.isArray(data) || data.length === 0) {
+        $("#lecturerTimetable").html("<p>No teaching assignments found.</p>");
+        return;
+      }
+
+      let html = '<div class="w3-row">';
+      data.forEach(s => {
+        html += `
+          <div class="w3-col s12 m6 l4 w3-padding">
+            <div class="w3-card">
+              <div class="w3-container w3-green">
+                <h5>${s.course_code || 'N/A'}</h5>
+              </div>
+              <div class="w3-container w3-padding">
+                <p>${s.day_of_week}, ${s.start_time} - ${s.end_time}</p>
+                <p>Venue: ${s.venue || 'TBA'}</p>
+                <p>Students: ${s.student_count || 'N/A'}</p>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      $("#lecturerTimetable").html(html);
+    })
+    .catch(err => {
+      $("#lecturerTimetable").html("<p class='w3-text-red'>Failed to load schedule.</p>");
+    });
+});
+</script>

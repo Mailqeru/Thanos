@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>TTMS - Admin Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; }
+    .link { cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="w3-sidebar w3-bar-block w3-collapse w3-card w3-animate-left" style="width:220px;" id="mySidebar">
+    <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">Close &times;</button>
+    <a href="#" class="w3-bar-item w3-button w3-red" id="navTitle">Admin Panel</a>
+    <a href="#" class="w3-bar-item w3-button link" id="navDashboard">Dashboard</a>
+    <a href="#" class="w3-bar-item w3-button link" id="navUsers">Manage Users</a>
+    <a href="#" class="w3-bar-item w3-button link" id="navSubjects">Manage Subjects</a>
+    <a href="#" class="w3-bar-item w3-button link" id="navTimetables">Timetable Engine</a>
+    <a href="#" class="w3-bar-item w3-button link" id="navReports">Reports</a>
+    <a href="#" class="w3-bar-item w3-button link" id="navLogout">Logout</a>
+  </div>
+
+  <div class="w3-main" style="margin-left:220px">
+    <div class="w3-teal">
+      <button class="w3-button w3-teal w3-xlarge w3-hide-large" onclick="w3_open()">&#9776;</button>
+      <div class="w3-container">
+        <h1 id="pageHeader">Loading...</h1>
+      </div>
+    </div>
+
+    <div class="w3-container" id="content" style="margin-top:30px;">
+      <p>Loading...</p>
+    </div>
+  </div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script>
+    function w3_open() {
+      document.getElementById("mySidebar").style.display = "block";
+    }
+    function w3_close() {
+      document.getElementById("mySidebar").style.display = "none";
+    }
+
+    // Check session
+    const session = localStorage.getItem("TTMSFC_userSession");
+    if (!session) {
+      window.location.replace("index.html");
+    }
+
+    const user = JSON.parse(session);
+    // Optional: Add extra check if you want only specific IDs as admin
+    // e.g., if (!['1001','1002'].includes(user.login)) window.location.replace("Lecturer.html");
+
+    const userName = user.full_name || user.login || "Admin";
+    document.getElementById("navTitle").innerText = "Hi, " + userName;
+    document.getElementById("pageHeader").innerText = "Welcome, " + userName + " (Admin)";
+
+    // Logout
+    document.getElementById("navLogout").onclick = function() {
+      if (confirm("Logout now?")) {
+        localStorage.removeItem("TTMSFC_userSession");
+        window.location.replace("index.html");
+      }
+    };
+
+    // Navigation loader
+    function loadPage(pageName, fileName, header) {
+      document.getElementById("nav" + pageName).onclick = function() {
+        $("#content").load(fileName, function(response, status, xhr) {
+          if (status === "error") {
+            $("#content").html(`<p class='w3-text-red'>Failed to load ${header}.</p>`);
+          } else {
+            document.getElementById("pageHeader").innerText = header;
+          }
+        });
+      };
+    }
+
+    // Register admin pages
+    loadPage("Dashboard", "AdminDashboard.html", "Admin Dashboard");
+    loadPage("Users", "ManageUsers.html", "Manage Users");
+    loadPage("Subjects", "ManageSubjects.html", "Manage Subjects");
+    loadPage("Timetables", "TimetableEngine.html", "Timetable Engine");
+    loadPage("Reports", "Reports.html", "System Reports");
+
+    // Default content
+    $(document).ready(function() {
+      $("#content").html(`
+        <div class='w3-panel w3-pale-red w3-border'>
+          <h3>Admin Dashboard</h3>
+          <p>You have full access to manage users, subjects, and timetable configurations.</p>
+          <p>Admin ID: <b>${user.login}</b></p>
+        </div>
+      `);
+    });
+  </script>
+</body>
+</html>

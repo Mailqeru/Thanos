@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>TTMS - Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; }
+    .link { cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="w3-sidebar w3-bar-block w3-collapse w3-card w3-animate-left" style="width:200px;" id="mySidebar">
+    <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">Close &times;</button>
+    <a href="#" class="w3-bar-item w3-button w3-blue" id="navTitle">Dashboard</a>
+    <a href="#" class="w3-bar-item w3-button link" id="navTimetable">My Timetable</a>
+    <a href="#" class="w3-bar-item w3-button link" id="navSubjects">My Subjects</a>
+    <a href="#" class="w3-bar-item w3-button link" id="navSections">Subject Sections</a>
+    <a href="#" class="w3-bar-item w3-button link" id="navLogout">Logout</a>
+  </div>
+
+  <div class="w3-main" style="margin-left:200px">
+    <div class="w3-teal">
+      <button class="w3-button w3-teal w3-xlarge w3-hide-large" onclick="w3_open()">&#9776;</button>
+      <div class="w3-container">
+        <h1 id="pageHeader">Loading...</h1>
+      </div>
+    </div>
+
+    <div class="w3-container" id="content" style="margin-top:30px;">
+      <p>Loading content...</p>
+    </div>
+  </div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script>
+    function w3_open() {
+      document.getElementById("mySidebar").style.display = "block";
+    }
+    function w3_close() {
+      document.getElementById("mySidebar").style.display = "none";
+    }
+
+    // Check if user is logged in
+    var userSession = localStorage.getItem("TTMSFC_userSession");
+    if (!userSession) {
+      alert("Please login first!");
+      window.location.replace("index.html");
+    }
+
+    var user = JSON.parse(userSession);
+    console.log("Logged in user:", user);
+
+    // Display user info
+    var userName = user.full_name || user.login;
+    var userRole = user.role || "Student";
+    document.getElementById("navTitle").innerText = "Hi, " + userName;
+    document.getElementById("pageHeader").innerText = "Welcome, " + userName + " (" + userRole + ")";
+
+    // Handle logout
+    $("#navLogout").click(function() {
+      if (confirm("Are you sure you want to logout?")) {
+        localStorage.removeItem("TTMSFC_userSession");
+        window.location.replace("index.html");
+      }
+    });
+
+    // Handle timetable navigation
+    $("#navTimetable").click(function() {
+      $("#content").load("StudentTimetable.html", function(response, status, xhr) {
+        if (status == "error") {
+          $("#content").html("<p class='w3-text-red'>Error loading timetable page.</p>");
+        } else {
+          $("#pageHeader").text("My Timetable");
+        }
+      });
+    });
+
+    // Handle subjects navigation
+    $("#navSubjects").click(function() {
+      $("#content").load("StudentSubjects.html", function(response, status, xhr) {
+        if (status == "error") {
+          $("#content").html("<p class='w3-text-red'>Error loading subjects page.</p>");
+        } else {
+          $("#pageHeader").text("My Subjects");
+        }
+      });
+    });
+
+    // Handle sections navigation
+    $("#navSections").click(function() {
+      $("#content").load("SubjectSection.html", function(response, status, xhr) {
+        if (status == "error") {
+          $("#content").html("<p class='w3-text-red'>Error loading sections page.</p>");
+        } else {
+          $("#pageHeader").text("Subject Sections");
+        }
+      });
+    });
+
+    // Load default content
+    $(document).ready(function() {
+      $("#content").html("<div class='w3-panel w3-pale-blue w3-border'><h3>Welcome to TTMS</h3><p>Click on 'My Timetable' to view your schedule.</p></div>");
+    });
+  </script>
+</body>
+</html>

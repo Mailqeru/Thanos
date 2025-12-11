@@ -1,0 +1,56 @@
+<div class="w3-container">
+  <h2>Course Enrollment List</h2>
+  <select class="w3-select w3-margin-bottom" id="courseSelect">
+    <option value="">-- Select a course --</option>
+  </select>
+  <div id="enrollmentList"></div>
+</div>
+
+<script>
+$(document).ready(function() {
+  const user = JSON.parse(localStorage.getItem("TTMSFC_userSession"));
+  const staffId = user.login;
+
+  // First, get lecturer's courses
+  const courseUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=courses&lecturer=${encodeURIComponent(staffId)}`;
+
+  fetch(courseUrl)
+    .then(res => res.json())
+    .then(courses => {
+      if (!Array.isArray(courses)) return;
+      courses.forEach(c => {
+        $("#courseSelect").append(`<option value="${c.course_code}">${c.course_code} - ${c.course_title}</option>`);
+      });
+    });
+
+  $("#courseSelect").change(function() {
+    const courseCode = $(this).val();
+    if (!courseCode) {
+      $("#enrollmentList").html("");
+      return;
+    }
+
+    // Get enrollment for selected course
+    const enrollUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=enrollment&course=${encodeURIComponent(courseCode)}`;
+
+    fetch(enrollUrl)
+      .then(res => res.json())
+      .then(students => {
+        if (!Array.isArray(students) || students.length === 0) {
+          $("#enrollmentList").html("<p>No students enrolled.</p>");
+          return;
+        }
+
+        let html = `<h3>Students in ${courseCode}</h3><ul class="w3-ul">`;
+        students.forEach(s => {
+          html += `<li>${s.matric_no} - ${s.name}</li>`;
+        });
+        html += "</ul>";
+        $("#enrollmentList").html(html);
+      })
+      .catch(err => {
+        $("#enrollmentList").html("<p class='w3-text-red'>Failed to load enrollment.</p>");
+      });
+  });
+});
+</script>
