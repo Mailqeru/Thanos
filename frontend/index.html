@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TimeTable Management System</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <!-- Optional: jQuery (not needed with Vue, but included per request) -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+  <div id="app">
+    <h1 v-if="!user">UTM TimeTable System</h1>
+
+    <!-- Login Form -->
+    <div v-if="!user" class="login-container">
+      <input v-model="login.id" placeholder="Matric / Staff ID" />
+      <input v-model="login.password" type="password" placeholder="Password" />
+      <select v-model="login.role">
+        <option value="student">Student</option>
+        <option value="lecturer">Lecturer</option>
+        <option value="admin">Admin</option>
+      </select>
+      <button @click="handleLogin">Login</button>
+      <p v-if="error" class="error">{{ error }}</p>
+    </div>
+
+    <!-- Dashboard -->
+    <div v-else>
+      <h2>Welcome, {{ user.name }} ({{ user.role }})</h2>
+      <button @click="logout">Logout</button>
+
+      <!-- Student View -->
+      <div v-if="user.role === 'student'">
+        <h3>Your Timetable</h3>
+        <div v-if="loading">Loading...</div>
+        <div v-else>
+          <div v-for="session in timetable" :key="session.course" class="session-card">
+            <strong>{{ session.course }}</strong><br/>
+            {{ session.day }}, {{ session.start }}–{{ session.end }}<br/>
+            Venue: {{ session.venue }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Lecturer View -->
+      <div v-else-if="user.role === 'lecturer'">
+        <h3>Your Teaching Schedule</h3>
+        <p>View-only (updates require admin approval)</p>
+        <!-- Same timetable display -->
+      </div>
+
+      <!-- Admin View -->
+      <div v-else-if="user.role === 'admin'">
+        <h3>Room Utilization Report</h3>
+        <p>Aggregated data from UTM service (simulated)</p>
+        <div class="report-card">N28-03: 72% utilized</div>
+        <div class="report-card">N28-05: 60% utilized</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
