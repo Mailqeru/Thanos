@@ -16,7 +16,7 @@
     <h2 class="w3-center"><b>FC-UTM</b><br>TimeTable System</h2>
     
     <label class="w3-text-blue"><b>Matric / Staff ID</b></label>
-    <input class="w3-input w3-border" type="text" id="login" placeholder="e.g. A23CS0086" required>
+    <input class="w3-input w3-border" type="text" id="login" placeholder="e.g. A23CS0086 or 12085" required>
     
     <label class="w3-text-blue"><b>Password (NRIC)</b></label>
     <input class="w3-input w3-border" type="password" id="password" placeholder="e.g. 991231011234" required>
@@ -28,90 +28,105 @@
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script>
-  // Redirect if already logged in
-  const session = localStorage.getItem("TTMSFC_userSession");
-  if (session) {
-    const user = JSON.parse(session);
-    const role = user.inferredRole || "student"; // fallback
+    // Redirect if already logged in
+    const session = localStorage.getItem("TTMSFC_userSession");
+    if (session) {
+      try {
+        const user = JSON.parse(session);
+        const role = user.inferredRole || "student";
 
-    if (role === "lecturer") {
-      window.location.replace("Lecturer.html");
-    } else if (role === "admin") {
-      window.location.replace("Admin.html");
-    } else {
-      window.location.replace("Main.html");
-    }
-  }
-
-  $("#btnLogin").click(function() {
-    const login = $("#login").val().trim();
-    const password = $("#password").val().trim();
-
-    if (!login || !password) {
-      alert("Please fill in both fields.");
-      return;
+        if (role === "lecturer") {
+          window.location.replace("Lecturer/Lecturer.html");
+        } else if (role === "admin") {
+          window.location.replace("Admin/Admin.html");
+        } else {
+          window.location.replace("Student/Main.html");
+        }
+      } catch (e) {
+        localStorage.removeItem("TTMSFC_userSession");
+      }
     }
 
-    const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=authentication&login=${encodeURIComponent(login)}&password=${encodeURIComponent(password)}`;
+    $("#btnLogin").click(function() {
+      const login = $("#login").val().trim();
+      const password = $("#password").val().trim();
 
-    fetch(url)
-      .then(res => {
-        if (!res.ok) throw new Error("Network or server error");
-        return res.json();
-      })
-      .then(jsonInst => {
-        if (!Array.isArray(jsonInst) || jsonInst.length === 0) {
-          throw new Error("Invalid credentials");
-        }
+      if (!login || !password) {
+        alert("Please fill in both fields.");
+        return;
+      }
 
-        const user = jsonInst[0]; // raw user data from API
+      const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=authentication&login=${encodeURIComponent(login)}&password=${encodeURIComponent(password)}`;
 
-        // 🔍 INFER ROLE FROM LOGIN ID
-        let inferredRole = "student"; // default
+      fetch(url)
+        .then(res => {
+          if (!res.ok) throw new Error("Network or server error");
+          return res.json();
+        })
+        .then(jsonInst => {
+          if (!Array.isArray(jsonInst) || jsonInst.length === 0) {
+            throw new Error("Invalid credentials or account not found");
+          }
 
-        if (/^[AB]\d/i.test(login)) {
-          // Starts with A or B → Student
-          inferredRole = "student";
-        } else if (/^\d+$/.test(login)) {
-          // All digits → Lecturer (or Staff)
-          inferredRole = "lecturer";
+          const apiUser = jsonInst[0];
+          let inferredRole = "student"; // default fallback
 
-          // Optional: if you know admin IDs (e.g., < 1000), handle it:
-          // if (parseInt(login) < 1000) inferredRole = "admin";
-        } else {
-          // Unknown format
-          throw new Error("Unrecognized user ID format");
-        }
+          // 🔑 Determine role strictly from 'description'
+          const desc = (apiUser.description || "").toLowerCase().trim();
 
-        // Save user + inferred role
-        const sessionData = {
-          ...user,
-          login: login,
-          inferredRole: inferredRole
-        };
+          if (desc.includes("pensyarah") || desc.includes("lecturer") || desc.includes("staff")) {
+            inferredRole = "lecturer";
+          } else if (desc.includes("admin") || desc.includes("pentadbir")) {
+            inferredRole = "admin";
+          } else if (desc.includes("pelajar") || desc.includes("student")) {
+            inferredRole = "student";
+          } else {
+            // If description doesn't match any known role
+            throw new Error("User role could not be determined from account description");
+          }
 
-        localStorage.setItem("TTMSFC_userSession", JSON.stringify(sessionData));
-        alert("Login successful!");
+          // Extract fields (no_pekerja may be absent for students — that's OK)
+          const no_pekerja = apiUser.no_pekerja;
+          const session_id = apiUser.session_id;
 
-        // Redirect based on inferred role
-        if (inferredRole === "lecturer") {
-          window.location.replace("Lecturer.html");
-        } else if (inferredRole === "admin") {
-          window.location.replace("Admin.html");
-        } else {
-          window.location.replace("Main.html");
-        }
-      })
-      .catch(err => {
-        console.error("Login failed:", err);
-        alert("Login failed! Invalid ID, password, or unsupported user type.");
-      });
-  });
+          // For lecturers, ensure critical fields exist
+          if (inferredRole === "lecturer") {
+            if (no_pekerja == null || session_id == null) {
+              throw new Error("Staff account is missing required identifiers (no_pekerja or session_id)");
+            }
+          }
 
-  // Enter key support
-  $("#password").keypress(function(e) {
-    if (e.which === 13) $("#btnLogin").click();
-  });
-</script>
+          // Save full session
+          const sessionData = {
+            ...apiUser,
+            login: apiUser.login_name,
+            no_pekerja: no_pekerja,
+            session_id: session_id,
+            inferredRole: inferredRole
+          };
+
+          localStorage.setItem("TTMSFC_userSession", JSON.stringify(sessionData));
+          alert("Login successful!");
+
+          // ✅ FIXED: Correct paths based on folder structure
+          if (inferredRole === "lecturer") {
+            window.location.replace("Lecturer/Lecturer.html");
+          } else if (inferredRole === "admin") {
+            window.location.replace("Admin/Admin.html");
+          } else {
+            window.location.replace("Student/Main.html");
+          }
+        })
+        .catch(err => {
+          console.error("Login failed:", err);
+          alert("Login failed! " + err.message);
+        });
+    });
+
+    // Enter key support
+    $("#password").keypress(function(e) {
+      if (e.which === 13) $("#btnLogin").click();
+    });
+  </script>
 </body>
 </html>

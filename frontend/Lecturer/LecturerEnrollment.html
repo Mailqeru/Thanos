@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>TTMS - My Courses</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+  <style>
+    .filter-box {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .filter-row {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+    }
+    .filter-item {
+      flex: 1;
+      min-width: 150px;
+    }
+    .session-box {
+      background: white;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+    .session-title {
+      font-weight: bold;
+      font-size: 1.2em;
+      color: #1976d2;
+      margin-bottom: 12px;
+      border-bottom: 2px solid #e0e0e0;
+      padding-bottom: 6px;
+    }
+    table.w3-table {
+      width: 100%;
+    }
+    table.w3-table th {
+      background-color: #f1f8ff;
+    }
+    .stats-box {
+      background: #e3f2fd;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 15px;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+
+<div class="filter-box">
+  <div class="filter-row">
+    <div class="filter-item">
+      <label class="w3-text-blue"><b>Session:</b></label>
+      <select class="w3-select w3-border" id="filterSession">
+        <option value="">All Sessions</option>
+      </select>
+    </div>
+    <div class="filter-item">
+      <label class="w3-text-blue"><b>Semester:</b></label>
+      <select class="w3-select w3-border" id="filterSemester">
+        <option value="">All Semesters</option>
+        <option value="1">Semester 1</option>
+        <option value="2">Semester 2</option>
+        <option value="3">Semester 3</option>
+      </select>
+    </div>
+    <div class="filter-item">
+      <button class="w3-button w3-blue" id="btnFilter">Filter</button>
+      <button class="w3-button w3-gray" id="btnReset">Reset</button>
+    </div>
+  </div>
+</div>
+
+<div class="stats-box" id="statsBox" style="display:none;">
+  <strong>Showing:</strong> <span id="statsText"></span>
+</div>
+
+<div id="coursesContainer">
+  <p class="w3-center">Loading courses...</p>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script>
+  (function() {
+    // Get session from localStorage
+    const session = localStorage.getItem("TTMSFC_userSession");
+    if (!session) {
+      alert("Please log in first.");
+      window.location.replace("index.html");
+      return;
+    }
+
+    const user = JSON.parse(session);
+    const no_pekerja = user.no_pekerja;
+
+    console.log("📚 LecturerEnrollment.html loaded");
+    console.log("Full user object:", user);
+    console.log("no_pekerja value:", no_pekerja);
+
+    if (!no_pekerja) {
+      alert("Staff ID (no_pekerja) not found. Redirecting...");
+      window.location.replace("index.html");
+      return;
+    }
+
+    // Store all courses globally for filtering
+    let allCourses = [];
+
+    // Use direct URL (bypassing proxy)
+    const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pensyarah_subjek&no_pekerja=${no_pekerja}`;
+
+    console.log("Fetching URL:", url);
+
+    // Load courses
+    fetch(url)
+      .then(res => {
+        console.log("Response status:", res.status);
+        console.log("Response OK?:", res.ok);
+        if (!res.ok) throw new Error("Failed to load courses");
+        return res.json();
+      })
+      .then(data => {
+        console.log("API Response data:", data);
+        
+        if (!Array.isArray(data) || data.length === 0) {
+          document.getElementById("coursesContainer").innerHTML = 
+            `<p class="w3-center w3-text-red">No courses found for this lecturer.</p>`;
+          return;
+        }
+
+        allCourses = data;
+
+        // Populate session dropdown
+        const sessions = [...new Set(data.map(c => c.sesi))].sort((a, b) => {
+          const yearA = parseInt(a.split('/')[0] || 0);
+          const yearB = parseInt(b.split('/')[0] || 0);
+          return yearB - yearA;
+        });
+
+        const sessionSelect = document.getElementById('filterSession');
+        sessions.forEach(sesi => {
+          const option = document.createElement('option');
+          option.value = sesi;
+          option.textContent = sesi;
+          sessionSelect.appendChild(option);
+        });
+
+        // Display all courses initially
+        displayCourses(allCourses);
+      })
+      .catch(err => {
+        console.error("❌ Error loading courses:", err);
+        document.getElementById("coursesContainer").innerHTML = 
+          `<p class="w3-center w3-text-red">Error loading courses: ${err.message}</p>
+           <p class="w3-center w3-small">Check browser console (F12) for details.</p>`;
+      });
+
+    // Filter button
+    document.getElementById('btnFilter').addEventListener('click', function() {
+      const selectedSession = document.getElementById('filterSession').value;
+      const selectedSemester = document.getElementById('filterSemester').value;
+
+      let filtered = allCourses;
+
+      if (selectedSession) {
+        filtered = filtered.filter(c => c.sesi === selectedSession);
+      }
+
+      if (selectedSemester) {
+        filtered = filtered.filter(c => c.semester == selectedSemester);
+      }
+
+      displayCourses(filtered);
+
+      // Update stats
+      const statsBox = document.getElementById('statsBox');
+      const statsText = document.getElementById('statsText');
+      if (selectedSession || selectedSemester) {
+        statsBox.style.display = 'block';
+        const parts = [];
+        if (selectedSession) parts.push(`Session: ${selectedSession}`);
+        if (selectedSemester) parts.push(`Semester: ${selectedSemester}`);
+        statsText.textContent = `${filtered.length} course(s) - ${parts.join(', ')}`;
+      } else {
+        statsBox.style.display = 'none';
+      }
+    });
+
+    // Reset button
+    document.getElementById('btnReset').addEventListener('click', function() {
+      document.getElementById('filterSession').value = '';
+      document.getElementById('filterSemester').value = '';
+      document.getElementById('statsBox').style.display = 'none';
+      displayCourses(allCourses);
+    });
+
+    // Display courses function
+    function displayCourses(courses) {
+      if (courses.length === 0) {
+        document.getElementById("coursesContainer").innerHTML = 
+          `<p class="w3-center w3-text-orange">No courses match your filter criteria.</p>`;
+        return;
+      }
+
+      // Group by sesi (session)
+      const grouped = {};
+      courses.forEach(course => {
+        const sesi = course.sesi || "Unknown Session";
+        if (!grouped[sesi]) grouped[sesi] = [];
+        grouped[sesi].push(course);
+      });
+
+      // Sort sessions in descending order
+      const sortedSessions = Object.keys(grouped).sort((a, b) => {
+        const yearA = parseInt(a.split('/')[0] || 0);
+        const yearB = parseInt(b.split('/')[0] || 0);
+        return yearB - yearA;
+      });
+
+      let html = '';
+
+      sortedSessions.forEach(sesi => {
+        const sessionCourses = grouped[sesi];
+
+        // Sort courses by semester, then by section
+        sessionCourses.sort((a, b) => {
+          const semA = a.semester || 0;
+          const semB = b.semester || 0;
+          if (semA !== semB) return semA - semB;
+          return (a.seksyen || "").localeCompare(b.seksyen || "");
+        });
+
+        // Calculate total students for this session
+        const totalStudents = sessionCourses.reduce((sum, c) => sum + (parseInt(c.bil_pelajar) || 0), 0);
+
+        html += `<div class="session-box">
+                  <div class="session-title">
+                    Session: ${sesi} 
+                    <span style="font-size:0.85em; color:#666; font-weight:normal;">
+                      (${sessionCourses.length} course${sessionCourses.length > 1 ? 's' : ''}, ${totalStudents} students)
+                    </span>
+                  </div>
+                  <table class="w3-table w3-bordered w3-striped w3-hoverable">
+                    <thead>
+                      <tr>
+                        <th>Code</th>
+                        <th>Subject</th>
+                        <th>Section</th>
+                        <th>Sem</th>
+                        <th>Students</th>
+                      </tr>
+                    </thead>
+                    <tbody>`;
+
+        sessionCourses.forEach(c => {
+          html += `<tr>
+                    <td><b>${c.kod_subjek || '–'}</b></td>
+                    <td>${c.nama_subjek || '–'}</td>
+                    <td>${c.seksyen || '–'}</td>
+                    <td>${c.semester || '–'}</td>
+                    <td>${c.bil_pelajar != null ? c.bil_pelajar : '–'}</td>
+                  </tr>`;
+        });
+
+        html += `</tbody></table></div>`;
+      });
+
+      document.getElementById("coursesContainer").innerHTML = html;
+      console.log(`✅ Displayed ${courses.length} course(s)`);
+    }
+  })();
+</script>
+</body>
+</html>

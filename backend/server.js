@@ -1,9 +1,13 @@
 const express = require('express');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const path = require('path');
+const cors = require('cors'); // Add this
 
 const app = express();
 const PORT = 3001;
+
+// Enable CORS
+app.use(cors()); // Add this line
 
 // Serve static files from the frontend folder
 app.use(express.static(path.join(__dirname, '../frontend')));
@@ -14,6 +18,9 @@ app.use('/api', createProxyMiddleware({
   changeOrigin: true,
   pathRewrite: {
     '^/api': '/ttms'
+  },
+  onProxyReq: (proxyReq, req, res) => {
+    console.log(`Proxying: ${req.method} ${req.url} -> ${proxyReq.path}`);
   }
 }));
 

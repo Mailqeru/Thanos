@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>TTMS - Lecturer Dashboard</title>
+  <meta name="refresh" content="900"> <!-- Auto-refresh every 15 mins -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; }
+    .link { cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="w3-sidebar w3-bar-block w3-collapse w3-card w3-animate-left" style="width:220px;" id="mySidebar">
+    <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">Close &times;</button>
+    <a href="#" class="w3-bar-item w3-button w3-blue" id="navTitle">Lecturer Panel</a>
+    <a href="#" class="w3-bar-item w3-button link" id="navDashboard">Dashboard</a>
+    <a href="#" class="w3-bar-item w3-button link" id="navMyClasses">My Classes</a>
+    <a href="#" class="w3-bar-item w3-button link" id="navEnrollment">Course Enrollment List</a>
+    <a href="#" class="w3-bar-item w3-button link" id="navLogout">Logout</a>
+  </div>
+
+  <div class="w3-main" style="margin-left:220px">
+    <div class="w3-teal">
+      <button class="w3-button w3-teal w3-xlarge w3-hide-large" onclick="w3_open()">&#9776;</button>
+      <div class="w3-container">
+        <h1 id="pageHeader">Loading...</h1>
+      </div>
+    </div>
+
+    <div class="w3-container" id="content" style="margin-top:30px;">
+      <p>Loading...</p>
+    </div>
+  </div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script>
+    function w3_open() {
+      document.getElementById("mySidebar").style.display = "block";
+    }
+    function w3_close() {
+      document.getElementById("mySidebar").style.display = "none";
+    }
+
+    // 🔍 DEBUG: Log session details to console on load
+    console.log("🚀 Lecturer.html loaded.");
+
+    // Check session
+    const session = localStorage.getItem("TTMSFC_userSession");
+    if (!session) {
+      console.warn("❌ No session found. Redirecting to login...");
+      window.location.replace("../index.html"); // ✅ FIXED: Go up one level
+    }
+
+    let user;
+    try {
+      user = JSON.parse(session);
+      console.log("✅ Full user session:", user);
+
+      // Extract key identifiers
+      const login = user.login || "N/A";
+      const noPekerja = user.no_pekerja || "NOT SET";
+      const sessionId = user.session_id || "N/A";
+      const role = user.inferredRole || "unknown";
+
+      // 🔍 Output critical debug info
+      console.log("🔍 Debug Info:");
+      console.log("   - login (entered ID):", login);
+      console.log("   - no_pekerja (staff ID):", noPekerja);
+      console.log("   - session_id:", sessionId);
+      console.log("   - inferredRole:", role);
+
+      // Alert if no_pekerja is missing (common issue)
+      if (role === "lecturer" && (!user.no_pekerja || user.no_pekerja === "NOT SET")) {
+        console.error("🚨 WARNING: Lecturer account missing 'no_pekerja'. Enrollment features may fail.");
+      }
+    } catch (e) {
+      console.error("💥 Corrupted session data:", e);
+      alert("Session data is invalid. Redirecting to login.");
+      localStorage.removeItem("TTMSFC_userSession");
+      window.location.replace("../index.html"); // ✅ FIXED: Go up one level
+      throw e;
+    }
+
+    // Set UI text
+    const userName = user.full_name || user.login || "Lecturer";
+    document.getElementById("navTitle").innerText = "Hi, " + userName;
+    document.getElementById("pageHeader").innerText = "Welcome, " + userName + " (Lecturer)";
+
+    // Logout
+    document.getElementById("navLogout").onclick = function() {
+      if (confirm("Logout now?")) {
+        localStorage.removeItem("TTMSFC_userSession");
+        window.location.replace("../index.html"); // ✅ FIXED: Go up one level
+      }
+    };
+
+    // ✅ FIXED Navigation loader with fetch + script execution
+    function loadPage(pageName, fileName, header) {
+      document.getElementById("nav" + pageName).onclick = function() {
+        console.log(`🔄 Loading: ${fileName}`);
+        
+        fetch(fileName)
+          .then(response => {
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            return response.text();
+          })
+          .then(html => {
+            // Extract body content
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const body = doc.querySelector('body');
+            
+            document.getElementById("pageHeader").innerText = header;
+            document.getElementById("content").innerHTML = body.innerHTML;
+            
+            // Execute scripts from loaded page
+            const scripts = doc.querySelectorAll('script');
+            scripts.forEach(oldScript => {
+              const newScript = document.createElement('script');
+              if (oldScript.src) {
+                newScript.src = oldScript.src;
+              } else {
+                newScript.textContent = oldScript.textContent;
+              }
+              document.head.appendChild(newScript);
+            });
+            
+            console.log(`✅ Loaded: ${header} from ${fileName}`);
+          })
+          .catch(error => {
+            document.getElementById("content").innerHTML = 
+              `<p class='w3-text-red'>Failed to load ${header}. Error: ${error.message}</p>`;
+            console.error(`❌ Failed to load ${fileName}:`, error);
+          });
+      };
+    }
+
+    // Register all pages - files should be in the same Lecturer/ folder
+    loadPage("MyClasses", "MyClasses.html", "My Classes");
+    loadPage("Enrollment", "LecturerEnrollment.html", "Course Enrollment List");
+
+    // Default content
+    $(document).ready(function() {
+      $("#content").html(`
+        <div class='w3-panel w3-pale-green w3-border'>
+          <h3>Lecturer Dashboard</h3>
+          <p>Use the sidebar to manage your classes, sections, and attendance.</p>
+          <p><b>Your login ID:</b> ${user.login || '—'}</p>
+          <p><b>Staff ID (no_pekerja):</b> ${user.no_pekerja || '<span class="w3-text-red">MISSING</span>'}</p>
+          <p class="w3-tiny w3-text-gray">💡 Check browser console (F12) for full debug info.</p>
+        </div>
+      `);
+    });
+  </script>
+</body>
+</html>
