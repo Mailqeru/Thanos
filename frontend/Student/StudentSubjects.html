@@ -1,3 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Subjects</title>
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    .loading { color: #1976D2; font-style: italic; }
+  </style>
+</head>
+<body>
+
 <div class="w3-container">
   <h3>My Subjects</h3>
   
@@ -16,43 +28,64 @@
 </div>
 
 <script>
-  let allSubjects = []; // Store raw data globally for filtering
+  // ✅ Safe global variable: use `var` or check existence
+  var allSubjects = window.allSubjects || [];
 
   (function() {
     var userSession = localStorage.getItem("TTMSFC_userSession");
     if (!userSession) {
-      $("#subjectsContent").html("<p class='w3-text-red'>Session expired. Please login again.</p>");
-      $("#sessionSelect").html("<option>Not logged in</option>");
+      document.getElementById("subjectsContent").innerHTML = 
+        "<p class='w3-text-red'>Session expired. Please login again.</p>";
+      document.getElementById("sessionSelect").innerHTML = 
+        "<option>Not logged in</option>";
       return;
     }
     
-    var user = JSON.parse(userSession);
-    var matricNo = user.login_name;
+    try {
+      var user = JSON.parse(userSession);
+      var matricNo = user.login_name;
+    } catch (e) {
+      document.getElementById("subjectsContent").innerHTML = 
+        "<p class='w3-text-red'>Invalid session data. Please log in again.</p>";
+      return;
+    }
     
     console.log("Fetching subjects for:", matricNo);
-    var url = "http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar_subjek&no_matrik=" + matricNo;
+    var url = "http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar_subjek&no_matrik=" + encodeURIComponent(matricNo);
 
     fetch(url)
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error('Network response was not ok');
+        return res.json();
+      })
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {
-          allSubjects = data;
+          allSubjects = data; // update global
+          window.allSubjects = allSubjects; // optional: attach to window explicitly
           populateSessionDropdown(data);
-          // Optionally auto-select the latest session
-          const latestKey = Object.keys(groupSubjects(data))[0];
-          if (latestKey) {
-            document.getElementById("sessionSelect").value = latestKey;
+          
+          // Auto-select latest session
+          const grouped = groupSubjects(data);
+          const sortedKeys = Object.keys(grouped).sort().reverse();
+          if (sortedKeys.length > 0) {
+            document.getElementById("sessionSelect").value = sortedKeys[0];
             showSelectedSubjects();
           }
         } else {
-          $("#sessionSelect").html("<option>No sessions available</option>");
-          $("#subjectsContent").html("<div class='w3-panel w3-pale-yellow w3-border'><p>No subjects found.</p></div>");
+          document.getElementById("sessionSelect").innerHTML = 
+            "<option>No sessions available</option>";
+          document.getElementById("subjectsContent").innerHTML = 
+            "<div class='w3-panel w3-pale-yellow w3-border'><p>No subjects found.</p></div>";
         }
       })
       .catch(err => {
         console.error("Error loading subjects:", err);
-        $("#sessionSelect").html("<option>Error loading</option>");
-        $("#subjectsContent").html("<div class='w3-panel w3-pale-red w3-border'><p>Failed to load subjects.</p></div>");
+        document.getElementById("sessionSelect").innerHTML = 
+          "<option>Error loading</option>";
+        document.getElementById("subjectsContent").innerHTML = 
+          `<div class='w3-panel w3-pale-red w3-border'>
+            <p>Failed to load subjects: ${err.message || 'Unknown error'}</p>
+          </div>`;
       });
   })();
 
@@ -71,8 +104,7 @@
     const select = document.getElementById("sessionSelect");
     let options = '<option value="">-- All Sessions --</option>';
     
-    // Sort keys chronologically if possible (optional improvement)
-    const sortedKeys = Object.keys(grouped).sort().reverse(); // e.g., newest first
+    const sortedKeys = Object.keys(grouped).sort().reverse();
 
     sortedKeys.forEach(key => {
       options += `<option value="${key}">${key}</option>`;
@@ -86,16 +118,20 @@
     const grouped = groupSubjects(allSubjects);
     
     if (!selectedKey) {
-      // Show all sessions (original view)
       let html = '';
       for (let key in grouped) {
-        html += buildSubjectTable(key, grouped[key]);
+        if (grouped.hasOwnProperty(key)) {
+          html += buildSubjectTable(key, grouped[key]);
+        }
       }
-      $("#subjectsContent").html(html || "<p>No subjects to display.</p>");
+      document.getElementById("subjectsContent").innerHTML = 
+        html || "<p>No subjects to display.</p>";
     } else if (grouped[selectedKey]) {
-      $("#subjectsContent").html(buildSubjectTable(selectedKey, grouped[selectedKey]));
+      document.getElementById("subjectsContent").innerHTML = 
+        buildSubjectTable(selectedKey, grouped[selectedKey]);
     } else {
-      $("#subjectsContent").html("<p>No subjects found for this session.</p>");
+      document.getElementById("subjectsContent").innerHTML = 
+        "<p>No subjects found for this session.</p>";
     }
   }
 
@@ -123,3 +159,5 @@
     return html;
   }
 </script>
+</body>
+</html>

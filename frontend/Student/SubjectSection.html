@@ -13,6 +13,7 @@
       border-radius: 4px;
     }
     .loading { color: #1976D2; font-style: italic; }
+    .info-note { font-size: 0.9em; color: #555; margin-top: -8px; }
   </style>
 </head>
 <body>
@@ -40,23 +41,24 @@
     <div class="w3-third">
       <label>&nbsp;</label>
       <button class="w3-button w3-blue w3-block" onclick="loadSubjectSections()">
-        Load Sections
+        Load Valid Sections
       </button>
     </div>
   </div>
 
   <!-- Search -->
   <div id="searchContainer" class="search-container" style="display:none;">
-    <input type="text" id="searchInput" placeholder="Search by course code, subject name, or lecturer..." onkeyup="filterSections()">
+    <input type="text" id="searchInput" placeholder="Search by course code or subject name..." onkeyup="filterSections()">
+    <div class="info-note">Only sections with lecturer & ≥1 enrolled student are shown.</div>
   </div>
 
   <div id="sectionsContent">
-    <p>Please select session & semester, then click <strong>Load Sections</strong>.</p>
+    <p>Please select session & semester, then click <strong>Load Valid Sections</strong>.</p>
   </div>
 </div>
 
 <script>
-// === Time/day mappings (exactly as in your timetable) ===
+// === Time/day mappings ===
 const hariMap = {
   2: "Monday", 3: "Tuesday", 4: "Wednesday",
   5: "Thursday", 6: "Friday", 7: "Saturday", 8: "Sunday"
@@ -67,9 +69,22 @@ const masaMap = {
   5: "11:00 - 12:00", 6: "12:00 - 13:00", 7: "13:00 - 14:00",
   8: "14:00 - 15:00", 9: "15:00 - 16:00", 10: "16:00 - 17:00"
 };
-// =======================================================
 
+const ITEMS_PER_PAGE = 10;
+let currentPage = 1;
+let validSubjectList = []; // ← Only valid subjects (with at least 1 valid section)
+let currentSesi = '';
+let currentSemester = '';
 let globalEnrichedData = [];
+let totalPages = 0;
+
+// Helper: Check if a section is valid
+function isValidSection(sec) {
+  const lecturer = (sec.pensyarah || '').toString().trim();
+  const hasLecturer = lecturer !== '' && lecturer.toLowerCase() !== 'tba';
+  const hasEnrolled = (sec.bil_pelajar || 0) > 0;
+  return hasLecturer && hasEnrolled;
+}
 
 async function loadSubjectSections() {
   const userSession = localStorage.getItem("TTMSFC_userSession");
@@ -80,76 +95,122 @@ async function loadSubjectSections() {
     return;
   }
 
-  const sesi = document.getElementById("sessionSelect").value;
-  const semester = document.getElementById("semesterSelect").value;
+  currentSesi = document.getElementById("sessionSelect").value;
+  currentSemester = document.getElementById("semesterSelect").value;
+  currentPage = 1;
 
   document.getElementById("sectionsContent").innerHTML = 
-    "<p class='loading'>Loading subjects... (parallel fetch)</p>";
+    "<p class='loading'>Loading and filtering subjects...</p>";
   document.getElementById("searchContainer").style.display = "none";
 
   try {
-    // Fetch all offered subjects
-    const urlSections = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=subjek_seksyen&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}`;
+    // Step 1: Fetch all subject metadata
+    const urlSections = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=subjek_seksyen&sesi=${encodeURIComponent(currentSesi)}&semester=${encodeURIComponent(currentSemester)}`;
     const resSec = await fetch(urlSections);
-    const sectionData = await resSec.json();
+    const allSubjects = await resSec.json();
 
-    if (!Array.isArray(sectionData) || sectionData.length === 0) {
+    if (!Array.isArray(allSubjects) || allSubjects.length === 0) {
       document.getElementById("sectionsContent").innerHTML =
         `<div class='w3-panel w3-pale-yellow w3-border'>
-          <p>No subjects offered for ${sesi} Semester ${semester}.</p>
+          <p>No subjects offered for ${currentSesi} Semester ${currentSemester}.</p>
         </div>`;
       return;
     }
 
-    // Build parallel requests for all sections
-    const fetchPromises = [];
+    // Step 2: Filter out invalid sections and keep only subjects with ≥1 valid section
+    const cleanedSubjects = [];
 
-    sectionData.forEach(subj => {
+    for (const subj of allSubjects) {
       const kod = (subj.kod_subjek || '').trim();
       const nama = (subj.nama_subjek || '').trim();
 
-      if (!subj.seksyen_list || !Array.isArray(subj.seksyen_list)) return;
+      if (!subj.seksyen_list || !Array.isArray(subj.seksyen_list)) continue;
 
-      subj.seksyen_list.forEach(sec => {
-        const seksyen = (sec.seksyen || '').trim();
-        const lecturer = (sec.pensyarah || '').trim();
-        const enrolled = sec.bil_pelajar || 0;
+      // Filter valid sections only
+      const validSections = subj.seksyen_list.filter(isValidSection);
 
-        // Build normalized searchable string (for later)
-        const searchable = [kod, nama, lecturer]
-          .filter(x => x) // remove empty
-          .join(' ')
-          .toLowerCase();
+      if (validSections.length > 0) {
+        cleanedSubjects.push({
+          kod_subjek: kod,
+          nama_subjek: nama,
+          seksyen_list: validSections
+        });
+      }
+    }
 
-        const promise = (async () => {
-          try {
-            const urlJadual = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=jadual_subjek&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}&kod_subjek=${encodeURIComponent(kod)}&seksyen=${encodeURIComponent(seksyen)}`;
-            const res = await fetch(urlJadual);
-            const jadualList = await res.json();
+    if (cleanedSubjects.length === 0) {
+      document.getElementById("sectionsContent").innerHTML =
+        `<div class='w3-panel w3-pale-yellow w3-border'>
+          <p>No sections with lecturer and enrolled students found for ${currentSesi} Semester ${currentSemester}.</p>
+        </div>`;
+      return;
+    }
 
-            const scheduleEntries = (Array.isArray(jadualList) ? jadualList : [])
-              .filter(e => e.hari && e.masa)
-              .map(e => ({
-                day: hariMap[e.hari] || `Day ${e.hari}`,
-                time: masaMap[e.masa] || `Slot ${e.masa}`,
-                room: (e.ruang?.kod_ruang) || '—'
-              }));
+    // Step 3: Use ONLY valid subjects for pagination
+    validSubjectList = cleanedSubjects;
+    totalPages = Math.ceil(validSubjectList.length / ITEMS_PER_PAGE);
+    await loadPage(currentPage);
+    document.getElementById("searchContainer").style.display = "block";
+  } catch (err) {
+    console.error(err);
+    document.getElementById("sectionsContent").innerHTML =
+      `<div class='w3-panel w3-pale-red w3-border'>
+        <p><strong>Error loading or filtering subjects.</strong></p>
+        <p>${err.message || 'Unknown error'}</p>
+      </div>`;
+  }
+}
 
-            return { kod, nama, seksyen, lecturer, enrolled, scheduleEntries, searchable };
-          } catch (err) {
-            return { kod, nama, seksyen, lecturer, enrolled, scheduleEntries: [], searchable };
-          }
-        })();
+async function loadPage(page) {
+  const startIndex = (page - 1) * ITEMS_PER_PAGE;
+  const pageSubjects = validSubjectList.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
-        fetchPromises.push(promise);
-      });
+  document.getElementById("sectionsContent").innerHTML = 
+    `<p class='loading'>Loading schedules for page ${page} of ${totalPages}...</p>`;
+
+  const fetchPromises = [];
+
+  pageSubjects.forEach(subj => {
+    const kod = (subj.kod_subjek || '').trim();
+    const nama = (subj.nama_subjek || '').trim();
+
+    subj.seksyen_list.forEach(sec => {
+      const seksyen = (sec.seksyen || '').trim();
+      const lecturer = (sec.pensyarah || '').trim();
+      const enrolled = sec.bil_pelajar || 0;
+
+      const searchable = [kod, nama, lecturer].filter(x => x).join(' ').toLowerCase();
+
+      const promise = (async () => {
+        try {
+          const urlJadual = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=jadual_subjek&sesi=${encodeURIComponent(currentSesi)}&semester=${encodeURIComponent(currentSemester)}&kod_subjek=${encodeURIComponent(kod)}&seksyen=${encodeURIComponent(seksyen)}`;
+          const res = await fetch(urlJadual);
+          const jadualList = await res.json();
+
+          const scheduleEntries = (Array.isArray(jadualList) ? jadualList : [])
+            .filter(e => e.hari && e.masa)
+            .map(e => ({
+              day: hariMap[e.hari] || `Day ${e.hari}`,
+              time: masaMap[e.masa] || `Slot ${e.masa}`,
+              room: (e.ruang?.kod_ruang) || '—'
+            }));
+
+          return { kod, nama, seksyen, lecturer, enrolled, scheduleEntries, searchable };
+        } catch (err) {
+          return { kod, nama, seksyen, lecturer, enrolled, scheduleEntries: [], searchable };
+        }
+      })();
+
+      fetchPromises.push(promise);
     });
+  });
 
-    const enrichedData = await Promise.all(fetchPromises);
+  try {
+    globalEnrichedData = await Promise.all(fetchPromises);
 
     // Group by course code
     const grouped = {};
-    enrichedData.forEach(item => {
+    globalEnrichedData.forEach(item => {
       const key = item.kod || 'UNKNOWN';
       if (!grouped[key]) {
         grouped[key] = { kod: item.kod, nama: item.nama, sections: [] };
@@ -157,28 +218,24 @@ async function loadSubjectSections() {
       grouped[key].sections.push(item);
     });
 
-    globalEnrichedData = enrichedData;
-    renderSections(Object.values(grouped), sesi, semester);
-    document.getElementById("searchContainer").style.display = "block";
+    renderSections(Object.values(grouped), currentSesi, currentSemester, page);
   } catch (err) {
-    console.error(err);
+    console.error("Error loading page schedules:", err);
     document.getElementById("sectionsContent").innerHTML =
       `<div class='w3-panel w3-pale-red w3-border'>
-        <p><strong>Error loading sections.</strong></p>
-        <p>${err.message || 'Unknown error'}</p>
+        <p><strong>Error loading schedules for page ${page}.</strong></p>
       </div>`;
   }
 }
 
-function renderSections(groups, sesi, semester) {
-  let html = `<h4>Subjects Offered – ${sesi} Semester ${semester}</h4>`;
+function renderSections(groups, sesi, semester, page) {
+  let html = `<h4>Valid Sections – ${sesi} Semester ${semester} (Page ${page} of ${totalPages})</h4>`;
 
   groups.forEach(group => {
-    // Combine searchable text from all sections
     const allSearchable = group.sections
       .map(s => s.searchable)
       .join(' ')
-      .replace(/"/g, '&quot;') // escape quotes for HTML attribute
+      .replace(/"/g, '&quot;');
 
     html += `
       <div class="w3-panel w3-card-4 subject-item" data-search="${allSearchable}" style="margin-bottom:20px;">
@@ -197,14 +254,9 @@ function renderSections(groups, sesi, semester) {
           <tbody>`;
 
     group.sections.forEach(sec => {
-      let scheduleHtml = '';
-      if (sec.scheduleEntries.length > 0) {
-        sec.scheduleEntries.forEach(entry => {
-          scheduleHtml += `${entry.day} – ${entry.time} – ${entry.room}<br>`;
-        });
-      } else {
-        scheduleHtml = '<span class="w3-text-gray">No schedule</span>';
-      }
+      let scheduleHtml = sec.scheduleEntries.length > 0
+        ? sec.scheduleEntries.map(e => `${e.day} – ${e.time} – ${e.room}`).join('<br>')
+        : '<span class="w3-text-gray">No schedule</span>';
 
       html += `
         <tr>
@@ -222,15 +274,28 @@ function renderSections(groups, sesi, semester) {
       </div>`;
   });
 
+  // Pagination controls
+  html += `
+    <div class="w3-bar w3-margin-top">
+      <button class="w3-button w3-blue ${page <= 1 ? 'w3-disabled' : ''}" 
+              onclick="if(${page} > 1) loadPage(${page - 1})">
+        &laquo; Prev
+      </button>
+      <span class="w3-bar-item w3-text">Page ${page} of ${totalPages}</span>
+      <button class="w3-button w3-blue ${page >= totalPages ? 'w3-disabled' : ''}" 
+              onclick="if(${page} < ${totalPages}) loadPage(${page + 1})">
+        Next &raquo;
+      </button>
+    </div>`;
+
   html += `
     <div class="w3-panel w3-pale-green w3-border">
-      <p><b>Total Sections Loaded:</b> ${globalEnrichedData.length}</p>
+      <p><b>Page ${page}</b>: ${globalEnrichedData.length} section(s) shown | Total valid: ${validSubjectList.reduce((sum, s) => sum + s.seksyen_list.length, 0)}</p>
     </div>`;
 
   document.getElementById("sectionsContent").innerHTML = html;
 }
 
-// ✅ FIXED SEARCH: supports "mobile app", "nor erne", "MCST1013", etc.
 function filterSections() {
   const input = document.getElementById("searchInput").value.trim();
   const items = document.querySelectorAll(".subject-item");
@@ -240,7 +305,6 @@ function filterSections() {
     return;
   }
 
-  // Split query into words and normalize
   const queryWords = input
     .toLowerCase()
     .split(/\s+/)
@@ -248,7 +312,6 @@ function filterSections() {
 
   items.forEach(item => {
     const searchableText = (item.getAttribute("data-search") || "").toLowerCase();
-    // Only show if ALL query words are found
     const matches = queryWords.every(word => searchableText.includes(word));
     item.style.display = matches ? "" : "none";
   });
