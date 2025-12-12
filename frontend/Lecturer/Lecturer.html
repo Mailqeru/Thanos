@@ -1,121 +1,654 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="refresh" content="900" />
   <title>TTMS - Lecturer Dashboard</title>
-  <meta name="refresh" content="900"> <!-- Auto-refresh every 15 mins -->
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
   <style>
-    body { margin: 0; font-family: Arial, sans-serif; }
-    .link { cursor: pointer; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #667eea;
+      --primary-dark: #764ba2;
+      --secondary: #4158d0;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --info: #3b82f6;
+      --dark: #1f2937;
+      --light: #f3f4f6;
+      --white: #ffffff;
+      --sidebar-width: 280px;
+      --header-height: 70px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f8f9fc;
+      color: #333;
+      overflow-x: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+      box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow-y: auto;
+    }
+
+    .sidebar-header {
+      padding: 30px 25px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar-title {
+      color: white;
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sidebar-subtitle {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 14px;
+      font-weight: 400;
+    }
+
+    .sidebar-user {
+      padding: 20px 25px;
+      background: rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .user-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .user-name {
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .user-role {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 13px;
+    }
+
+    .sidebar-nav {
+      padding: 20px 0;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 14px 25px;
+      color: rgba(255, 255, 255, 0.9);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border-left: 4px solid transparent;
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-left-color: white;
+      color: white;
+    }
+
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.2);
+      border-left-color: white;
+      color: white;
+      font-weight: 600;
+    }
+
+    .nav-icon {
+      margin-right: 12px;
+      font-size: 20px;
+      width: 24px;
+      text-align: center;
+    }
+
+    .nav-logout {
+      margin-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 20px;
+    }
+
+    /* Main Content */
+    .main-wrapper {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .top-header {
+      position: sticky;
+      top: 0;
+      height: var(--header-height);
+      background: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      display: flex;
+      align-items: center;
+      padding: 0 30px;
+      z-index: 100;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 24px;
+      color: var(--dark);
+      cursor: pointer;
+      padding: 8px;
+      margin-right: 15px;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+
+    .menu-toggle:hover {
+      background: var(--light);
+    }
+
+    .header-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--dark);
+    }
+
+    .header-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .header-time {
+      font-size: 14px;
+      color: #6b7280;
+      padding: 8px 16px;
+      background: var(--light);
+      border-radius: 8px;
+    }
+
+    .main-content {
+      padding: 30px;
+      max-width: 1400px;
+    }
+
+    /* Dashboard Cards */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 16px;
+      padding: 25px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border: 1px solid #e5e7eb;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
+
+    .stat-card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-card-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .stat-card-value {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 8px;
+    }
+
+    .stat-card-label {
+      font-size: 13px;
+      color: #9ca3af;
+    }
+
+    .icon-blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+    .icon-green { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; }
+    .icon-orange { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; }
+    .icon-purple { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; }
+
+    /* Info Panel */
+    .info-panel {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      margin-bottom: 30px;
+      border-left: 5px solid var(--primary);
+    }
+
+    .info-panel h2 {
+      font-size: 22px;
+      color: var(--dark);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .info-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .info-value {
+      font-size: 16px;
+      color: var(--dark);
+      font-weight: 500;
+    }
+
+    .info-value.missing {
+      color: var(--danger);
+      font-weight: 600;
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .quick-actions h2 {
+      font-size: 22px;
+      color: var(--dark);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .action-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .action-btn {
+      padding: 20px;
+      border-radius: 12px;
+      border: 2px solid #e5e7eb;
+      background: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      text-decoration: none;
+      color: var(--dark);
+    }
+
+    .action-btn:hover {
+      border-color: var(--primary);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .action-btn-icon {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+
+    .action-btn-text {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    /* Alert */
+    .alert {
+      padding: 15px 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 14px;
+    }
+
+    .alert-info {
+      background: #eff6ff;
+      color: #1e40af;
+      border-left: 4px solid var(--info);
+    }
+
+    .alert-warning {
+      background: #fffbeb;
+      color: #92400e;
+      border-left: 4px solid var(--warning);
+    }
+
+    /* Overlay for mobile */
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+    }
+
+    .overlay.active {
+      display: block;
+    }
+
+    /* Scrollbar */
+    .sidebar::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .sidebar::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 3px;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 968px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-wrapper {
+        margin-left: 0;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+
+      .top-header {
+        padding: 0 20px;
+      }
+
+      .main-content {
+        padding: 20px;
+      }
+
+      .header-time {
+        display: none;
+      }
+
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .action-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stat-card-value {
+        font-size: 28px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header-title {
+        font-size: 18px;
+      }
+
+      .sidebar-header {
+        padding: 20px;
+      }
+
+      .sidebar-title {
+        font-size: 20px;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="w3-sidebar w3-bar-block w3-collapse w3-card w3-animate-left" style="width:220px;" id="mySidebar">
-    <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">Close &times;</button>
-    <a href="#" class="w3-bar-item w3-button w3-blue" id="navTitle">Lecturer Panel</a>
-    <a href="#" class="w3-bar-item w3-button link" id="navDashboard">Dashboard</a>
-    <a href="#" class="w3-bar-item w3-button link" id="navTimetable">My Timetable</a>
-    <a href="#" class="w3-bar-item w3-button link" id="navEnrollment">Course Enrollment List</a>
-    <a href="#" class="w3-bar-item w3-button link" id="navLogout">Logout</a>
-  </div>
 
-  <div class="w3-main" style="margin-left:220px">
-    <div class="w3-teal">
-      <button class="w3-button w3-teal w3-xlarge w3-hide-large" onclick="w3_open()">&#9776;</button>
-      <div class="w3-container">
-        <h1 id="pageHeader">Loading...</h1>
+  <!-- Overlay -->
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">
+        <span>🎓</span>
+        <span>TTMS</span>
+      </div>
+      <div class="sidebar-subtitle">Lecturer Portal</div>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="user-avatar" id="userAvatar">L</div>
+      <div class="user-name" id="userName">Loading...</div>
+      <div class="user-role">Lecturer</div>
+    </div>
+
+    <div class="sidebar-nav">
+      <a class="nav-item active" id="navDashboard">
+        <span class="nav-icon">📊</span>
+        <span>Dashboard</span>
+      </a>
+      <a class="nav-item" id="navTimetable">
+        <span class="nav-icon">📅</span>
+        <span>My Timetable</span>
+      </a>
+      <a class="nav-item" id="navEnrollment">
+        <span class="nav-icon">👥</span>
+        <span>Course Enrollment</span>
+      </a>
+      
+      <div class="nav-logout">
+        <a class="nav-item" id="navLogout">
+          <span class="nav-icon">🚪</span>
+          <span>Logout</span>
+        </a>
       </div>
     </div>
+  </nav>
 
-    <div class="w3-container" id="content" style="margin-top:30px;">
+  <!-- Main Content -->
+  <div class="main-wrapper">
+    <header class="top-header">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <h1 class="header-title" id="pageHeader">Dashboard</h1>
+      <div class="header-actions">
+        <div class="header-time" id="currentTime">--:--</div>
+      </div>
+    </header>
+
+    <main class="main-content" id="content">
       <p>Loading...</p>
-    </div>
+    </main>
   </div>
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <!-- ✅ Load theme constants -->
+  <script src="theme.js"></script>
+
   <script>
-    function w3_open() {
-      document.getElementById("mySidebar").style.display = "block";
-    }
-    function w3_close() {
-      document.getElementById("mySidebar").style.display = "none";
+    // ✅ Now APP_THEME is available (from theme.js)
+
+    // Sidebar Toggle
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('overlay');
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('active');
     }
 
-    // 🔍 DEBUG: Log session details to console on load
-    console.log("🚀 Lecturer.html loaded.");
+    function closeSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('overlay');
+      sidebar.classList.remove('open');
+      overlay.classList.remove('active');
+    }
 
-    // Check session
+    // Update Time
+    function updateTime() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: true 
+      });
+      document.getElementById('currentTime').textContent = timeStr;
+    }
+    updateTime();
+    setInterval(updateTime, 60000);
+
+    // Session Check
+    console.log("🚀 Lecturer Dashboard loaded.");
+
     const session = localStorage.getItem("TTMSFC_userSession");
     if (!session) {
       console.warn("❌ No session found. Redirecting to login...");
-      window.location.replace("../index.html"); // ✅ FIXED: Go up one level
+      window.location.replace("../index.html");
     }
 
     let user;
     try {
       user = JSON.parse(session);
-      console.log("✅ Full user session:", user);
-
-      // Extract key identifiers
-      const login = user.login || "N/A";
-      const noPekerja = user.no_pekerja || "NOT SET";
-      const sessionId = user.session_id || "N/A";
       const role = user.inferredRole || "unknown";
-
-      // 🔍 Output critical debug info
-      console.log("🔍 Debug Info:");
-      console.log("   - login (entered ID):", login);
-      console.log("   - no_pekerja (staff ID):", noPekerja);
-      console.log("   - session_id:", sessionId);
-      console.log("   - inferredRole:", role);
-
-      // Alert if no_pekerja is missing (common issue)
-      if (role === "lecturer" && (!user.no_pekerja || user.no_pekerja === "NOT SET")) {
-        console.error("🚨 WARNING: Lecturer account missing 'no_pekerja'. Enrollment features may fail.");
+      if (role !== "lecturer") {
+        console.error("🚨 Access denied: Not a lecturer.");
+        alert("Access denied.");
+        window.location.replace("../index.html");
       }
     } catch (e) {
-      console.error("💥 Corrupted session data:", e);
-      alert("Session data is invalid. Redirecting to login.");
+      console.error("💥 Corrupted session:", e);
+      alert("Session invalid. Redirecting to login.");
       localStorage.removeItem("TTMSFC_userSession");
-      window.location.replace("../index.html"); // ✅ FIXED: Go up one level
+      window.location.replace("../index.html");
       throw e;
     }
 
-    // Set UI text
+    // Set UI
     const userName = user.full_name || user.login || "Lecturer";
-    document.getElementById("navTitle").innerText = "Hi, " + userName;
-    document.getElementById("pageHeader").innerText = "Welcome, " + userName + " (Lecturer)";
+    const initials = userName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    
+    document.getElementById("userName").textContent = userName;
+    document.getElementById("userAvatar").textContent = initials;
 
     // Logout
     document.getElementById("navLogout").onclick = function() {
-      if (confirm("Logout now?")) {
+      if (confirm("Are you sure you want to logout?")) {
         localStorage.removeItem("TTMSFC_userSession");
-        window.location.replace("../index.html"); // ✅ FIXED: Go up one level
+        window.location.replace("../index.html");
       }
     };
 
-    // ✅ FIXED Navigation loader with fetch + script execution
+    // Load external page fragments
     function loadPage(pageName, fileName, header) {
       document.getElementById("nav" + pageName).onclick = function() {
         console.log(`🔄 Loading: ${fileName}`);
         
+        // Update active state
+        document.querySelectorAll('.nav-item').forEach(item => {
+          item.classList.remove('active');
+        });
+        this.classList.add('active');
+        
         fetch(fileName)
           .then(response => {
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
             return response.text();
           })
           .then(html => {
-            // Extract body content
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const body = doc.querySelector('body');
-            
-            document.getElementById("pageHeader").innerText = header;
-            document.getElementById("content").innerHTML = body.innerHTML;
-            
-            // Execute scripts from loaded page
-            const scripts = doc.querySelectorAll('script');
+            document.getElementById("pageHeader").textContent = header;
+            document.getElementById("content").innerHTML = html;
+
+            // Re-execute scripts
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
+            const scripts = tempDiv.querySelectorAll('script');
             scripts.forEach(oldScript => {
               const newScript = document.createElement('script');
               if (oldScript.src) {
@@ -125,33 +658,148 @@
               }
               document.head.appendChild(newScript);
             });
-            
-            console.log(`✅ Loaded: ${header} from ${fileName}`);
+
+            // Close sidebar on mobile
+            if (window.innerWidth <= 968) {
+              closeSidebar();
+            }
+
+            console.log(`✅ Loaded: ${header}`);
           })
           .catch(error => {
-            document.getElementById("content").innerHTML = 
-              `<p class='w3-text-red'>Failed to load ${header}. Error: ${error.message}</p>`;
-            console.error(`❌ Failed to load ${fileName}:`, error);
+            document.getElementById("content").innerHTML = `
+              <div class="alert alert-warning">
+                <span>⚠️</span>
+                <div>
+                  <strong>Failed to load ${header}</strong><br>
+                  ${error.message}
+                </div>
+              </div>
+            `;
+            console.error(`❌ Load error:`, error);
           });
       };
     }
 
-    // Register all pages - files should be in the same Lecturer/ folder
+    // Register pages
     loadPage("Timetable", "LecturerTimetable.html", "My Timetable");
-    loadPage("Enrollment", "LecturerEnrollment.html", "Course Enrollment List");
+    loadPage("Enrollment", "LecturerEnrollment.html", "Course Enrollment");
 
-    // Default content
-    $(document).ready(function() {
-      $("#content").html(`
-        <div class='w3-panel w3-pale-green w3-border'>
-          <h3>Lecturer Dashboard</h3>
-          <p>Use the sidebar to manage your classes, sections, and attendance.</p>
-          <p><b>Your login ID:</b> ${user.login || '—'}</p>
-          <p><b>Staff ID (no_pekerja):</b> ${user.no_pekerja || '<span class="w3-text-red">MISSING</span>'}</p>
-          <p class="w3-tiny w3-text-gray">💡 Check browser console (F12) for full debug info.</p>
+    // Dashboard click
+    document.getElementById("navDashboard").onclick = function() {
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      this.classList.add('active');
+      document.getElementById("pageHeader").textContent = "Dashboard";
+      loadDashboard();
+      if (window.innerWidth <= 968) {
+        closeSidebar();
+      }
+    };
+
+    // Load Dashboard
+    function loadDashboard() {
+      const staffIdStatus = user.no_pekerja && user.no_pekerja !== "NOT SET" 
+        ? user.no_pekerja 
+        : `<span class="missing" style="color: ${APP_THEME.danger}; font-weight: 600;">⚠️ MISSING</span>`;
+
+      document.getElementById("content").innerHTML = `
+        ${!user.no_pekerja || user.no_pekerja === "NOT SET" ? `
+        <div class="alert alert-warning">
+          <span>⚠️</span>
+          <div>
+            <strong>Profile Incomplete</strong><br>
+            Your Staff ID (no_pekerja) is missing. Some features may not work properly.
+          </div>
         </div>
-      `);
-    });
+        ` : ''}
+
+        <div class="dashboard-grid">
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <div class="stat-card-title">Account Status</div>
+              <div class="stat-card-icon icon-blue">✓</div>
+            </div>
+            <div class="stat-card-value">Active</div>
+            <div class="stat-card-label">Your account is active</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <div class="stat-card-title">Current Semester</div>
+              <div class="stat-card-icon icon-green">📚</div>
+            </div>
+            <div class="stat-card-value">2024/25</div>
+            <div class="stat-card-label">Academic session</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <div class="stat-card-title">Quick Access</div>
+              <div class="stat-card-icon icon-orange">⚡</div>
+            </div>
+            <div class="stat-card-value">Ready</div>
+            <div class="stat-card-label">All systems operational</div>
+          </div>
+        </div>
+
+        <div class="info-panel">
+          <h2>👤 Profile Information</h2>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Full Name</div>
+              <div class="info-value">${userName}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Login ID</div>
+              <div class="info-value">${user.login || '—'}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Staff ID (no_pekerja)</div>
+              <div class="info-value">${staffIdStatus}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Role</div>
+              <div class="info-value">Lecturer</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="quick-actions">
+          <h2>⚡ Quick Actions</h2>
+          <div class="action-grid">
+            <a class="action-btn" onclick="document.getElementById('navTimetable').click()">
+              <div class="action-btn-icon">📅</div>
+              <div class="action-btn-text">View Timetable</div>
+            </a>
+            <a class="action-btn" onclick="document.getElementById('navEnrollment').click()">
+              <div class="action-btn-icon">👥</div>
+              <div class="action-btn-text">Course Enrollment</div>
+            </a>
+            <a class="action-btn" onclick="alert('Feature coming soon!')">
+              <div class="action-btn-icon">📝</div>
+              <div class="action-btn-text">Grade Entry</div>
+            </a>
+            <a class="action-btn" onclick="alert('Feature coming soon!')">
+              <div class="action-btn-icon">📊</div>
+              <div class="action-btn-text">Reports</div>
+            </a>
+          </div>
+        </div>
+
+        <div class="alert alert-info" style="margin-top: 20px;">
+          <span>💡</span>
+          <div>
+            <strong>Debug Information</strong><br>
+            Check browser console (F12) for detailed session information and logs.
+          </div>
+        </div>
+      `;
+    }
+
+    // Load dashboard on start
+    loadDashboard();
   </script>
 </body>
 </html>

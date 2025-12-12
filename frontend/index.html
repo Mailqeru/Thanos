@@ -1,32 +1,153 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TTMS - Login</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <!-- W3.CSS for lightweight responsiveness -->
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+  
   <style>
-    body { background: #f0f5ff; padding-top: 80px; }
-    .login-box { max-width: 320px; margin: auto; background: white; padding: 28px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    .w3-btn { width: 100%; margin-top: 20px; padding: 10px; }
-    .error { color: #d32f2f; margin-top: 10px; text-align: center; }
+    /* UTM Brand Colors */
+    :root {
+      --utm-blue: #003366;
+      --utm-gold: #C9A85C;
+      --light-bg: #f8f9fc;
+      --input-border: #d1d5db;
+      --error-red: #d32f2f;
+    }
+
+    body {
+      background-color: var(--light-bg);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #333;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 400px;
+      padding: 32px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+      box-sizing: border-box;
+    }
+
+    .logo-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .logo-header h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--utm-blue);
+    }
+
+    .logo-header .subtitle {
+      font-size: 16px;
+      color: #555;
+      margin-top: 4px;
+    }
+
+    .input-group {
+      margin-bottom: 20px;
+    }
+
+    .input-group label {
+      display: block;
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 6px;
+      color: var(--utm-blue);
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--input-border);
+      border-radius: 6px;
+      font-size: 16px;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+    }
+
+    .input-group input:focus {
+      outline: none;
+      border-color: var(--utm-blue);
+      box-shadow: 0 0 0 2px rgba(0, 51, 102, 0.15);
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: 12px;
+      background-color: var(--utm-blue);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn-login:hover {
+      background-color: #002244;
+    }
+
+    .error-message {
+      color: var(--error-red);
+      text-align: center;
+      font-size: 14px;
+      min-height: 20px;
+      margin-top: 8px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 480px) {
+      .login-container {
+        padding: 24px 20px;
+      }
+
+      .logo-header h1 {
+        font-size: 22px;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="login-box">
-    <h2 class="w3-center"><b>FC-UTM</b><br>TimeTable System</h2>
-    
-    <label class="w3-text-blue"><b>Matric / Staff ID</b></label>
-    <input class="w3-input w3-border" type="text" id="login" placeholder="e.g. A23CS0086 or 12085" required>
-    
-    <label class="w3-text-blue"><b>Password (NRIC)</b></label>
-    <input class="w3-input w3-border" type="password" id="password" placeholder="e.g. 991231011234" required>
-    
-    <button class="w3-btn w3-blue" id="btnLogin">Login</button>
-    
-    <p id="msg" class="error" style="min-height: 22px;"></p>
+  <div class="login-container">
+    <div class="logo-header">
+      <h1>FC-UTM</h1>
+      <div class="subtitle">Timetable Management System</div>
+    </div>
+
+    <div class="input-group">
+      <label for="login">Matric / Staff ID</label>
+      <input type="text" id="login" placeholder="e.g. A23CS0086 or 12085" autocomplete="off" required />
+    </div>
+
+    <div class="input-group">
+      <label for="password">Password (NRIC)</label>
+      <input type="password" id="password" placeholder="e.g. 991231011234" required />
+    </div>
+
+    <button class="btn-login" id="btnLogin">Login</button>
+
+    <div id="msg" class="error-message"></div>
   </div>
 
+  <!-- jQuery -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
   <script>
     // Redirect if already logged in
     const session = localStorage.getItem("TTMSFC_userSession");
@@ -47,31 +168,30 @@
       }
     }
 
-    $("#btnLogin").click(function() {
+    $("#btnLogin").click(function () {
       const login = $("#login").val().trim();
       const password = $("#password").val().trim();
 
       if (!login || !password) {
-        alert("Please fill in both fields.");
+        $("#msg").text("Please fill in both fields.");
         return;
       }
 
       const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=authentication&login=${encodeURIComponent(login)}&password=${encodeURIComponent(password)}`;
 
       fetch(url)
-        .then(res => {
+        .then((res) => {
           if (!res.ok) throw new Error("Network or server error");
           return res.json();
         })
-        .then(jsonInst => {
+        .then((jsonInst) => {
           if (!Array.isArray(jsonInst) || jsonInst.length === 0) {
             throw new Error("Invalid credentials or account not found");
           }
 
           const apiUser = jsonInst[0];
-          let inferredRole = "student"; // default fallback
+          let inferredRole = "student";
 
-          // 🔑 Determine role strictly from 'description'
           const desc = (apiUser.description || "").toLowerCase().trim();
 
           if (desc.includes("pensyarah") || desc.includes("lecturer") || desc.includes("staff")) {
@@ -81,22 +201,18 @@
           } else if (desc.includes("pelajar") || desc.includes("student")) {
             inferredRole = "student";
           } else {
-            // If description doesn't match any known role
             throw new Error("User role could not be determined from account description");
           }
 
-          // Extract fields (no_pekerja may be absent for students — that's OK)
           const no_pekerja = apiUser.no_pekerja;
           const session_id = apiUser.session_id;
 
-          // For lecturers, ensure critical fields exist
           if (inferredRole === "lecturer") {
             if (no_pekerja == null || session_id == null) {
               throw new Error("Staff account is missing required identifiers (no_pekerja or session_id)");
             }
           }
 
-          // Save full session
           const sessionData = {
             ...apiUser,
             login: apiUser.login_name,
@@ -106,9 +222,8 @@
           };
 
           localStorage.setItem("TTMSFC_userSession", JSON.stringify(sessionData));
-          alert("Login successful!");
+          $("#msg").text("");
 
-          // ✅ FIXED: Correct paths based on folder structure
           if (inferredRole === "lecturer") {
             window.location.replace("Lecturer/Lecturer.html");
           } else if (inferredRole === "admin") {
@@ -117,14 +232,14 @@
             window.location.replace("Student/Main.html");
           }
         })
-        .catch(err => {
+        .catch((err) => {
           console.error("Login failed:", err);
-          alert("Login failed! " + err.message);
+          $("#msg").text("Login failed! " + err.message);
         });
     });
 
     // Enter key support
-    $("#password").keypress(function(e) {
+    $("#password").keypress(function (e) {
       if (e.which === 13) $("#btnLogin").click();
     });
   </script>

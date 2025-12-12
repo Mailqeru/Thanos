@@ -1,107 +1,701 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>TTMS - Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="refresh" content="900">
+  <title>TTMS - Student Dashboard</title>
   <style>
-    body { margin: 0; font-family: Arial, sans-serif; }
-    .link { cursor: pointer; }
+    :root {
+      --primary: #667eea;
+      --primary-dark: #764ba2;
+      --secondary: #4158d0;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --info: #3b82f6;
+      --dark: #1f2937;
+      --light: #f3f4f6;
+      --white: #ffffff;
+      --sidebar-width: 240px;
+      --header-height: 70px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8f9fc;
+      color: #333;
+      overflow-x: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
+      box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow-y: auto;
+    }
+
+    .sidebar-header {
+      padding: 25px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-title {
+      color: white;
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .sidebar-subtitle {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 13px;
+    }
+
+    .sidebar-user {
+      padding: 20px 20px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .user-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+
+    .user-name {
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .user-role {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 12px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 14px 20px;
+      color: rgba(255, 255, 255, 0.9);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border-left: 4px solid transparent;
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-left-color: white;
+      color: white;
+    }
+
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.2);
+      border-left-color: white;
+      color: white;
+      font-weight: 600;
+    }
+
+    .nav-icon {
+      margin-right: 12px;
+      font-size: 18px;
+      width: 24px;
+      text-align: center;
+    }
+
+    .nav-logout {
+      margin-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 20px;
+    }
+
+    /* Main Content */
+    .main-wrapper {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      transition: margin-left 0.3s ease;
+    }
+
+    .top-header {
+      position: sticky;
+      top: 0;
+      height: var(--header-height);
+      background: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      display: flex;
+      align-items: center;
+      padding: 0 25px;
+      z-index: 100;
+    }
+
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 24px;
+      color: var(--dark);
+      cursor: pointer;
+      padding: 8px;
+      margin-right: 15px;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+
+    .menu-toggle:hover {
+      background: var(--light);
+    }
+
+    .header-title {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--dark);
+    }
+
+    .header-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .header-time {
+      font-size: 14px;
+      color: #6b7280;
+      padding: 8px 16px;
+      background: var(--light);
+      border-radius: 8px;
+    }
+
+    .main-content {
+      padding: 30px;
+      max-width: 1400px;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      border-left: 4px solid var(--primary);
+    }
+
+    .stat-card-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+
+    .stat-card-label {
+      font-size: 13px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .info-panel {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 25px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .info-panel h3 {
+      margin-bottom: 16px;
+      color: var(--dark);
+      font-size: 18px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .info-label {
+      font-size: 12px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .info-value {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--dark);
+    }
+
+    .welcome-panel {
+      background: #eef5ff;
+      border-left: 4px solid var(--primary);
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+    }
+
+    .welcome-panel h3 {
+      color: var(--dark);
+      margin-bottom: 8px;
+    }
+
+    .welcome-panel p {
+      color: #666;
+    }
+
+    .quick-actions {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 25px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .quick-actions h3 {
+      margin-bottom: 16px;
+      color: var(--dark);
+      font-size: 18px;
+    }
+
+    .action-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px;
+    }
+
+    .action-btn {
+      padding: 16px;
+      border-radius: 10px;
+      border: 2px solid #eaeef5;
+      background: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+      color: var(--dark);
+    }
+
+    .action-btn:hover {
+      border-color: var(--primary);
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    .action-icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .action-text {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    /* Alerts */
+    .alert {
+      padding: 16px 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .alert-info {
+      background: #eff6ff;
+      color: #1e40af;
+      border-left: 4px solid var(--info);
+    }
+
+    /* Overlay for mobile */
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+    }
+
+    .overlay.active {
+      display: block;
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-wrapper {
+        margin-left: 0;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+
+      .main-content {
+        padding: 20px 16px;
+      }
+
+      .top-header {
+        padding: 0 16px;
+      }
+
+      .header-time {
+        display: none;
+      }
+
+      .dashboard-grid,
+      .info-grid,
+      .action-grid {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="w3-sidebar w3-bar-block w3-collapse w3-card w3-animate-left" style="width:200px;" id="mySidebar">
-    <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">Close &times;</button>
-    <a href="#" class="w3-bar-item w3-button w3-blue" id="navTitle">Dashboard</a>
-    <a href="#" class="w3-bar-item w3-button link" id="navTimetable">My Timetable</a>
-    <a href="#" class="w3-bar-item w3-button link" id="navSubjects">My Subjects</a>
-    <a href="#" class="w3-bar-item w3-button link" id="navSections">Subject Sections</a>
-    <a href="#" class="w3-bar-item w3-button link" id="navLogout">Logout</a>
-  </div>
 
-  <div class="w3-main" style="margin-left:200px">
-    <div class="w3-teal">
-      <button class="w3-button w3-teal w3-xlarge w3-hide-large" onclick="w3_open()">&#9776;</button>
-      <div class="w3-container">
-        <h1 id="pageHeader">Loading...</h1>
+  <!-- Overlay -->
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">TTMS</div>
+      <div class="sidebar-subtitle">Student Portal</div>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="user-avatar" id="userAvatar">S</div>
+      <div class="user-name" id="userName">Loading...</div>
+      <div class="user-role">Student</div>
+    </div>
+
+    <a class="nav-item active" id="navDashboard">
+      <span class="nav-icon">📊</span>
+      <span>Dashboard</span>
+    </a>
+    <a class="nav-item" id="navTimetable">
+      <span class="nav-icon">📅</span>
+      <span>My Timetable</span>
+    </a>
+    <a class="nav-item" id="navSubjects">
+      <span class="nav-icon">📚</span>
+      <span>My Subjects</span>
+    </a>
+    <a class="nav-item" id="navSections">
+      <span class="nav-icon">👥</span>
+      <span>Subject Sections</span>
+    </a>
+
+    <div class="nav-logout">
+      <a class="nav-item" id="navLogout">
+        <span class="nav-icon">🚪</span>
+        <span>Logout</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <div class="main-wrapper">
+    <header class="top-header">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <h1 class="header-title" id="pageHeader">Student Dashboard</h1>
+      <div class="header-actions">
+        <div class="header-time" id="currentTime">--:--</div>
       </div>
-    </div>
+    </header>
 
-    <div class="w3-container" id="content" style="margin-top:30px;">
-      <p>Loading content...</p>
-    </div>
+    <main class="main-content" id="content">
+      <!-- Dashboard loaded dynamically -->
+    </main>
   </div>
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <!-- Theme -->
+  <script src="theme.js"></script>
+
   <script>
-    function w3_open() {
-      document.getElementById("mySidebar").style.display = "block";
+    // Time
+    function updateTime() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: true 
+      });
+      document.getElementById('currentTime').textContent = timeStr;
     }
-    function w3_close() {
-      document.getElementById("mySidebar").style.display = "none";
+    updateTime();
+    setInterval(updateTime, 60000);
+
+    // Sidebar
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('overlay');
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('active');
     }
 
-    // Check if user is logged in
-    var userSession = localStorage.getItem("TTMSFC_userSession");
-    if (!userSession) {
-      alert("Please login first!");
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('overlay').classList.remove('active');
+    }
+
+    // Auth & Role Check
+    const session = localStorage.getItem("TTMSFC_userSession");
+    if (!session) {
+      alert("Please log in first.");
       window.location.replace("../index.html");
     }
 
-    var user = JSON.parse(userSession);
-    console.log("Logged in user:", user);
+    let user;
+    try {
+      user = JSON.parse(session);
+      const role = (user.inferredRole || "unknown").toLowerCase();
+      if (role !== "student") {
+        alert("Access denied: Student access only.");
+        localStorage.removeItem("TTMSFC_userSession");
+        window.location.replace("../index.html");
+      }
+    } catch (e) {
+      alert("Invalid session. Please log in again.");
+      localStorage.removeItem("TTMSFC_userSession");
+      window.location.replace("../index.html");
+    }
 
-    // Display user info
-    var userName = user.full_name || user.login;
-    var userRole = user.role || "Student";
-    document.getElementById("navTitle").innerText = "Hi, " + userName;
-    document.getElementById("pageHeader").innerText = "Welcome, " + userName + " (" + userRole + ")";
+    // Set UI
+    const fullName = user.full_name || user.login || "Student";
+    const matricNo = user.login_name || user.login || "N/A";
+    const initials = fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || "S";
+    
+    document.getElementById("userName").textContent = fullName;
+    document.getElementById("userAvatar").textContent = initials;
 
-    // Handle logout
-    $("#navLogout").click(function() {
+    // Logout
+    document.getElementById("navLogout").onclick = function() {
       if (confirm("Are you sure you want to logout?")) {
         localStorage.removeItem("TTMSFC_userSession");
         window.location.replace("../index.html");
       }
-    });
+    };
 
-    // Handle timetable navigation
-    $("#navTimetable").click(function() {
-      $("#content").load("StudentTimetable.html", function(response, status, xhr) {
-        if (status == "error") {
-          $("#content").html("<p class='w3-text-red'>Error loading timetable page.</p>");
-        } else {
-          $("#pageHeader").text("My Timetable");
+    // Load page fragments
+    function loadPage(targetId, fileName, title) {
+      document.getElementById(targetId).onclick = function() {
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        this.classList.add('active');
+        document.getElementById("pageHeader").textContent = title;
+
+        fetch(fileName)
+          .then(res => res.ok ? res.text() : Promise.reject(new Error(`HTTP ${res.status}`)))
+          .then(html => {
+            document.getElementById("content").innerHTML = html;
+            const temp = document.createElement('div');
+            temp.innerHTML = html;
+            temp.querySelectorAll('script').forEach(oldScript => {
+              const newScript = document.createElement('script');
+              if (oldScript.src) newScript.src = oldScript.src;
+              else newScript.textContent = oldScript.textContent;
+              document.head.appendChild(newScript);
+            });
+            if (window.innerWidth <= 768) closeSidebar();
+          })
+          .catch(err => {
+            document.getElementById("content").innerHTML = `
+              <div class="alert alert-info">
+                <span>❌</span>
+                <div>
+                  <strong>Failed to load ${title}</strong><br>
+                  ${err.message || 'Unknown error'}
+                </div>
+              </div>
+            `;
+          });
+      };
+    }
+
+    // Register navigation
+    loadPage("navTimetable", "StudentTimetable.html", "My Timetable");
+    loadPage("navSubjects", "StudentSubjects.html", "My Subjects");
+    loadPage("navSections", "SubjectSection.html", "Subject Sections");
+
+    // Dashboard click
+    document.getElementById("navDashboard").onclick = function() {
+      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+      this.classList.add('active');
+      document.getElementById("pageHeader").textContent = "Student Dashboard";
+      loadDashboard();
+      if (window.innerWidth <= 768) closeSidebar();
+    };
+
+    // 🔥 NEW: Helper to compare academic sessions
+    function compareSessions(sesiA, sesiB) {
+      // Handles "2024/2025" -> compare by start year
+      const yearA = parseInt(sesiA.split('/')[0] || 0);
+      const yearB = parseInt(sesiB.split('/')[0] || 0);
+      return yearA - yearB;
+    }
+
+    // 🔥 NEW: Load dashboard WITH current-session filtering
+    async function loadDashboard() {
+      let totalSubjects = 0;
+      let totalClasses = 0;
+      let currentSession = "—";
+      let currentSemester = "—";
+
+      try {
+        const matricNo = user.login_name || user.login;
+        if (matricNo && matricNo !== "N/A") {
+          const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar_subjek&no_matrik=${encodeURIComponent(matricNo)}`;
+          const res = await fetch(url);
+          const allData = await res.json();
+
+          if (Array.isArray(allData) && allData.length > 0) {
+            // 🔍 Find the LATEST session + semester
+            let latestEntry = allData[0];
+            for (const entry of allData) {
+              if (compareSessions(entry.sesi, latestEntry.sesi) > 0) {
+                latestEntry = entry;
+              } else if (entry.sesi === latestEntry.sesi && (entry.semester || 0) > (latestEntry.semester || 0)) {
+                latestEntry = entry;
+              }
+            }
+
+            currentSession = latestEntry.sesi || "—";
+            currentSemester = latestEntry.semester || "—";
+
+            // ✅ Filter to ONLY current session & semester
+            const currentData = allData.filter(item => 
+              item.sesi === currentSession && item.semester == currentSemester
+            );
+
+            // Count unique subjects and total classes (only current semester!)
+            totalSubjects = new Set(currentData.map(s => s.kod_subjek)).size;
+            totalClasses = currentData.length;
+          }
         }
-      });
-    });
+      } catch (e) {
+        console.warn("Could not load enrollment stats:", e);
+      }
 
-    // Handle subjects navigation
-    $("#navSubjects").click(function() {
-      $("#content").load("StudentSubjects.html", function(response, status, xhr) {
-        if (status == "error") {
-          $("#content").html("<p class='w3-text-red'>Error loading subjects page.</p>");
-        } else {
-          $("#pageHeader").text("My Subjects");
-        }
-      });
-    });
+      document.getElementById("content").innerHTML = `
+        <div class="alert alert-info">
+          <span>💡</span>
+          <div>
+            <strong>Welcome!</strong> Stats below reflect <strong>${currentSession} Semester ${currentSemester}</strong> only.
+          </div>
+        </div>
 
-    // Handle sections navigation
-    $("#navSections").click(function() {
-      $("#content").load("SubjectSection.html", function(response, status, xhr) {
-        if (status == "error") {
-          $("#content").html("<p class='w3-text-red'>Error loading sections page.</p>");
-        } else {
-          $("#pageHeader").text("Subject Sections");
-        }
-      });
-    });
+        <div class="dashboard-grid">
+          <div class="stat-card">
+            <div class="stat-card-value">${totalSubjects}</div>
+            <div class="stat-card-label">Enrolled Subjects</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-value">${totalClasses}</div>
+            <div class="stat-card-label">Total Classes</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-value">Active</div>
+            <div class="stat-card-label">Account Status</div>
+          </div>
+        </div>
 
-    // Load default content
-    $(document).ready(function() {
-      $("#content").html("<div class='w3-panel w3-pale-blue w3-border'><h3>Welcome to TTMS</h3><p>Click on 'My Timetable' to view your schedule.</p></div>");
-    });
+        <div class="info-panel">
+          <h3>👤 Profile Information</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Full Name</div>
+              <div class="info-value">${fullName}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Matric Number</div>
+              <div class="info-value">${matricNo}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Current Session</div>
+              <div class="info-value">${currentSession} (Semester ${currentSemester})</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="quick-actions">
+          <h3>⚡ Quick Actions</h3>
+          <div class="action-grid">
+            <div class="action-btn" onclick="document.getElementById('navTimetable').click()">
+              <div class="action-icon">📅</div>
+              <div class="action-text">View Timetable</div>
+            </div>
+            <div class="action-btn" onclick="document.getElementById('navSubjects').click()">
+              <div class="action-icon">📚</div>
+              <div class="action-text">My Subjects</div>
+            </div>
+            <div class="action-btn" onclick="document.getElementById('navSections').click()">
+              <div class="action-icon">👥</div>
+              <div class="action-text">Browse Sections</div>
+            </div>
+            <div class="action-btn" onclick="alert('Feature coming soon!')">
+              <div class="action-icon">✅</div>
+              <div class="action-text">Attendance</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="welcome-panel">
+          <h3>🎓 Welcome to TTMS</h3>
+          <p>Manage your timetable, subjects, and class sections in one place.</p>
+        </div>
+      `;
+    }
+
+    // Load dashboard on start
+    loadDashboard();
   </script>
 </body>
 </html>

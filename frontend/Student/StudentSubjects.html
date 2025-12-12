@@ -1,91 +1,216 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>My Subjects</title>
-  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <style>
-    .loading { color: #1976D2; font-style: italic; }
-  </style>
-</head>
-<body>
-
-<div class="w3-container">
+<div class="subjects-container">
   <h3>My Subjects</h3>
-  
-  <!-- Dropdown to select session/semester -->
-  <div class="w3-margin-bottom">
+
+  <div class="filter-group">
     <label for="sessionSelect">Select Session/Semester:</label>
-    <select id="sessionSelect" class="w3-select" onchange="showSelectedSubjects()">
+    <select id="sessionSelect" onchange="showSelectedSubjects()">
       <option value="">Loading...</option>
     </select>
   </div>
 
-  <!-- Container to display subjects for the selected session -->
   <div id="subjectsContent">
-    <p>Select a session/semester to view your subjects.</p>
+    <div class="loading">Loading your subjects...</div>
   </div>
 </div>
 
-<script>
-  // ✅ Safe global variable: use `var` or check existence
-  var allSubjects = window.allSubjects || [];
+<style>
+  .subjects-container {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
 
+  .subjects-container h3 {
+    color: var(--primary);
+    margin-bottom: 20px;
+    font-weight: 600;
+    font-size: 24px;
+  }
+
+  .filter-group {
+    margin-bottom: 24px;
+  }
+
+  .filter-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #444;
+  }
+
+  .filter-group select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--border-color, #d1d5db);
+    border-radius: 8px;
+    font-size: 16px;
+    background-color: white;
+    color: #333;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23667eea' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 40px;
+  }
+
+  .subject-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    margin-bottom: 24px;
+    overflow: hidden;
+    border: 1px solid #eaeef5;
+  }
+
+  .subject-card header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    padding: 14px 20px;
+  }
+
+  .subject-card header h4 {
+    margin: 0;
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .subject-card table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .subject-card th,
+  .subject-card td {
+    padding: 14px 20px;
+    text-align: left;
+    border-bottom: 1px solid #f0f2f8;
+  }
+
+  .subject-card thead th {
+    background-color: #f8f9ff;
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .subject-card tbody tr:hover {
+    background-color: #fafbff;
+  }
+
+  .subject-summary {
+    padding: 14px 20px;
+    background-color: #f0f5ff;
+    font-weight: 600;
+    color: var(--primary);
+    font-size: 14px;
+  }
+
+  .empty-message {
+    text-align: center;
+    padding: 30px;
+    color: #666;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    border: 1px solid #eee;
+  }
+
+  .loading {
+    color: var(--primary);
+    font-style: italic;
+    text-align: center;
+    padding: 30px;
+    font-size: 16px;
+  }
+
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  @media (max-width: 600px) {
+    .subjects-container {
+      padding: 0 12px;
+    }
+
+    .subjects-container h3 {
+      font-size: 20px;
+    }
+
+    .subject-card th,
+    .subject-card td {
+      padding: 10px;
+      font-size: 13px;
+    }
+
+    .subject-card header h4 {
+      font-size: 16px;
+    }
+
+    .filter-group select {
+      padding: 10px 14px;
+      font-size: 14px;
+      padding-right: 36px;
+    }
+  }
+</style>
+
+<script>
   (function() {
-    var userSession = localStorage.getItem("TTMSFC_userSession");
+    console.log("📚 Student Subjects fragment loaded");
+
+    const contentEl = document.getElementById("subjectsContent");
+    const selectEl = document.getElementById("sessionSelect");
+
+    const userSession = localStorage.getItem("TTMSFC_userSession");
     if (!userSession) {
-      document.getElementById("subjectsContent").innerHTML = 
-        "<p class='w3-text-red'>Session expired. Please login again.</p>";
-      document.getElementById("sessionSelect").innerHTML = 
-        "<option>Not logged in</option>";
+      contentEl.innerHTML = `<div class="empty-message">Session expired. Please log in again.</div>`;
+      selectEl.innerHTML = "<option>Not logged in</option>";
       return;
     }
-    
+
+    let user, matricNo;
     try {
-      var user = JSON.parse(userSession);
-      var matricNo = user.login_name;
+      user = JSON.parse(userSession);
+      matricNo = user.login_name || user.login;
     } catch (e) {
-      document.getElementById("subjectsContent").innerHTML = 
-        "<p class='w3-text-red'>Invalid session data. Please log in again.</p>";
+      contentEl.innerHTML = `<div class="empty-message">Invalid session data. Please log in again.</div>`;
       return;
     }
-    
-    console.log("Fetching subjects for:", matricNo);
-    var url = "http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar_subjek&no_matrik=" + encodeURIComponent(matricNo);
+
+    if (!matricNo) {
+      contentEl.innerHTML = `<div class="empty-message">Matric number not found in session.</div>`;
+      return;
+    }
+
+    const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar_subjek&no_matrik=${encodeURIComponent(matricNo)}`;
 
     fetch(url)
       .then(res => {
-        if (!res.ok) throw new Error('Network response was not ok');
+        if (!res.ok) throw new Error('Failed to load subjects');
         return res.json();
       })
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {
-          allSubjects = data; // update global
-          window.allSubjects = allSubjects; // optional: attach to window explicitly
+          window.studentSubjectsData = data; // Store globally for filter function
           populateSessionDropdown(data);
-          
-          // Auto-select latest session
+
           const grouped = groupSubjects(data);
           const sortedKeys = Object.keys(grouped).sort().reverse();
           if (sortedKeys.length > 0) {
-            document.getElementById("sessionSelect").value = sortedKeys[0];
+            selectEl.value = sortedKeys[0];
             showSelectedSubjects();
           }
         } else {
-          document.getElementById("sessionSelect").innerHTML = 
-            "<option>No sessions available</option>";
-          document.getElementById("subjectsContent").innerHTML = 
-            "<div class='w3-panel w3-pale-yellow w3-border'><p>No subjects found.</p></div>";
+          selectEl.innerHTML = "<option>No sessions available</option>";
+          contentEl.innerHTML = `<div class="empty-message">No subjects found.</div>`;
         }
       })
       .catch(err => {
-        console.error("Error loading subjects:", err);
-        document.getElementById("sessionSelect").innerHTML = 
-          "<option>Error loading</option>";
-        document.getElementById("subjectsContent").innerHTML = 
-          `<div class='w3-panel w3-pale-red w3-border'>
-            <p>Failed to load subjects: ${err.message || 'Unknown error'}</p>
-          </div>`;
+        console.error("❌ Error loading subjects:", err);
+        selectEl.innerHTML = "<option>Error loading</option>";
+        contentEl.innerHTML = `<div class="empty-message">Failed to load subjects: ${err.message || 'Unknown error'}</div>`;
       });
   })();
 
@@ -103,61 +228,57 @@
     const grouped = groupSubjects(data);
     const select = document.getElementById("sessionSelect");
     let options = '<option value="">-- All Sessions --</option>';
-    
-    const sortedKeys = Object.keys(grouped).sort().reverse();
 
+    const sortedKeys = Object.keys(grouped).sort().reverse();
     sortedKeys.forEach(key => {
       options += `<option value="${key}">${key}</option>`;
     });
-    
+
     select.innerHTML = options;
   }
 
   function showSelectedSubjects() {
     const selectedKey = document.getElementById("sessionSelect").value;
-    const grouped = groupSubjects(allSubjects);
-    
+    const data = window.studentSubjectsData || [];
+    const grouped = groupSubjects(data);
+
     if (!selectedKey) {
       let html = '';
-      for (let key in grouped) {
-        if (grouped.hasOwnProperty(key)) {
-          html += buildSubjectTable(key, grouped[key]);
-        }
-      }
-      document.getElementById("subjectsContent").innerHTML = 
-        html || "<p>No subjects to display.</p>";
+      const sortedKeys = Object.keys(grouped).sort().reverse();
+      sortedKeys.forEach(key => {
+        html += buildSubjectCard(key, grouped[key]);
+      });
+      document.getElementById("subjectsContent").innerHTML = html || `<div class="empty-message">No subjects to display.</div>`;
     } else if (grouped[selectedKey]) {
-      document.getElementById("subjectsContent").innerHTML = 
-        buildSubjectTable(selectedKey, grouped[selectedKey]);
+      document.getElementById("subjectsContent").innerHTML = buildSubjectCard(selectedKey, grouped[selectedKey]);
     } else {
-      document.getElementById("subjectsContent").innerHTML = 
-        "<p>No subjects found for this session.</p>";
+      document.getElementById("subjectsContent").innerHTML = `<div class="empty-message">No subjects found for this session.</div>`;
     }
   }
 
-  function buildSubjectTable(title, subjects) {
-    let html = `<div class="w3-panel w3-card-4" style="margin-bottom:20px;">`;
-    html += `<header class="w3-container w3-blue"><h4>${title}</h4></header>`;
-    html += `<table class="w3-table-all w3-hoverable">`;
-    html += `<thead><tr class="w3-light-blue">
+  function buildSubjectCard(title, subjects) {
+    let html = `<div class="subject-card">`;
+    html += `<header><h4>${title}</h4></header>`;
+    html += `<div class="table-container">`;
+    html += `<table>`;
+    html += `<thead><tr>
                <th>Course Code</th>
                <th>Course Name</th>
                <th>Section</th>
-             </tr></thead><tbody>`;
+             </tr></thead>`;
+    html += `<tbody>`;
 
     subjects.forEach(item => {
       html += `<tr>
-                 <td>${item.kod_subjek || 'N/A'}</td>
-                 <td>${item.nama_subjek || 'N/A'}</td>
-                 <td>${item.seksyen || 'N/A'}</td>
+                 <td>${item.kod_subjek || '—'}</td>
+                 <td>${item.nama_subjek || '—'}</td>
+                 <td>${item.seksyen || '—'}</td>
                </tr>`;
     });
 
-    html += `</tbody></table>`;
-    html += `<div class="w3-container"><p><b>Total Subjects:</b> ${subjects.length}</p></div>`;
+    html += `</tbody></table></div>`;
+    html += `<div class="subject-summary">Total Subjects: ${subjects.length}</div>`;
     html += `</div>`;
     return html;
   }
 </script>
-</body>
-</html>
