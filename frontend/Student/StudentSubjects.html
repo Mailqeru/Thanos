@@ -20,7 +20,7 @@
   }
 
   .subjects-container h3 {
-    color: var(--primary);
+    color: #003366; /* --utm-blue */
     margin-bottom: 20px;
     font-weight: 600;
     font-size: 24px;
@@ -40,13 +40,13 @@
   .filter-group select {
     width: 100%;
     padding: 12px 16px;
-    border: 1px solid var(--border-color, #d1d5db);
+    border: 1px solid #d1d5db; /* --input-border */
     border-radius: 8px;
     font-size: 16px;
     background-color: white;
     color: #333;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23667eea' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23003366' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 16px center;
     padding-right: 40px;
@@ -62,7 +62,7 @@
   }
 
   .subject-card header {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    background: linear-gradient(135deg, #003366 0%, #002244 100%); /* UTM blue gradient */
     padding: 14px 20px;
   }
 
@@ -86,8 +86,8 @@
   }
 
   .subject-card thead th {
-    background-color: #f8f9ff;
-    color: var(--primary);
+    background-color: #f0f5ff;
+    color: #003366; /* --utm-blue */
     font-weight: 600;
     font-size: 14px;
     text-transform: uppercase;
@@ -95,15 +95,16 @@
   }
 
   .subject-card tbody tr:hover {
-    background-color: #fafbff;
+    background-color: #f8fbff;
   }
 
   .subject-summary {
     padding: 14px 20px;
     background-color: #f0f5ff;
     font-weight: 600;
-    color: var(--primary);
+    color: #003366; /* --utm-blue */
     font-size: 14px;
+    border-top: 1px solid #eaeef5;
   }
 
   .empty-message {
@@ -117,7 +118,7 @@
   }
 
   .loading {
-    color: var(--primary);
+    color: #003366; /* --utm-blue */
     font-style: italic;
     text-align: center;
     padding: 30px;
@@ -193,7 +194,7 @@
       })
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {
-          window.studentSubjectsData = data; // Store globally for filter function
+          window.studentSubjectsData = data;
           populateSessionDropdown(data);
 
           const grouped = groupSubjects(data);

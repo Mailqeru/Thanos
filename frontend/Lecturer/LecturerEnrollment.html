@@ -54,10 +54,10 @@
 </div>
 
 <style>
-  /* Scoped styles — will apply only when this fragment is loaded */
   .enrollment-container {
     max-width: 1400px;
     margin: 0 auto;
+    padding: 0 16px;
   }
 
   .header {
@@ -65,12 +65,12 @@
     border-radius: 20px;
     padding: 30px;
     margin-bottom: 20px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.12);
   }
 
   .header h1 {
     font-size: 28px;
-    color: var(--primary);
+    color: #003366; /* UTM blue */
     margin-bottom: 8px;
     display: flex;
     align-items: center;
@@ -87,7 +87,7 @@
     border-radius: 20px;
     padding: 25px;
     margin-bottom: 20px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.12);
   }
 
   .filter-title {
@@ -130,7 +130,7 @@
     cursor: pointer;
     transition: all 0.3s ease;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23667eea' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-image: url("image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23003366' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 15px center;
     padding-right: 40px;
@@ -138,8 +138,8 @@
 
   .form-group select:focus {
     outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #003366; /* UTM blue */
+    box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.15);
   }
 
   .button-group {
@@ -161,14 +161,14 @@
   }
 
   .btn-primary {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    background: linear-gradient(135deg, #003366 0%, #002244 100%); /* UTM blue */
     color: white;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 51, 102, 0.3);
   }
 
   .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 6px 20px rgba(0, 51, 102, 0.4);
   }
 
   .btn-secondary {
@@ -181,12 +181,12 @@
   }
 
   .stats-banner {
-    background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+    background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%); /* UTM green */
     color: white;
     padding: 20px 25px;
     border-radius: 16px;
     margin-bottom: 20px;
-    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 4px 15px rgba(46, 125, 50, 0.3);
     display: flex;
     align-items: center;
     gap: 15px;
@@ -213,21 +213,21 @@
   }
 
   .alert-info {
-    background: #e8f4fd;
-    color: #004085;
-    border-left: 4px solid var(--info);
+    background: #e3f2fd;
+    color: #003366;
+    border-left: 4px solid #1565c0;
   }
 
   .alert-warning {
-    background: #ffeaa7;
-    color: #d63031;
-    border-left: 4px solid var(--warning);
+    background: #fff8e1;
+    color: #ed6c02;
+    border-left: 4px solid #ed6c02;
   }
 
   .alert-error {
-    background: #fee;
-    color: var(--danger);
-    border-left: 4px solid var(--danger);
+    background: #ffebee;
+    color: #c62828;
+    border-left: 4px solid #c62828;
   }
 
   .loading {
@@ -235,12 +235,12 @@
     padding: 60px 20px;
     background: white;
     border-radius: 20px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.12);
   }
 
   .spinner {
     border: 3px solid #f3f3f3;
-    border-top: 3px solid var(--primary);
+    border-top: 3px solid #003366; /* UTM blue */
     border-radius: 50%;
     width: 50px;
     height: 50px;
@@ -258,7 +258,7 @@
     border-radius: 20px;
     padding: 30px;
     margin-bottom: 20px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.12);
     transition: transform 0.3s ease;
   }
 
@@ -280,7 +280,7 @@
   .session-title {
     font-size: 22px;
     font-weight: 700;
-    color: var(--primary);
+    color: #003366; /* UTM blue */
     display: flex;
     align-items: center;
     gap: 10px;
@@ -298,15 +298,16 @@
     align-items: center;
     gap: 6px;
     padding: 6px 12px;
-    background: #f8f9fc;
+    background: #f8fbff;
     border-radius: 8px;
     font-weight: 500;
+    color: #003366;
   }
 
   .table-container {
     overflow-x: auto;
     border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
   }
 
   table {
@@ -316,7 +317,7 @@
   }
 
   thead th {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    background: linear-gradient(135deg, #003366 0%, #002244 100%); /* UTM blue */
     color: white;
     padding: 15px 12px;
     text-align: left;
@@ -333,7 +334,7 @@
   }
 
   tbody tr:hover {
-    background: #f8f9ff;
+    background: #f8fbff;
   }
 
   tbody td {
@@ -344,15 +345,15 @@
 
   .course-code {
     font-weight: 700;
-    color: var(--primary);
+    color: #003366; /* UTM blue */
     font-size: 15px;
   }
 
   .section-badge {
     display: inline-block;
     padding: 4px 12px;
-    background: #e8f4fd;
-    color: var(--info);
+    background: #e3f2fd;
+    color: #1565c0;
     border-radius: 20px;
     font-size: 12px;
     font-weight: 600;
@@ -361,15 +362,16 @@
   .semester-badge {
     display: inline-block;
     padding: 4px 10px;
-    background: #f0f0f0;
+    background: #f0f4ff;
     border-radius: 6px;
     font-size: 13px;
     font-weight: 500;
+    color: #003366;
   }
 
   .student-count {
     font-weight: 600;
-    color: var(--success);
+    color: #2e7d32; /* UTM green */
   }
 
   .summary-cards {
@@ -383,14 +385,14 @@
     background: white;
     border-radius: 16px;
     padding: 25px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
     text-align: center;
   }
 
   .summary-card-value {
     font-size: 36px;
     font-weight: 700;
-    color: var(--primary);
+    color: #003366; /* UTM blue */
     margin-bottom: 8px;
   }
 
@@ -402,6 +404,10 @@
 
   /* Mobile Responsive */
   @media (max-width: 768px) {
+    .enrollment-container {
+      padding: 0 12px;
+    }
+
     .header {
       padding: 20px;
     }
@@ -477,10 +483,8 @@
 
 <script>
   (function() {
-    // This script runs when the fragment is loaded into lecturer.html
-    console.log("📚 Enrollment fragment loaded");
+    console.log("📚 Lecturer Enrollment (UTM Branded) fragment loaded");
 
-    // Get session from parent page (assumes it's available in localStorage)
     const session = localStorage.getItem("TTMSFC_userSession");
     if (!session) {
       document.getElementById("coursesContainer").innerHTML = `
@@ -501,7 +505,7 @@
           <span>❌</span>
           <div>
             <strong>Profile Incomplete</strong><br>
-            Staff ID (no_pekerja) not found. Please update your profile.
+            Staff ID (no_pekerja) not found.
           </div>
         </div>
       `;
@@ -534,7 +538,6 @@
 
         allCourses = data;
 
-        // Populate session dropdown
         const sessions = [...new Set(data.map(c => c.sesi))].sort((a, b) => {
           const yearA = parseInt(a.split('/')[0] || 0);
           const yearB = parseInt(b.split('/')[0] || 0);
@@ -565,7 +568,6 @@
         `;
       });
 
-    // Re-attach event listeners (important after DOM injection)
     document.getElementById('btnFilter').addEventListener('click', filterCourses);
     document.getElementById('btnReset').addEventListener('click', resetFilters);
 
@@ -574,13 +576,8 @@
       const selectedSemester = document.getElementById('filterSemester').value;
 
       let filtered = allCourses;
-
-      if (selectedSession) {
-        filtered = filtered.filter(c => c.sesi === selectedSession);
-      }
-      if (selectedSemester) {
-        filtered = filtered.filter(c => c.semester == selectedSemester);
-      }
+      if (selectedSession) filtered = filtered.filter(c => c.sesi === selectedSession);
+      if (selectedSemester) filtered = filtered.filter(c => c.semester == selectedSemester);
 
       displayCourses(filtered);
 
@@ -707,9 +704,6 @@
       `;
 
       document.getElementById("coursesContainer").innerHTML = html;
-
-      // Re-attach event listeners after DOM update (for Reset/Filter buttons if re-rendered)
-      // But in this case, buttons are outside the replaced content, so it's safe.
     }
   })();
 </script>

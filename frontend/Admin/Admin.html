@@ -7,6 +7,13 @@
   <style>
     body { margin: 0; font-family: Arial, sans-serif; }
     .link { cursor: pointer; }
+    .debug-box {
+      background: #f0f8ff;
+      border-left: 4px solid #003366;
+      padding: 12px;
+      margin: 15px 0;
+      border-radius: 4px;
+    }
   </style>
 </head>
 <body>
@@ -18,6 +25,7 @@
     <a href="#" class="w3-bar-item w3-button link" id="navSubjects">Manage Subjects</a>
     <a href="#" class="w3-bar-item w3-button link" id="navTimetables">Timetable Engine</a>
     <a href="#" class="w3-bar-item w3-button link" id="navReports">Reports</a>
+    <a href="#" class="w3-bar-item w3-button link" id="navLecturers">View Lecturers</a>
     <a href="#" class="w3-bar-item w3-button link" id="navLogout">Logout</a>
   </div>
 
@@ -43,15 +51,24 @@
       document.getElementById("mySidebar").style.display = "none";
     }
 
-    // Check session
-    const session = localStorage.getItem("TTMSFC_userSession");
-    if (!session) {
-      window.location.replace("index.html");
+    // Validate session on load
+    const rawSession = localStorage.getItem("TTMSFC_userSession");
+    if (!rawSession) {
+      window.location.replace("../index.html");
     }
 
-    const user = JSON.parse(session);
-    // Optional: Add extra check if you want only specific IDs as admin
-    // e.g., if (!['1001','1002'].includes(user.login)) window.location.replace("Lecturer.html");
+    let user;
+    try {
+      user = JSON.parse(rawSession);
+    } catch (e) {
+      localStorage.removeItem("TTMSFC_userSession");
+      window.location.replace("../index.html");
+    }
+
+    if (user.inferredRole !== "admin") {
+      alert("Admin access required");
+      window.location.replace("../index.html");
+    }
 
     const userName = user.full_name || user.login || "Admin";
     document.getElementById("navTitle").innerText = "Hi, " + userName;
@@ -61,11 +78,11 @@
     document.getElementById("navLogout").onclick = function() {
       if (confirm("Logout now?")) {
         localStorage.removeItem("TTMSFC_userSession");
-        window.location.replace("index.html");
+        window.location.replace("../index.html");
       }
     };
 
-    // Navigation loader
+    // Load page content (HTML fragment only - no scripts)
     function loadPage(pageName, fileName, header) {
       document.getElementById("nav" + pageName).onclick = function() {
         $("#content").load(fileName, function(response, status, xhr) {
@@ -73,25 +90,134 @@
             $("#content").html(`<p class='w3-text-red'>Failed to load ${header}.</p>`);
           } else {
             document.getElementById("pageHeader").innerText = header;
+            // Initialize page-specific logic
+            if (pageName === "Lecturers") {
+              initLecturersPage();
+            }
           }
         });
       };
     }
 
-    // Register admin pages
+    // Initialize View Lecturers page
+    function initLecturersPage() {
+      console.log("🚀 [Debug] Initializing View Lecturers");
+
+      const raw = localStorage.getItem("TTMSFC_userSession");
+      if (!raw) {
+        document.getElementById("lecturerTableContainer").innerHTML = 
+          `<p class="w3-text-red">❌ No session. Please log in again.</p>`;
+        return;
+      }
+
+      let session;
+      try {
+        session = JSON.parse(raw);
+      } catch (e) {
+        document.getElementById("lecturerTableContainer").innerHTML = 
+          `<p class="w3-text-red">❌ Invalid session format.</p>`;
+        return;
+      }
+
+      if (!session.session_id || !session.login) {
+        document.getElementById("lecturerTableContainer").innerHTML = 
+          `<p class="w3-text-red">❌ Session missing required fields.</p>`;
+        return;
+      }
+
+      // Update session info display
+      document.getElementById("loginDisplay").textContent = session.login;
+      document.getElementById("sessionIdDisplay").textContent = session.session_id;
+
+      // Fetch lecturer data
+      const sesi = "2025/2026";
+      const semester = "1";
+      const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pensyarah&session_id=${encodeURIComponent(session.session_id)}&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}`;
+
+      fetch(url)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          const container = document.getElementById("lecturerTableContainer");
+          
+          if (!Array.isArray(data) || data.length === 0) {
+            container.innerHTML = `
+              <div class="w3-panel w3-pale-yellow w3-border">
+                <h3>ℹ️ No Lecturers Found</h3>
+                <p>Session ID <code>${session.session_id}</code> is valid, but no lecturers are assigned for <strong>${sesi} Semester ${semester}</strong>.</p>
+                <p>Or your account does not have permission to view this data.</p>
+              </div>`;
+            return;
+          }
+
+          let html = `
+            <table class="w3-table w3-bordered w3-striped w3-white">
+              <thead>
+                <tr class="w3-teal">
+                  <th>No.</th>
+                  <th>Lecturer Name</th>
+                  <th>Staff ID</th>
+                  <th>Subjects</th>
+                  <th>Sections</th>
+                  <th>Students</th>
+                </tr>
+              </thead>
+              <tbody>`;
+
+          data.forEach((lect, i) => {
+            html += `
+              <tr>
+                <td>${i + 1}</td>
+                <td>${lect.nama || '—'}</td>
+                <td>${lect.no_pekerja || '—'}</td>
+                <td>${lect.bil_subjek || 0}</td>
+                <td>${lect.bil_seksyen || 0}</td>
+                <td>${lect.bil_pelajar || 0}</td>
+              </tr>`;
+          });
+
+          html += `</tbody></table>`;
+          container.innerHTML = html;
+          console.log("✅ [Debug] Loaded", data.length, "lecturer(s)");
+        })
+        .catch(err => {
+          console.error("🔥 [Debug] Fetch error:", err);
+          document.getElementById("lecturerTableContainer").innerHTML = `
+            <div class="w3-panel w3-pale-red w3-border">
+              <h3>❌ Error Loading Lecturers</h3>
+              <p><strong>Session ID used:</strong> <code>${session.session_id}</code></p>
+              <p><strong>Error:</strong> ${err.message}</p>
+              <p>Check browser console (F12) for details.</p>
+            </div>`;
+        });
+    }
+
+    // Register all pages
     loadPage("Dashboard", "AdminDashboard.html", "Admin Dashboard");
     loadPage("Users", "ManageUsers.html", "Manage Users");
     loadPage("Subjects", "ManageSubjects.html", "Manage Subjects");
     loadPage("Timetables", "TimetableEngine.html", "Timetable Engine");
     loadPage("Reports", "Reports.html", "System Reports");
+    loadPage("Lecturers", "ViewLecturers.html", "View Lecturers");
 
-    // Default content
+    // Default dashboard content
     $(document).ready(function() {
       $("#content").html(`
-        <div class='w3-panel w3-pale-red w3-border'>
+        <div class='w3-panel w3-pale-blue w3-border'>
           <h3>Admin Dashboard</h3>
-          <p>You have full access to manage users, subjects, and timetable configurations.</p>
-          <p>Admin ID: <b>${user.login}</b></p>
+          <p>Welcome, <b>${userName}</b>!</p>
+          <p><strong>Account:</strong> <code>${user.login}</code></p>
+          <p><strong>Session ID:</strong> <code>${user.session_id || '—'}</code></p>
+          <div class="debug-box">
+            <strong>🔍 Debug Info:</strong><br>
+            • Session obtained from TTMS login API<br>
+            • Used for all data requests<br>
+            • Expires in ~30-60 minutes
+          </div>
         </div>
       `);
     });

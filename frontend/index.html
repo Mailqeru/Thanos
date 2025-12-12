@@ -4,12 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TTMS - Login</title>
-  
-  <!-- W3.CSS for lightweight responsiveness -->
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
-  
   <style>
-    /* UTM Brand Colors */
     :root {
       --utm-blue: #003366;
       --utm-gold: #C9A85C;
@@ -17,7 +13,6 @@
       --input-border: #d1d5db;
       --error-red: #d32f2f;
     }
-
     body {
       background-color: var(--light-bg);
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -29,7 +24,6 @@
       min-height: 100vh;
       color: #333;
     }
-
     .login-container {
       width: 100%;
       max-width: 400px;
@@ -39,29 +33,24 @@
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
       box-sizing: border-box;
     }
-
     .logo-header {
       text-align: center;
       margin-bottom: 28px;
     }
-
     .logo-header h1 {
       margin: 0;
       font-size: 24px;
       font-weight: 700;
       color: var(--utm-blue);
     }
-
     .logo-header .subtitle {
       font-size: 16px;
       color: #555;
       margin-top: 4px;
     }
-
     .input-group {
       margin-bottom: 20px;
     }
-
     .input-group label {
       display: block;
       font-weight: 600;
@@ -69,7 +58,6 @@
       margin-bottom: 6px;
       color: var(--utm-blue);
     }
-
     .input-group input {
       width: 100%;
       padding: 12px 14px;
@@ -79,13 +67,11 @@
       box-sizing: border-box;
       transition: border-color 0.2s;
     }
-
     .input-group input:focus {
       outline: none;
       border-color: var(--utm-blue);
       box-shadow: 0 0 0 2px rgba(0, 51, 102, 0.15);
     }
-
     .btn-login {
       width: 100%;
       padding: 12px;
@@ -98,11 +84,9 @@
       cursor: pointer;
       transition: background-color 0.2s;
     }
-
     .btn-login:hover {
       background-color: #002244;
     }
-
     .error-message {
       color: var(--error-red);
       text-align: center;
@@ -110,13 +94,10 @@
       min-height: 20px;
       margin-top: 8px;
     }
-
-    /* Responsive adjustments */
     @media (max-width: 480px) {
       .login-container {
         padding: 24px 20px;
       }
-
       .logo-header h1 {
         font-size: 22px;
       }
@@ -131,34 +112,29 @@
     </div>
 
     <div class="input-group">
-      <label for="login">Matric / Staff ID</label>
-      <input type="text" id="login" placeholder="e.g. A23CS0086 or 12085" autocomplete="off" required />
+      <label for="login">Matric / Staff ID <em style="color:#888">(or 'admin')</em></label>
+      <input type="text" id="login" placeholder="e.g. A23CS0086 or 'admin'" autocomplete="off" required />
     </div>
 
     <div class="input-group">
-      <label for="password">Password (NRIC)</label>
-      <input type="password" id="password" placeholder="e.g. 991231011234" required />
+      <label for="password">Password (NRIC) <em style="color:#888">or Session ID</em></label>
+      <input type="password" id="password" placeholder="NRIC or active session ID" required />
     </div>
 
     <button class="btn-login" id="btnLogin">Login</button>
-
     <div id="msg" class="error-message"></div>
   </div>
 
-  <!-- jQuery -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-
   <script>
-    // Redirect if already logged in
-    const session = localStorage.getItem("TTMSFC_userSession");
-    if (session) {
+    // Auto-redirect if already logged in
+    const existingSession = localStorage.getItem("TTMSFC_userSession");
+    if (existingSession) {
       try {
-        const user = JSON.parse(session);
-        const role = user.inferredRole || "student";
-
-        if (role === "lecturer") {
+        const user = JSON.parse(existingSession);
+        if (user.inferredRole === "lecturer") {
           window.location.replace("Lecturer/Lecturer.html");
-        } else if (role === "admin") {
+        } else if (user.inferredRole === "admin") {
           window.location.replace("Admin/Admin.html");
         } else {
           window.location.replace("Student/Main.html");
@@ -166,6 +142,10 @@
       } catch (e) {
         localStorage.removeItem("TTMSFC_userSession");
       }
+    }
+
+    function isLikelySessionId(str) {
+      return /^\d{12,16}$/.test(str.trim());
     }
 
     $("#btnLogin").click(function () {
@@ -177,6 +157,22 @@
         return;
       }
 
+      // 🔵 ADMIN MODE: login = "admin" + password = session_id
+      if (login.toLowerCase() === "admin" && isLikelySessionId(password)) {
+        const adminSession = {
+          login: "admin",               // ✅ critical for Admin.html
+          login_name: "admin",
+          session_id: password,         // real session ID from user
+          inferredRole: "admin",
+          isManualAdmin: true
+        };
+        localStorage.setItem("TTMSFC_userSession", JSON.stringify(adminSession));
+        $("#msg").text("");
+        window.location.replace("Admin/Admin.html");
+        return;
+      }
+
+      // 🟢 STUDENT/LECTURER MODE: use TTMS API
       const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=authentication&login=${encodeURIComponent(login)}&password=${encodeURIComponent(password)}`;
 
       fetch(url)
@@ -191,7 +187,6 @@
 
           const apiUser = jsonInst[0];
           let inferredRole = "student";
-
           const desc = (apiUser.description || "").toLowerCase().trim();
 
           if (desc.includes("pensyarah") || desc.includes("lecturer") || desc.includes("staff")) {
@@ -200,24 +195,12 @@
             inferredRole = "admin";
           } else if (desc.includes("pelajar") || desc.includes("student")) {
             inferredRole = "student";
-          } else {
-            throw new Error("User role could not be determined from account description");
-          }
-
-          const no_pekerja = apiUser.no_pekerja;
-          const session_id = apiUser.session_id;
-
-          if (inferredRole === "lecturer") {
-            if (no_pekerja == null || session_id == null) {
-              throw new Error("Staff account is missing required identifiers (no_pekerja or session_id)");
-            }
           }
 
           const sessionData = {
             ...apiUser,
-            login: apiUser.login_name,
-            no_pekerja: no_pekerja,
-            session_id: session_id,
+            login: apiUser.login_name,    // ✅ ensure `login` exists
+            session_id: apiUser.session_id,
             inferredRole: inferredRole
           };
 
@@ -238,7 +221,6 @@
         });
     });
 
-    // Enter key support
     $("#password").keypress(function (e) {
       if (e.which === 13) $("#btnLogin").click();
     });

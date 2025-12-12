@@ -37,10 +37,11 @@
   .subject-sections-container {
     max-width: 1100px;
     margin: 0 auto;
+    padding: 0 16px;
   }
 
   .subject-sections-container h3 {
-    color: var(--primary);
+    color: #003366; /* UTM blue */
     margin-bottom: 24px;
     font-weight: 600;
     font-size: 24px;
@@ -69,7 +70,7 @@
   .filter-group button {
     width: 100%;
     padding: 12px 16px;
-    border: 1px solid var(--border-color, #d1d5db);
+    border: 1px solid #d1d5db;
     border-radius: 8px;
     font-size: 16px;
     background: white;
@@ -78,25 +79,25 @@
 
   .filter-group select {
     appearance: none;
-    background-image: url("image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23667eea' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-image: url("image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23003366' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 16px center;
     padding-right: 40px;
   }
 
   .filter-group button {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    background: linear-gradient(135deg, #003366 0%, #002244 100%); /* UTM blue gradient */
     color: white;
     border: none;
     cursor: pointer;
     font-weight: 600;
     transition: transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 2px 6px rgba(0, 51, 102, 0.3);
   }
 
   .filter-group button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 10px rgba(0, 51, 102, 0.4);
   }
 
   .search-container {
@@ -107,7 +108,7 @@
     width: 100%;
     max-width: 600px;
     padding: 12px 16px;
-    border: 1px solid var(--border-color, #d1d5db);
+    border: 1px solid #d1d5db;
     border-radius: 8px;
     font-size: 16px;
   }
@@ -128,7 +129,7 @@
   }
 
   .subject-card header {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    background: linear-gradient(135deg, #003366 0%, #002244 100%); /* UTM blue */
     padding: 14px 20px;
   }
 
@@ -152,8 +153,8 @@
   }
 
   .subject-card thead th {
-    background-color: #f8f9ff;
-    color: var(--primary);
+    background-color: #f0f5ff;
+    color: #003366; /* UTM blue */
     font-weight: 600;
     font-size: 13px;
     text-transform: uppercase;
@@ -161,12 +162,13 @@
   }
 
   .subject-card tbody tr:hover {
-    background-color: #fafbff;
+    background-color: #f8fbff;
   }
 
   .schedule-entry {
     line-height: 1.4;
     margin-bottom: 4px;
+    color: #555;
   }
 
   .pagination {
@@ -179,9 +181,9 @@
 
   .pagination button {
     padding: 8px 16px;
-    border: 1px solid var(--primary);
+    border: 1px solid #003366; /* UTM blue */
     background: white;
-    color: var(--primary);
+    color: #003366; /* UTM blue */
     border-radius: 6px;
     cursor: pointer;
     font-weight: 600;
@@ -189,7 +191,7 @@
   }
 
   .pagination button:hover:not(:disabled) {
-    background: var(--light);
+    background: #f0f4ff;
   }
 
   .pagination button:disabled {
@@ -199,16 +201,16 @@
 
   .pagination .page-info {
     font-weight: 600;
-    color: var(--primary);
+    color: #003366; /* UTM blue */
   }
 
   .summary {
     margin-top: 20px;
     padding: 14px 20px;
     background-color: #f0f5ff;
-    border-left: 4px solid var(--primary);
+    border-left: 4px solid #003366; /* UTM blue */
     font-weight: 600;
-    color: var(--primary);
+    color: #003366; /* UTM blue */
     border-radius: 0 8px 8px 0;
     font-size: 14px;
   }
@@ -224,7 +226,7 @@
   }
 
   .loading {
-    color: var(--primary);
+    color: #003366; /* UTM blue */
     font-style: italic;
   }
 
@@ -259,14 +261,44 @@
       font-size: 14px;
       padding-right: 36px;
     }
+
+    .pagination {
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .pagination .page-info {
+      margin: 4px 0;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .subject-sections-container h3 {
+      font-size: 20px;
+    }
+
+    .subject-card header h5 {
+      font-size: 16px;
+    }
+
+    .filter-group select,
+    .filter-group button {
+      padding: 8px 12px;
+      font-size: 14px;
+    }
+
+    .subject-card th,
+    .subject-card td {
+      padding: 8px;
+      font-size: 12px;
+    }
   }
 </style>
 
 <script>
   (function() {
-    console.log("👥 Subject Sections fragment loaded");
+    console.log("👥 Subject Sections (UTM Branded) fragment loaded");
 
-    // Constants
     const hariMap = { 2: "Mon", 3: "Tue", 4: "Wed", 5: "Thu", 6: "Fri", 7: "Sat", 8: "Sun" };
     const masaMap = {
       2: "08:00–09:00", 3: "09:00–10:00", 4: "10:00–11:00", 5: "11:00–12:00",
@@ -281,11 +313,9 @@
     let globalEnrichedData = [];
     let totalPages = 0;
 
-    // Re-attach event listeners
     document.getElementById("loadSectionsBtn").addEventListener("click", loadSubjectSections);
     document.getElementById("searchInput").addEventListener("input", filterSections);
 
-    // Initialize filters
     (async function initFilters() {
       const userSession = localStorage.getItem("TTMSFC_userSession");
       const contentEl = document.getElementById("sectionsContent");
@@ -465,7 +495,7 @@
     }
 
     function renderSections(groups, sesi, semester, page) {
-      let html = `<h4 style="color: var(--primary); margin: 20px 0;">Valid Sections – ${sesi} Semester ${semester} (Page ${page} of ${totalPages})</h4>`;
+      let html = `<h4 style="color: #003366; margin: 20px 0;">Valid Sections – ${sesi} Semester ${semester} (Page ${page} of ${totalPages})</h4>`;
 
       groups.forEach(group => {
         const allSearchable = group.sections
@@ -523,7 +553,7 @@
       document.getElementById("sectionsContent").innerHTML = html;
     }
 
-    window.loadPage = loadPage; // Expose for pagination buttons
+    window.loadPage = loadPage;
 
     function filterSections() {
       const input = document.getElementById("searchInput").value.trim();
