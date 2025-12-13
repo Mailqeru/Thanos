@@ -1,14 +1,16 @@
 <div class="w3-container">
-  <h2>👁️ View Lecturers</h2>
-  
-  <div class="w3-panel w3-light-grey w3-round">
-    <h3>🔑 Session Being Used</h3>
-    <p><strong>Account:</strong> <span id="loginDisplay">—</span></p>
-    <p><strong>Session ID:</strong> <code id="sessionIdDisplay" style="word-break: break-all;">—</code></p>
-    <p><strong>Term:</strong> 2025/2026 Semester 1</p>
+  <div class="w3-card w3-padding w3-light-grey">
+    <h4>🔑 Your Login Info</h4>
+    <p><strong>Account:</strong> <span id="loginDisplay">...</span></p>
+    <p><strong>Password (Session ID):</strong> <span id="sessionIdDisplay">...</span></p>
   </div>
 
-  <div id="lecturerTableContainer">
-    <p class="w3-text-blue">Loading lecturer data...</p>
+  <div class="w3-card w3-padding w3-pink w3-margin-top">
+    <h4>✅ Real Session ID Used for Data</h4>
+    <p><strong>Session ID:</strong> <span id="sessionUsedDisplay">Loading...</span></p>
+  </div>
+
+  <div id="lecturerTableContainer" class="w3-margin-top">
+    <p>Loading lecturers...</p>
   </div>
 </div>

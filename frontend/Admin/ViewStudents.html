@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TTMS - View Students</title>
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --utm-blue: #003366;
+      --utm-gold: #C9A85C;
+      --light-bg: #f8f9fc;
+      --input-border: #d1d5db;
+      --error-red: #d32f2f;
+      --success-green: #4CAF50;
+      --warning-yellow: #FFC107;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--light-bg);
+      color: #333;
+    }
+
+    /* UTM-themed buttons */
+    .btn-primary { background-color: var(--utm-blue) !important; color: white !important; }
+    .btn-success { background-color: var(--success-green) !important; color: white !important; }
+    .btn-secondary { background-color: #6c757d !important; color: white !important; }
+    .btn-info { background-color: #17a2b8 !important; color: white !important; }
+    .btn-purple { background-color: #6f42c1 !important; color: white !important; }
+
+    .btn-primary:hover { background-color: #002244 !important; }
+    .btn-success:hover { background-color: #449d48 !important; }
+    .btn-secondary:hover { background-color: #5a6268 !important; }
+    .btn-info:hover { background-color: #138496 !important; }
+    .btn-purple:hover { background-color: #5a32a3 !important; }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .card-header i {
+      color: var(--utm-blue);
+      font-size: 24px;
+    }
+
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .form-group {
+      flex: 1;
+      min-width: 160px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.95em;
+      margin-bottom: 6px;
+      color: #444;
+    }
+
+    .w3-select, .w3-input {
+      width: 100%;
+      border: 1px solid var(--input-border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 1em;
+      background: white;
+    }
+
+    .w3-select:focus, .w3-input:focus {
+      border-color: var(--utm-blue);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(0,51,102,0.15);
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .stats-box {
+      background: #e8f5e9;
+      padding: 14px;
+      border-radius: 10px;
+      margin: 20px 0;
+      border-left: 4px solid var(--success-green);
+      font-size: 0.95em;
+    }
+
+    .debug-box {
+      background: #f0f8ff;
+      border-left: 4px solid var(--utm-blue);
+      padding: 14px;
+      margin: 20px 0;
+      border-radius: 10px;
+      font-size: 0.92em;
+      color: #2c3e50;
+    }
+
+    .pagination-info {
+      font-size: 0.9em;
+      color: #666;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pagination-controls .w3-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .pagination-controls .w3-button {
+      min-width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      font-size: 0.9em;
+    }
+
+    table.w3-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+
+    table.w3-table thead tr {
+      background-color: var(--utm-blue) !important;
+      color: white;
+    }
+
+    table.w3-table th, table.w3-table td {
+      padding: 12px 10px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+
+    table.w3-table tbody tr:hover {
+      background-color: #f9f9f9;
+    }
+
+    .status-tag {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      font-weight: 600;
+    }
+
+    .status-active { background-color: #e8f5e9; color: #2e7d32; }
+    .status-inactive { background-color: #f5f5f5; color: #666; }
+
+    .action-btn {
+      padding: 6px 12px !important;
+      font-size: 0.85em !important;
+    }
+
+    .back-btn {
+      margin-bottom: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--utm-blue) !important;
+      color: white !important;
+      padding: 8px 16px !important;
+      border-radius: 8px !important;
+    }
+
+    .back-btn:hover {
+      background: #002244 !important;
+    }
+
+    /* Mobile adjustments */
+    @media (max-width: 768px) {
+      .card {
+        margin: 16px;
+        padding: 16px;
+      }
+
+      .form-row {
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .form-group {
+        min-width: 100%;
+      }
+
+      .btn-group {
+        flex-direction: column;
+      }
+
+      .w3-button {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .pagination-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+      }
+
+      table.w3-table {
+        font-size: 14px;
+      }
+
+      table.w3-table th, table.w3-table td {
+        padding: 10px 6px;
+      }
+
+      .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .card-header h3 {
+        margin: 0;
+      }
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #666;
+      background: #fafafa;
+      border-radius: 12px;
+      margin: 20px 0;
+    }
+
+    .empty-state i {
+      font-size: 48px;
+      color: var(--utm-blue);
+      margin-bottom: 16px;
+    }
+
+    .loading-spinner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      color: var(--utm-blue);
+    }
+
+    .loading-spinner i {
+      font-size: 32px;
+      margin-bottom: 16px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .error-panel {
+      background: #ffebee;
+      border-left: 4px solid var(--error-red);
+      padding: 16px;
+      border-radius: 10px;
+      margin: 20px 0;
+    }
+
+    .error-panel h4 {
+      color: var(--error-red);
+      margin-top: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="w3-container">
+    <!-- Header -->
+    <div class="card">
+      <div class="card-header">
+        <i class="fas fa-graduation-cap"></i>
+        <h3>View Students</h3>
+      </div>
+      <p>Browse and search students by session, semester, and apply pagination limits.</p>
+    </div>
+
+    <!-- Debug Info (Collapsible on mobile) -->
+    <div class="debug-box">
+      <strong><i class="fas fa-bug"></i> Session Information</strong><br>
+      • Stored Session ID (Password): <code id="debugPassword">Loading...</code><br>
+      • Extracted Real Session ID: <span id="debugRealSession">Not extracted yet</span><br>
+      • Auth URL: <span id="debugAuthUrl">Not generated</span>
+    </div>
+
+    <!-- Filters & Controls -->
+    <div class="card">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="sessionSelect"><i class="fas fa-calendar-alt"></i> Academic Session</label>
+          <select class="w3-select w3-border" id="sessionSelect">
+            <!-- Populated by JS -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="semesterSelect"><i class="fas fa-book"></i> Semester</label>
+          <select class="w3-select w3-border" id="semesterSelect">
+            <option value="1">Semester 1</option>
+            <option value="2">Semester 2</option>
+            <option value="3">Special Semester</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="limitSelect"><i class="fas fa-list-ol"></i> Records Per Page</label>
+          <select class="w3-select w3-border" id="limitSelect">
+            <option value="10">10 records</option>
+            <option value="20" selected>20 records</option>
+            <option value="50">50 records</option>
+            <option value="100">100 records</option>
+            <option value="200">200 records</option>
+            <option value="0">All records</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="searchInput"><i class="fas fa-search"></i> Search Student</label>
+          <input type="text" class="w3-input w3-border" id="searchInput" placeholder="Search by name or ID...">
+        </div>
+        <div class="form-group">
+          <label for="searchBySelect"><i class="fas fa-filter"></i> Search By</label>
+          <select class="w3-select w3-border" id="searchBySelect">
+            <option value="name">Student Name</option>
+            <option value="id">Student ID</option>
+            <option value="program">Program</option>
+            <option value="all">All Fields</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button class="w3-button btn-primary" id="loadStudentsBtn">
+          <i class="fas fa-sync-alt"></i> Load Students
+        </button>
+        <button class="w3-button btn-success" id="applySearchBtn">
+          <i class="fas fa-search"></i> Search
+        </button>
+        <button class="w3-button btn-secondary" id="clearSearchBtn">
+          <i class="fas fa-times"></i> Clear
+        </button>
+        <button class="w3-button btn-info" id="debugAuthBtn">
+          <i class="fas fa-bug"></i> Debug Auth
+        </button>
+        <button class="w3-button btn-purple" id="exportBtn" style="display:none;">
+          <i class="fas fa-download"></i> Export
+        </button>
+      </div>
+
+      <!-- Pagination Info -->
+      <div class="w3-row" style="margin-top: 20px;">
+        <div class="w3-col s12 m6">
+          <div id="paginationInfo" class="pagination-info">
+            Page info will appear here
+          </div>
+        </div>
+        <div class="w3-col s12 m6">
+          <div id="paginationControls" class="pagination-controls w3-right">
+            <!-- Controls inserted by JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Session Info (hidden by default) -->
+    <div id="sessionInfo" class="debug-box" style="display:none;">
+      <strong><i class="fas fa-key"></i> Session Details</strong><br>
+      • Real Session ID: <code id="sessionUsedDisplay">Not loaded yet</code><br>
+      • API Status: <span id="apiStatus">Inactive</span>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner" style="display:none;">
+      <i class="fas fa-spinner"></i>
+      <p>Loading student data...</p>
+    </div>
+
+    <!-- Error Panel -->
+    <div id="errorContainer" class="error-panel" style="display:none;">
+      <h4><i class="fas fa-exclamation-triangle"></i> <span id="errorTitle">Error</span></h4>
+      <p id="errorMessage"></p>
+      <div id="errorDetails" style="display:none; margin-top:12px;">
+        <details>
+          <summary>Debug Details</summary>
+          <pre id="errorDetailsContent" style="background:#f8f8f8; padding:12px; border-radius:6px; overflow:auto; max-height:300px; font-size:13px;"></pre>
+        </details>
+      </div>
+    </div>
+
+    <!-- Auth Debug Response -->
+    <div id="debugResponseContainer" class="card" style="display:none;">
+      <h4><i class="fas fa-code"></i> Auth Response Debug</h4>
+      <div style="max-height: 400px; overflow-y: auto; background: #f9f9f9; padding: 12px; border-radius:8px; margin:12px 0;">
+        <pre id="debugResponseContent" style="margin:0; font-size:13px;"></pre>
+      </div>
+      <button class="w3-button btn-secondary w3-tiny" onclick="document.getElementById('debugResponseContainer').style.display='none'">
+        <i class="fas fa-times"></i> Close
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div id="studentStats" class="stats-box" style="display:none;"></div>
+
+    <!-- Student Table -->
+    <div id="studentTableContainer">
+      <div class="empty-state">
+        <i class="fas fa-users"></i>
+        <h4>Ready to Load Students</h4>
+        <p>Configure your filters above and click <strong>Load Students</strong> to begin.</p>
+        <p>Use pagination to navigate large datasets efficiently.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script>
+    // Initialize when page loads
+    $(document).ready(function() {
+      initStudentsPage();
+    });
+    
+    function initStudentsPage() {
+      console.log("📚 Initializing View Students page");
+      
+      // Get user session for debugging
+      const raw = localStorage.getItem("TTMSFC_userSession");
+      if (raw) {
+        try {
+          const session = JSON.parse(raw);
+          document.getElementById('debugPassword').textContent = session.session_id || 'No session ID';
+        } catch (e) {
+          document.getElementById('debugPassword').textContent = 'Invalid JSON';
+        }
+      }
+      
+      // Generate academic years
+      const academicYears = generateAcademicYears();
+      const currentYear = new Date().getFullYear();
+      const defaultSession = `${currentYear}/${currentYear + 1}`;
+      
+      // Populate session select
+      const sessionSelect = document.getElementById('sessionSelect');
+      sessionSelect.innerHTML = academicYears.map(year => 
+        `<option value="${year}" ${year === defaultSession ? 'selected' : ''}>${year}</option>`
+      ).join('');
+      
+      // Initialize variables
+      let currentSessionId = null;
+      let currentStudentData = [];
+      let currentPage = 1;
+      let currentLimit = 20;
+      let totalRecords = 0;
+      let totalPages = 1;
+      let currentOffset = 0;
+      
+      // Event listeners
+      document.getElementById('loadStudentsBtn').onclick = fetchStudentData;
+      document.getElementById('applySearchBtn').onclick = applySearch;
+      document.getElementById('clearSearchBtn').onclick = clearSearch;
+      document.getElementById('exportBtn').onclick = exportData;
+      document.getElementById('debugAuthBtn').onclick = debugAuthOnly;
+      
+      // Enter key support for search
+      document.getElementById('searchInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') applySearch();
+      });
+      
+      // When limit changes, reset to page 1
+      document.getElementById('limitSelect').addEventListener('change', function() {
+        currentPage = 1;
+      });
+      
+      // Generate academic years function
+      function generateAcademicYears() {
+        const currentYear = new Date().getFullYear();
+        const years = [];
+        for (let i = currentYear - 5; i <= currentYear + 1; i++) {
+          years.push(`${i}/${i + 1}`);
+        }
+        return years;
+      }
+      
+      // Debug: Test auth only
+      async function debugAuthOnly() {
+        const raw = localStorage.getItem("TTMSFC_userSession");
+        if (!raw) {
+          alert("No session found in localStorage");
+          return;
+        }
+        
+        let session;
+        try {
+          session = JSON.parse(raw);
+        } catch (e) {
+          alert("Invalid JSON in session");
+          return;
+        }
+        
+        const password = session.session_id;
+        if (!password) {
+          alert("No session_id in user session");
+          return;
+        }
+        
+        // Show auth URL in debug
+        const authUrl = `http://web.fc.utm.my/ttms/auth-admin.php?session_id=${encodeURIComponent(password)}`;
+        document.getElementById('debugAuthUrl').textContent = authUrl;
+        
+        showLoading(true);
+        
+        try {
+          console.log("🔍 [Debug] Testing auth with URL:", authUrl);
+          
+          const response = await fetch(authUrl);
+          const responseText = await response.text();
+          
+          console.log("🔍 [Debug] Response status:", response.status);
+          console.log("🔍 [Debug] Response text (first 500 chars):", responseText.substring(0, 500));
+          
+          // Display response for inspection
+          document.getElementById('debugResponseContent').textContent = responseText;
+          document.getElementById('debugResponseContainer').style.display = 'block';
+          
+          // Try multiple extraction patterns
+          const patterns = [
+            /name\s*=\s*["']session_id["']\s+value\s*=\s*["']([^"']+)/i,
+            /value\s*=\s*["']([^"']+)["']\s+name\s*=\s*["']session_id["']/i,
+            /session_id["']?\s*:\s*["']([^"']+)/i,
+            /<input[^>]*name=["']session_id["'][^>]*value=["']([^"']+)/i,
+            /value=["']([^"']+)["'][^>]*name=["']session_id["']/i
+          ];
+          
+          let extractedId = null;
+          let patternUsed = null;
+          
+          for (let i = 0; i < patterns.length; i++) {
+            const match = responseText.match(patterns[i]);
+            if (match && match[1]) {
+              extractedId = match[1].trim();
+              patternUsed = `Pattern ${i+1}`;
+              break;
+            }
+          }
+          
+          if (extractedId) {
+            document.getElementById('debugRealSession').textContent = extractedId;
+            document.getElementById('debugRealSession').style.color = 'green';
+            alert(`✅ Success! Extracted session ID: ${extractedId}\nUsing: ${patternUsed}`);
+          } else {
+            document.getElementById('debugRealSession').textContent = 'NOT FOUND';
+            document.getElementById('debugRealSession').style.color = 'red';
+            
+            // Look for any input fields with session_id
+            const sessionIdInputs = responseText.match(/<input[^>]*session_id[^>]*>/gi);
+            if (sessionIdInputs) {
+              console.log("🔍 [Debug] Found session_id inputs:", sessionIdInputs);
+              alert(`❌ Could not extract session ID.\nFound ${sessionIdInputs.length} input(s) with session_id.\nCheck debug panel for full response.`);
+            } else {
+              alert("❌ No session_id input found in response. Check debug panel.");
+            }
+          }
+          
+        } catch (error) {
+          console.error("🔍 [Debug] Auth test failed:", error);
+          alert(`Debug auth failed: ${error.message}`);
+        } finally {
+          showLoading(false);
+        }
+      }
+      
+      // Extract session ID from auth response
+      function extractSessionIdFromResponse(text) {
+        console.log("🔄 Extracting session ID from response");
+        
+        // Try multiple extraction patterns
+        const patterns = [
+          /name\s*=\s*["']session_id["']\s+value\s*=\s*["']([^"']+)/i,
+          /value\s*=\s*["']([^"']+)["']\s+name\s*=\s*["']session_id["']/i,
+          /session_id["']?\s*:\s*["']([^"']+)/i,
+          /<input[^>]*name=["']session_id["'][^>]*value=["']([^"']+)/i,
+          /value=["']([^"']+)["'][^>]*name=["']session_id["']/i
+        ];
+        
+        for (let i = 0; i < patterns.length; i++) {
+          const match = text.match(patterns[i]);
+          if (match && match[1]) {
+            const extracted = match[1].trim();
+            console.log(`✅ Extracted using pattern ${i+1}:`, extracted);
+            return extracted;
+          }
+        }
+        
+        // Last resort: look for any value that looks like a session ID
+        const potentialIds = text.match(/[A-Za-z0-9]{20,}/g);
+        if (potentialIds && potentialIds.length > 0) {
+          console.log("⚠️ Trying potential IDs:", potentialIds);
+          return potentialIds[0];
+        }
+        
+        return null;
+      }
+      
+      // Fetch student data from API
+      async function fetchStudentData() {
+        // Get user session
+        const raw = localStorage.getItem("TTMSFC_userSession");
+        if (!raw) {
+          showError("No session found", "Please log in again.");
+          return;
+        }
+        
+        let session;
+        try {
+          session = JSON.parse(raw);
+        } catch (e) {
+          showError("Invalid session", "Session data is corrupted.");
+          return;
+        }
+        
+        if (!session.session_id) {
+          showError("Session ID missing", "Invalid session data.");
+          return;
+        }
+        
+        const password = session.session_id;
+        const sesi = document.getElementById('sessionSelect').value;
+        const semester = document.getElementById('semesterSelect').value;
+        const limit = document.getElementById('limitSelect').value;
+        
+        // Update debug display
+        document.getElementById('debugPassword').textContent = password;
+        
+        // Update current values
+        currentLimit = parseInt(limit) || 0;
+        currentPage = 1;
+        currentOffset = 0;
+        
+        // Show loading
+        showLoading(true);
+        hideError();
+        document.getElementById('exportBtn').style.display = 'none';
+        
+        try {
+          // Step 1: Get real session ID
+          const authUrl = `http://web.fc.utm.my/ttms/auth-admin.php?session_id=${encodeURIComponent(password)}`;
+          console.log("🔑 [Auth] Fetching real session from:", authUrl);
+          document.getElementById('debugAuthUrl').textContent = authUrl;
+          
+          const authResponse = await fetch(authUrl);
+          if (!authResponse.ok) {
+            throw new Error(`Auth failed: HTTP ${authResponse.status} - ${authResponse.statusText}`);
+          }
+          
+          const authText = await authResponse.text();
+          console.log("🔑 [Auth] Response length:", authText.length);
+          
+          // Save response for debugging
+          window.lastAuthResponse = authText;
+          
+          // Extract session ID using the same method as lecturers page
+          const realSessionId = extractSessionIdFromResponse(authText);
+          
+          if (!realSessionId) {
+            // Show debug details
+            document.getElementById('errorDetailsContent').textContent = 
+              `Auth URL: ${authUrl}\n\nResponse (first 2000 chars):\n${authText.substring(0, 2000)}`;
+            document.getElementById('errorDetails').style.display = 'block';
+            
+            throw new Error("Could not extract session ID from auth response. Click 'Debug Auth' button to investigate.");
+          }
+          
+          console.log("✅ [Auth] Real session ID extracted:", realSessionId);
+          currentSessionId = realSessionId;
+          
+          // Update debug displays
+          document.getElementById('debugRealSession').textContent = realSessionId;
+          document.getElementById('debugRealSession').style.color = 'green';
+          document.getElementById('sessionUsedDisplay').textContent = realSessionId;
+          document.getElementById('apiStatus').textContent = 'Active';
+          document.getElementById('sessionInfo').style.display = 'block';
+          
+          // Step 2: Fetch student data
+          let dataUrl;
+          if (currentLimit > 0) {
+            // With pagination
+            dataUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar&session_id=${encodeURIComponent(realSessionId)}&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}&limit=${currentLimit}&offset=0`;
+          } else {
+            // Without pagination (all records)
+            dataUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar&session_id=${encodeURIComponent(realSessionId)}&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}`;
+          }
+          
+          console.log("🔗 [Data] Fetching from:", dataUrl);
+          
+          const dataResponse = await fetch(dataUrl);
+          if (!dataResponse.ok) {
+            throw new Error(`Data fetch failed: HTTP ${dataResponse.status} - ${dataResponse.statusText}`);
+          }
+          
+          const dataText = await dataResponse.text();
+          console.log("🔗 [Data] Response length:", dataText.length);
+          
+          if (!dataText.trim()) {
+            throw new Error("Empty response from server");
+          }
+          
+          let data;
+          try {
+            data = JSON.parse(dataText);
+          } catch (e) {
+            console.error("❌ JSON Parse Error:", e);
+            console.error("❌ Response text:", dataText.substring(0, 500));
+            throw new Error(`Invalid JSON response: ${e.message}`);
+          }
+          
+          if (!Array.isArray(data)) {
+            console.log("⚠️ Response is not array:", typeof data, data);
+            // Try to handle if it's an object with data property
+            if (data && data.data && Array.isArray(data.data)) {
+              data = data.data;
+              console.log("✅ Using data.data array");
+            } else {
+              throw new Error(`Expected array but got: ${typeof data}`);
+            }
+          }
+          
+          console.log(`✅ [Data] Received ${data.length} student(s)`);
+          
+          // Store data
+          currentStudentData = data;
+          totalRecords = data.length;
+          
+          // Calculate pages
+          totalPages = currentLimit > 0 ? Math.ceil(totalRecords / currentLimit) : 1;
+          if (totalPages === 0) totalPages = 1;
+          
+          // Render data
+          renderStudentTable(data);
+          updatePaginationInfo();
+          renderPaginationControls();
+          updateStats(data);
+          
+          // Show export button
+          document.getElementById('exportBtn').style.display = 'inline-block';
+          
+          // Clear any error details
+          document.getElementById('errorDetails').style.display = 'none';
+          
+        } catch (error) {
+          console.error("🔥 [Error]", error);
+          showError("Failed to load students", error.message);
+        } finally {
+          showLoading(false);
+        }
+      }
+      
+      // Render student table
+      function renderStudentTable(data, highlightTerm = '', highlightField = '') {
+        const container = document.getElementById('studentTableContainer');
+        
+        if (!Array.isArray(data) || data.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-user-slash"></i>
+              <h4>No Students Found</h4>
+              <p>No student records found for the selected session/semester.</p>
+              <p>Try selecting a different academic session or semester.</p>
+              <p><small>The TTMS API might not have student data for this session.</small></p>
+            </div>`;
+          return;
+        }
+        
+        // Debug: Show first record structure
+        console.log("📊 First student record:", data[0]);
+        
+        // Determine available fields
+        const firstRecord = data[0];
+        const hasProgram = 'program' in firstRecord || 'kod_program' in firstRecord;
+        const hasFaculty = 'fakulti' in firstRecord || 'faculty' in firstRecord;
+        const hasStatus = 'status' in firstRecord;
+        
+        let html = `
+          <div style="overflow-x:auto;">
+            <table class="w3-table w3-bordered w3-striped">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Student ID</th>
+                  <th>Name</th>
+                  ${hasProgram ? '<th>Program</th>' : ''}
+                  ${hasFaculty ? '<th>Faculty</th>' : ''}
+                  ${hasStatus ? '<th>Status</th>' : ''}
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>`;
+        
+        data.forEach((student, index) => {
+          const globalIndex = currentOffset + index + 1;
+          const studentId = student.no_matrik || student.id || student.no_pelajar || student.matric_no || 'N/A';
+          const studentName = student.nama || student.name || 'Unknown';
+          const program = student.program || student.kod_program || student.course || 'N/A';
+          const faculty = student.fakulti || student.faculty || student.department || 'N/A';
+          const status = student.status || 'Active';
+          const statusClass = status.toLowerCase() === 'active' ? 'status-active' : 'status-inactive';
+          
+          // Check if this row should be highlighted
+          const shouldHighlight = highlightTerm && (
+            (highlightField === 'name' && studentName.toLowerCase().includes(highlightTerm.toLowerCase())) ||
+            (highlightField === 'id' && studentId.toString().includes(highlightTerm)) ||
+            (highlightField === 'program' && program.toLowerCase().includes(highlightTerm.toLowerCase())) ||
+            (highlightField === 'all' && (
+              studentName.toLowerCase().includes(highlightTerm.toLowerCase()) ||
+              studentId.toString().includes(highlightTerm) ||
+              program.toLowerCase().includes(highlightTerm.toLowerCase()) ||
+              faculty.toLowerCase().includes(highlightTerm.toLowerCase())
+            ))
+          );
+          
+          html += `
+            <tr ${shouldHighlight ? 'style="background-color:#fff9c4;"' : ''}>
+              <td>${globalIndex}</td>
+              <td><strong>${studentId}</strong></td>
+              <td>${studentName}</td>
+              ${hasProgram ? `<td>${program}</td>` : ''}
+              ${hasFaculty ? `<td>${faculty}</td>` : ''}
+              ${hasStatus ? `
+              <td>
+                <span class="status-tag ${statusClass}">
+                  ${status}
+                </span>
+              </td>` : ''}
+              <td>
+                <button class="w3-button btn-info action-btn" onclick="viewStudentDetails('${studentId}')">
+                  <i class="fas fa-eye"></i> View
+                </button>
+              </td>
+            </tr>`;
+        });
+        
+        html += `</tbody></table></div>`;
+        
+        // Add debug info about fields
+        html += `
+          <div class="w3-tiny w3-text-gray" style="margin-top:12px;">
+            <i class="fas fa-info-circle"></i> Showing ${data.length} records. Fields: ${Object.keys(firstRecord).join(', ')}
+          </div>`;
+        
+        container.innerHTML = html;
+      }
+      
+      // Apply search filter
+      function applySearch() {
+        const searchTerm = document.getElementById('searchInput').value.trim();
+        const searchBy = document.getElementById('searchBySelect').value;
+        
+        if (!searchTerm) {
+          // If no search term, show all data
+          renderStudentTable(currentStudentData);
+          updateStats(currentStudentData);
+          return;
+        }
+        
+        // Filter data
+        const filtered = currentStudentData.filter(student => {
+          const studentId = (student.no_matrik || student.id || student.no_pelajar || student.matric_no || '').toString().toLowerCase();
+          const studentName = (student.nama || student.name || '').toLowerCase();
+          const program = (student.program || student.kod_program || student.course || '').toLowerCase();
+          const faculty = (student.fakulti || student.faculty || student.department || '').toLowerCase();
+          const term = searchTerm.toLowerCase();
+          
+          switch(searchBy) {
+            case 'name':
+              return studentName.includes(term);
+            case 'id':
+              return studentId.includes(term);
+            case 'program':
+              return program.includes(term) || faculty.includes(term);
+            case 'all':
+              return studentName.includes(term) || 
+                     studentId.includes(term) || 
+                     program.includes(term) || 
+                     faculty.includes(term);
+            default:
+              return true;
+          }
+        });
+        
+        renderStudentTable(filtered, searchTerm, searchBy);
+        updateStats(filtered);
+      }
+      
+      // Clear search
+      function clearSearch() {
+        document.getElementById('searchInput').value = '';
+        renderStudentTable(currentStudentData);
+        updateStats(currentStudentData);
+      }
+      
+      // Update pagination info
+      function updatePaginationInfo() {
+        const infoDiv = document.getElementById('paginationInfo');
+        const start = currentOffset + 1;
+        const end = Math.min(currentOffset + currentLimit, totalRecords);
+        
+        if (currentLimit > 0) {
+          infoDiv.innerHTML = `
+            <i class="fas fa-info-circle"></i> 
+            Showing <strong>${start}-${end}</strong> of <strong>${totalRecords}</strong> students
+            | Page <strong>${currentPage}</strong> of <strong>${totalPages}</strong>
+          `;
+        } else {
+          infoDiv.innerHTML = `
+            <i class="fas fa-info-circle"></i> 
+            Showing all <strong>${totalRecords}</strong> students
+          `;
+        }
+      }
+      
+      // Render pagination controls
+      function renderPaginationControls() {
+        if (currentLimit === 0 || totalPages <= 1) {
+          document.getElementById('paginationControls').innerHTML = '';
+          return;
+        }
+        
+        let html = '<div class="w3-bar">';
+        
+        // Previous button
+        html += `
+          <button class="w3-button btn-secondary ${currentPage === 1 ? 'w3-disabled' : ''}" 
+                  onclick="changePage(${currentPage - 1})">
+            <i class="fas fa-chevron-left"></i>
+          </button>`;
+        
+        // Page numbers
+        const maxPagesToShow = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+        let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+        
+        if (endPage - startPage + 1 < maxPagesToShow) {
+          startPage = Math.max(1, endPage - maxPagesToShow + 1);
+        }
+        
+        // First page
+        if (startPage > 1) {
+          html += `<button class="w3-button" onclick="changePage(1)">1</button>`;
+          if (startPage > 2) html += `<span class="w3-bar-item">•••</span>`;
+        }
+        
+        // Page range
+        for (let i = startPage; i <= endPage; i++) {
+          html += `
+            <button class="w3-button ${i === currentPage ? 'btn-primary' : ''}" 
+                    onclick="changePage(${i})">
+              ${i}
+            </button>`;
+        }
+        
+        // Last page
+        if (endPage < totalPages) {
+          if (endPage < totalPages - 1) html += `<span class="w3-bar-item">•••</span>`;
+          html += `<button class="w3-button" onclick="changePage(${totalPages})">${totalPages}</button>`;
+        }
+        
+        // Next button
+        html += `
+          <button class="w3-button btn-secondary ${currentPage === totalPages ? 'w3-disabled' : ''}" 
+                  onclick="changePage(${currentPage + 1})">
+            <i class="fas fa-chevron-right"></i>
+          </button>`;
+        
+        html += '</div>';
+        
+        document.getElementById('paginationControls').innerHTML = html;
+        
+        // Add changePage function to window scope
+        window.changePage = async function(page) {
+          if (page < 1 || page > totalPages || page === currentPage) return;
+          
+          currentPage = page;
+          currentOffset = (page - 1) * currentLimit;
+          
+          // Fetch data for new page
+          await fetchPageData(currentOffset);
+        };
+      }
+      
+      // Fetch data for specific page
+      async function fetchPageData(offset) {
+        if (!currentSessionId) {
+          alert("No valid session. Please reload students first.");
+          return;
+        }
+        
+        showLoading(true);
+        
+        const sesi = document.getElementById('sessionSelect').value;
+        const semester = document.getElementById('semesterSelect').value;
+        
+        try {
+          const dataUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar&session_id=${encodeURIComponent(currentSessionId)}&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}&limit=${currentLimit}&offset=${offset}`;
+          
+          console.log("🔗 [Pagination] Fetching page data:", dataUrl);
+          
+          const response = await fetch(dataUrl);
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          
+          const dataText = await response.text();
+          const data = JSON.parse(dataText);
+          
+          currentStudentData = data;
+          renderStudentTable(data);
+          updatePaginationInfo();
+          
+        } catch (error) {
+          console.error("Page fetch error:", error);
+          showError("Failed to load page", error.message);
+        } finally {
+          showLoading(false);
+        }
+      }
+      
+      // Update statistics
+      function updateStats(data) {
+        const statsDiv = document.getElementById('studentStats');
+        
+        if (!data || data.length === 0) {
+          statsDiv.style.display = 'none';
+          return;
+        }
+        
+        // Count by program if available
+        const programCounts = {};
+        const facultyCounts = {};
+        let activeCount = 0;
+        
+        data.forEach(student => {
+          const program = student.program || student.kod_program || student.course || 'Unknown';
+          const faculty = student.fakulti || student.faculty || student.department || 'Unknown';
+          const status = (student.status || 'Active').toLowerCase();
+          
+          programCounts[program] = (programCounts[program] || 0) + 1;
+          facultyCounts[faculty] = (facultyCounts[faculty] || 0) + 1;
+          if (status === 'active') activeCount++;
+        });
+        
+        // Get top programs
+        const topPrograms = Object.entries(programCounts)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 3)
+          .map(([program, count]) => `${program}: ${count}`)
+          .join(', ');
+        
+        statsDiv.innerHTML = `
+          <strong><i class="fas fa-chart-bar"></i> Statistics:</strong><br>
+          • Total Students: <strong>${data.length}</strong><br>
+          • Active Students: <strong>${activeCount}</strong><br>
+          • Unique Programs: <strong>${Object.keys(programCounts).length}</strong><br>
+          ${topPrograms ? `• Top Programs: ${topPrograms}` : ''}
+        `;
+        
+        statsDiv.style.display = 'block';
+      }
+      
+      // Export data function
+      function exportData() {
+        if (currentStudentData.length === 0) {
+          alert("No data to export!");
+          return;
+        }
+        
+        // Convert to CSV
+        const headers = ['Student ID', 'Name', 'Program', 'Faculty', 'Status'];
+        const csvRows = [];
+        
+        // Add headers
+        csvRows.push(headers.join(','));
+        
+        // Add data rows
+        currentStudentData.forEach(student => {
+          const row = [
+            student.no_matrik || student.id || student.no_pelajar || student.matric_no || '',
+            student.nama || student.name || '',
+            student.program || student.kod_program || student.course || '',
+            student.fakulti || student.faculty || student.department || '',
+            student.status || 'Active'
+          ].map(field => `"${field}"`);
+          
+          csvRows.push(row.join(','));
+        });
+        
+        const csvContent = csvRows.join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        
+        const sesi = document.getElementById('sessionSelect').value;
+        const semester = document.getElementById('semesterSelect').value;
+        a.href = url;
+        a.download = `students_${sesi.replace('/', '-')}_sem${semester}_${new Date().toISOString().slice(0,10)}.csv`;
+        a.click();
+        
+        window.URL.revokeObjectURL(url);
+      }
+      
+      // View student subjects
+      window.viewStudentDetails = async function(studentId) {
+        if (!currentSessionId) {
+          alert("Real session not loaded. Please click 'Load Students' first.");
+          return;
+        }
+
+        const sesi = document.getElementById('sessionSelect').value;
+        const semester = document.getElementById('semesterSelect').value;
+
+        const container = document.getElementById('studentTableContainer');
+        container.innerHTML = `
+          <button class="back-btn" onclick="window.backToStudentsList()">
+            <i class="fas fa-arrow-left"></i> Back to Students
+          </button>
+          <div class="loading-spinner">
+            <i class="fas fa-spinner"></i>
+            <p>Loading subjects for student: <strong>${studentId}</strong><br>
+            Filtering for: <strong>${sesi}</strong> Semester <strong>${semester}</strong>
+          </p>
+          </div>`;
+
+        const subjectUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar_subjek&session_id=${encodeURIComponent(currentSessionId)}&no_matrik=${encodeURIComponent(studentId)}`;
+        
+        console.log("🔗 [Student Subjects] Fetching ALL subjects (filtering locally for", sesi, "Sem", semester, ")");
+
+        try {
+          const response = await fetch(subjectUrl);
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          
+          const text = await response.text();
+          if (!text.trim()) throw new Error("Empty response");
+
+          let subjects = JSON.parse(text);
+          if (!Array.isArray(subjects)) {
+            if (subjects && Array.isArray(subjects.data)) {
+              subjects = subjects.data;
+            } else {
+              throw new Error("Response is not an array");
+            }
+          }
+
+          const filtered = subjects.filter(subj => {
+            const subjSesi = (subj.sesi || '').toString();
+            const subjSem = (subj.semester || '').toString();
+            return subjSesi === sesi && subjSem === semester;
+          });
+
+          if (filtered.length === 0) {
+            container.innerHTML = `
+              <button class="back-btn" onclick="window.backToStudentsList()">
+                <i class="fas fa-arrow-left"></i> Back to Students
+              </button>
+              <div class="empty-state">
+                <i class="fas fa-book-open"></i>
+                <h4>No Subjects Found</h4>
+                <p>Student <code>${studentId}</code> has no enrolled subjects in:</p>
+                <p><strong>Session:</strong> ${sesi} | <strong>Semester:</strong> ${semester}</p>
+              </div>`;
+            return;
+          }
+
+          let html = `
+            <button class="back-btn" onclick="window.backToStudentsList()">
+              <i class="fas fa-arrow-left"></i> Back to Students
+            </button>
+            <div class="card">
+              <h4><i class="fas fa-book"></i> Subjects for Student: ${studentId}</h4>
+              <p><strong>Session:</strong> ${sesi} | <strong>Semester:</strong> ${semester}</p>
+            </div>
+            <div style="overflow-x:auto;">
+              <table class="w3-table w3-bordered w3-striped">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Subject Code</th>
+                    <th>Subject Name</th>
+                    <th>Credits</th>
+                    <th>Section</th>
+                    <th>Lecturer</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>`;
+
+          filtered.forEach((subj, i) => {
+            const statusClass = (subj.status || 'Active').toLowerCase() === 'active' ? 'status-active' : 'status-inactive';
+            html += `
+              <tr>
+                <td>${i + 1}</td>
+                <td>${subj.kod_subjek || '—'}</td>
+                <td>${subj.nama_subjek || '—'}</td>
+                <td>${subj.kredit || '—'}</td>
+                <td>${subj.seksyen || '—'}</td>
+                <td>${subj.nama_pensyarah || subj.pensyarah || '—'}</td>
+                <td>
+                  <span class="status-tag ${statusClass}">
+                    ${subj.status || 'Active'}
+                  </span>
+                </td>
+              </tr>`;
+          });
+
+          html += `</tbody></table></div>`;
+          container.innerHTML = html;
+
+        } catch (error) {
+          console.error("🔥 [Subject Load Error]:", error);
+          container.innerHTML = `
+            <button class="back-btn" onclick="window.backToStudentsList()">
+              <i class="fas fa-arrow-left"></i> Back to Students
+            </button>
+            <div class="error-panel">
+              <h4><i class="fas fa-exclamation-triangle"></i> Error Loading Subjects</h4>
+              <p><strong>Student ID:</strong> ${studentId}</p>
+              <p><strong>Filter:</strong> ${sesi} Semester ${semester}</p>
+              <p><strong>Error:</strong> ${error.message}</p>
+            </div>`;
+        }
+      };
+
+      // Function to go back to student list
+      window.backToStudentsList = function() {
+        if (currentStudentData && currentStudentData.length > 0) {
+          renderStudentTable(currentStudentData);
+          updatePaginationInfo();
+          renderPaginationControls();
+          updateStats(currentStudentData);
+          document.getElementById('studentStats').style.display = 'block';
+        } else {
+          fetchStudentData();
+        }
+      };
+      
+      // UI helper functions
+      function showLoading(show) {
+        document.getElementById('loadingSpinner').style.display = show ? 'flex' : 'none';
+        document.getElementById('loadStudentsBtn').disabled = show;
+        document.getElementById('debugAuthBtn').disabled = show;
+      }
+      
+      function showError(title, message) {
+        document.getElementById('errorTitle').textContent = title;
+        document.getElementById('errorMessage').textContent = message;
+        document.getElementById('errorContainer').style.display = 'block';
+      }
+      
+      function hideError() {
+        document.getElementById('errorContainer').style.display = 'none';
+        document.getElementById('errorDetails').style.display = 'none';
+      }
+    }
+  </script>
+</body>
+</html>

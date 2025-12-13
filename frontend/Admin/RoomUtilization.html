@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>TTMS - Room Utilization</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; }
+    .search-box {
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border: 1px solid #ddd;
+    }
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      align-items: flex-end;
+      margin-bottom: 15px;
+    }
+    .control-group {
+      flex: 1;
+      min-width: 180px;
+    }
+    .control-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #555;
+    }
+    .stats-box {
+      background: #e8f5e9;
+      padding: 15px;
+      border-radius: 6px;
+      margin: 20px 0;
+      border-left: 4px solid #4CAF50;
+    }
+    .no-data {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+      font-style: italic;
+    }
+    #chart_div {
+      height: 400px;
+      margin: 20px 0;
+    }
+    .filter-info {
+      background: #fff3cd;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+      border-left: 4px solid #ffc107;
+      color: #856404;
+    }
+  </style>
+</head>
+<body>
+  <div class="w3-container">
+    <h3><i class="fas fa-door-open"></i> Room Utilization Dashboard</h3>
+    <p>Analyze classroom usage by faculty, session, and semester. <small style="color:#666;">(Rooms with less than 2 scheduled slots are filtered out)</small></p>
+
+    <div class="search-box">
+      <div class="controls-row">
+        <div class="control-group">
+          <label for="facultySelect"><i class="fas fa-university"></i> Faculty Code</label>
+          <input type="text" class="w3-input w3-border" id="facultySelect" placeholder="e.g. FSKSM" value="FSKSM">
+        </div>
+        
+        <div class="control-group">
+          <label for="sessionSelect"><i class="fas fa-calendar-alt"></i> Academic Session</label>
+          <select class="w3-select w3-border" id="sessionSelect"></select>
+        </div>
+        
+        <div class="control-group">
+          <label for="semesterSelect"><i class="fas fa-book"></i> Semester</label>
+          <select class="w3-select w3-border" id="semesterSelect">
+            <option value="1">Semester 1</option>
+            <option value="2" selected>Semester 2</option>
+            <option value="3">Special Semester</option>
+          </select>
+        </div>
+      </div>
+      
+      <button class="w3-button w3-teal" id="loadBtn">
+        <i class="fas fa-sync-alt"></i> Analyze Utilization
+      </button>
+    </div>
+
+    <div id="loading" class="w3-center" style="display:none;">
+      <div class="w3-spin w3-xxlarge w3-text-teal"><i class="fas fa-spinner"></i></div>
+      <p>Analyzing room utilization... This may take a few seconds.</p>
+    </div>
+
+    <div id="error" class="w3-panel w3-pale-red w3-border" style="display:none;"></div>
+
+    <div id="stats" class="stats-box" style="display:none;"></div>
+
+    <div id="chart_div"></div>
+
+    <div id="results">
+      <p class="no-data">Configure filters and click "Analyze Utilization" to begin.</p>
+    </div>
+  </div>
+
+  <!-- Load Google Charts -->
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script>
+    // Generate academic years
+    function generateAcademicYears() {
+      const currentYear = new Date().getFullYear();
+      const years = [];
+      for (let i = currentYear - 5; i <= currentYear + 1; i++) {
+        years.push(`${i}/${i + 1}`);
+      }
+      return years;
+    }
+
+    // Initialize page
+    $(document).ready(function() {
+      // Populate session dropdown
+      const sessions = generateAcademicYears();
+      const currentYear = new Date().getFullYear();
+      const defaultSession = `${currentYear}/${currentYear + 1}`;
+      $('#sessionSelect').html(sessions.map(s => 
+        `<option value="${s}" ${s === defaultSession ? 'selected' : ''}>${s}</option>`
+      ).join(''));
+
+      // Load button
+      $('#loadBtn').click(analyzeRoomUtilization);
+    });
+
+    async function analyzeRoomUtilization() {
+      const faculty = $('#facultySelect').val().trim().toUpperCase();
+      const sesi = $('#sessionSelect').val();
+      const semester = $('#semesterSelect').val();
+      const MIN_SLOTS_THRESHOLD = 2; // Minimum slots to include room in results
+
+      if (!faculty) {
+        showError("Please enter a faculty code (e.g. FSKSM)");
+        return;
+      }
+
+      showLoading(true);
+      hideError();
+      $('#stats').hide();
+      $('#results').html('');
+
+      try {
+        // Step 1: Get all rooms for faculty
+        const roomsUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=ruang&kod_fakulti=${encodeURIComponent(faculty)}&kod_ruang_like=`;
+        console.log("🔗 Fetching rooms:", roomsUrl);
+        
+        const roomsRes = await fetch(roomsUrl);
+        if (!roomsRes.ok) throw new Error(`Failed to fetch rooms: ${roomsRes.status}`);
+        
+        const roomsText = await roomsRes.text();
+        let rooms = [];
+        try {
+          rooms = JSON.parse(roomsText);
+        } catch (e) {
+          throw new Error("Invalid room data (not JSON). Faculty code may be invalid.");
+        }
+
+        if (!Array.isArray(rooms) || rooms.length === 0) {
+          throw new Error(`No rooms found for faculty: ${faculty}`);
+        }
+
+        console.log(`✅ Found ${rooms.length} rooms`);
+
+        // Step 2: Fetch timetable for each room
+        const allRoomsData = [];
+        let filteredRoomsData = [];
+        let roomsWithNoData = 0;
+        let roomsWithMinimalUsage = 0;
+        let totalUsedSlotsAll = 0;
+        let totalUsedSlotsFiltered = 0;
+        let totalPossibleSlots = 0;
+
+        // Assume: 5 days/week, 10 slots/day = 50 slots per week
+        // Semester duration: ~14 weeks → 700 possible slots per room
+        const POSSIBLE_SLOTS_PER_ROOM = 5 * 10 * 14; // Adjust as needed
+
+        for (const room of rooms) {
+          const kod_ruang = room.kod_ruang || room.room_code;
+          if (!kod_ruang) continue;
+
+          try {
+            const scheduleUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=jadual_ruang&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}&kod_ruang=${encodeURIComponent(kod_ruang)}`;
+            const scheduleRes = await fetch(scheduleUrl);
+            const scheduleText = await scheduleRes.text();
+            
+            let schedule = [];
+            if (scheduleText.trim()) {
+              schedule = JSON.parse(scheduleText);
+              if (!Array.isArray(schedule)) {
+                schedule = [schedule]; // normalize
+              }
+            }
+
+            const usedSlots = schedule.length;
+            const utilizationPct = Math.min(100, (usedSlots / POSSIBLE_SLOTS_PER_ROOM) * 100);
+
+            const roomData = {
+              room: kod_ruang,
+              used: usedSlots,
+              total: POSSIBLE_SLOTS_PER_ROOM,
+              pct: parseFloat(utilizationPct.toFixed(1))
+            };
+
+            allRoomsData.push(roomData);
+            totalUsedSlotsAll += usedSlots;
+            totalPossibleSlots += POSSIBLE_SLOTS_PER_ROOM;
+
+            // Track rooms with no data
+            if (usedSlots === 0) {
+              roomsWithNoData++;
+            }
+
+            // Apply filter: only include rooms with 2 or more scheduled slots
+            if (usedSlots >= MIN_SLOTS_THRESHOLD) {
+              filteredRoomsData.push(roomData);
+              totalUsedSlotsFiltered += usedSlots;
+            } else {
+              roomsWithMinimalUsage++;
+            }
+
+          } catch (err) {
+            console.warn(`⚠️ Failed to fetch schedule for ${kod_ruang}:`, err.message);
+            // Still include room with 0 utilization
+            const roomData = {
+              room: kod_ruang,
+              used: 0,
+              total: POSSIBLE_SLOTS_PER_ROOM,
+              pct: 0
+            };
+            allRoomsData.push(roomData);
+            totalPossibleSlots += POSSIBLE_SLOTS_PER_ROOM;
+            roomsWithNoData++;
+          }
+        }
+
+        // Sort filtered data by utilization % (descending)
+        filteredRoomsData.sort((a, b) => b.pct - a.pct);
+
+        // Render results
+        renderResults(
+          filteredRoomsData, 
+          faculty, 
+          sesi, 
+          semester, 
+          totalUsedSlotsFiltered, 
+          totalPossibleSlots,
+          allRoomsData.length,
+          roomsWithMinimalUsage,
+          roomsWithNoData
+        );
+
+      } catch (error) {
+        console.error("🔥 Error:", error);
+        showError(error.message);
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    function renderResults(
+      data, 
+      faculty, 
+      sesi, 
+      semester, 
+      totalUsed, 
+      totalPossible, 
+      totalRooms,
+      filteredOutCount,
+      zeroSlotRooms
+    ) {
+      const avgUtil = totalPossible > 0 ? ((totalUsed / totalPossible) * 100).toFixed(1) : "0.0";
+
+      // Stats
+      $('#stats').html(`
+        <strong>📊 Summary for ${faculty} • ${sesi} • Semester ${semester}</strong><br>
+        • ${totalRooms} total rooms analyzed<br>
+        • <strong>${data.length} rooms with ≥2 scheduled slots</strong><br>
+        • Average utilization (filtered): <strong>${avgUtil}%</strong><br>
+        • Total scheduled slots (filtered): ${totalUsed}<br>
+        <small class="filter-info">
+          <i class="fas fa-filter"></i> Filtered out: ${filteredOutCount} rooms with less than 2 slots (${zeroSlotRooms} with 0 slots)
+        </small>
+      `).show();
+
+      // Chart
+      if (data.length > 0) {
+        drawChart(data);
+      } else {
+        $('#chart_div').html('<div class="no-data" style="height:400px; display:flex; align-items:center; justify-content:center;">No rooms meet the minimum 2-slot threshold for visualization</div>');
+      }
+
+      // Table
+      if (data.length === 0) {
+        $('#results').html(`
+          <div class="w3-panel w3-yellow">
+            <h4><i class="fas fa-exclamation-triangle"></i> No rooms meet the criteria</h4>
+            <p>None of the ${totalRooms} rooms have 2 or more scheduled slots for the selected semester.</p>
+            <p>Try selecting a different semester, academic session, or faculty.</p>
+          </div>
+        `);
+        return;
+      }
+
+      let html = `
+        <div class="filter-info">
+          <i class="fas fa-info-circle"></i> Showing ${data.length} rooms with 2 or more scheduled slots (${filteredOutCount} rooms filtered out)
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="w3-table w3-bordered w3-striped">
+            <thead>
+              <tr class="w3-teal">
+                <th>Room Code</th>
+                <th>Scheduled Slots</th>
+                <th>Possible Slots</th>
+                <th>Utilization</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>`;
+
+      data.forEach(item => {
+        const barWidth = Math.min(100, item.pct);
+        let status = '';
+        let statusClass = '';
+        
+        if (item.pct >= 80) {
+          status = 'High';
+          statusClass = 'w3-text-red';
+        } else if (item.pct >= 50) {
+          status = 'Medium';
+          statusClass = 'w3-text-orange';
+        } else if (item.pct >= 20) {
+          status = 'Normal';
+          statusClass = 'w3-text-green';
+        } else {
+          status = 'Low';
+          statusClass = 'w3-text-blue';
+        }
+        
+        html += `
+          <tr>
+            <td><code>${item.room}</code></td>
+            <td><strong>${item.used}</strong> slots</td>
+            <td>${item.total}</td>
+            <td>
+              <div style="width:100%; background:#e0e0e0; border-radius:4px;">
+                <div style="width:${barWidth}%; background:#4CAF50; height:20px; border-radius:4px; text-align:right; color:white; font-size:12px; padding-right:5px;">${item.pct}%</div>
+              </div>
+            </td>
+            <td><span class="${statusClass}">${status}</span></td>
+          </tr>`;
+      });
+
+      html += `</tbody></table></div>`;
+      $('#results').html(html);
+    }
+
+    function drawChart(data) {
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(() => {
+        const dataTable = new google.visualization.DataTable();
+        dataTable.addColumn('string', 'Room');
+        dataTable.addColumn('number', 'Utilization %');
+
+        // Show top 15 rooms to avoid clutter
+        const topRooms = data.slice(0, 15);
+        topRooms.forEach(item => {
+          dataTable.addRow([item.room, item.pct]);
+        });
+
+        const options = {
+          title: `Top Room Utilization (%) - Minimum 2 Slots`,
+          titleTextStyle: { fontSize: 16 },
+          hAxis: { title: 'Room Code', textStyle: { fontSize: 10 } },
+          vAxis: { title: 'Utilization %', minValue: 0, maxValue: 100 },
+          backgroundColor: '#f9f9f9',
+          chartArea: { width: '80%', height: '70%' },
+          legend: { position: 'none' }
+        };
+
+        const chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+        chart.draw(dataTable, options);
+      });
+    }
+
+    function showLoading(show) {
+      $('#loading').toggle(show);
+      $('#loadBtn').prop('disabled', show);
+    }
+
+    function showError(message) {
+      $('#error').text(message).show();
+    }
+
+    function hideError() {
+      $('#error').hide();
+    }
+  </script>
+</body>
+</html>

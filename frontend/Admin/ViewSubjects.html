@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TTMS - View Subjects</title>
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --utm-blue: #003366;
+      --utm-gold: #C9A85C;
+      --light-bg: #f8f9fc;
+      --input-border: #d1d5db;
+      --error-red: #d32f2f;
+      --success-green: #4CAF50;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--light-bg);
+      color: #333;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .card-header i {
+      color: var(--utm-blue);
+      font-size: 24px;
+    }
+
+    .info-box {
+      background: #f0f8ff;
+      border-left: 4px solid var(--utm-blue);
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 0.92em;
+      margin-bottom: 20px;
+    }
+
+    .info-box code {
+      background: #e6f0ff;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+
+    .btn-primary { background-color: var(--utm-blue) !important; color: white !important; }
+    .btn-success { background-color: var(--success-green) !important; color: white !important; }
+    .btn-secondary { background-color: #6c757d !important; color: white !important; }
+    .btn-blue { background-color: #17a2b8 !important; color: white !important; }
+
+    .btn-primary:hover { background-color: #002244 !important; }
+    .btn-success:hover { background-color: #449d48 !important; }
+    .btn-secondary:hover { background-color: #5a6268 !important; }
+    .btn-blue:hover { background-color: #138496 !important; }
+
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .form-group {
+      flex: 1;
+      min-width: 160px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.95em;
+      margin-bottom: 6px;
+      color: #444;
+    }
+
+    .w3-select, .w3-input {
+      width: 100%;
+      border: 1px solid var(--input-border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 1em;
+      background: white;
+    }
+
+    .w3-select:focus, .w3-input:focus {
+      border-color: var(--utm-blue);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(0,51,102,0.15);
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .stats-info {
+      font-size: 0.9em;
+      color: #666;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      margin-top: 16px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    table.w3-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    table.w3-table thead tr {
+      background-color: var(--utm-blue) !important;
+      color: white;
+    }
+
+    table.w3-table th, table.w3-table td {
+      padding: 12px 10px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+
+    table.w3-table tbody tr:hover {
+      background-color: #f9f9f9;
+      cursor: pointer;
+    }
+
+    .action-btn {
+      padding: 6px 12px !important;
+      font-size: 0.85em !important;
+      margin: 2px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #666;
+      background: #fafafa;
+      border-radius: 12px;
+      margin: 20px 0;
+    }
+
+    .empty-state i {
+      font-size: 48px;
+      color: var(--utm-blue);
+      margin-bottom: 16px;
+    }
+
+    .loading-spinner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      color: var(--utm-blue);
+    }
+
+    .loading-spinner i {
+      font-size: 32px;
+      margin-bottom: 16px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .error-panel {
+      background: #ffebee;
+      border-left: 4px solid var(--error-red);
+      padding: 16px;
+      border-radius: 10px;
+      margin: 20px 0;
+    }
+
+    .error-panel h4 {
+      color: var(--error-red);
+      margin-top: 0;
+    }
+
+    .subject-summary {
+      background: #e8f5e9;
+      padding: 14px;
+      border-radius: 10px;
+      margin-top: 20px;
+      border-left: 4px solid var(--success-green);
+    }
+
+    .subject-summary .w3-row > .w3-col {
+      padding: 4px 0;
+    }
+
+    .w3-modal-content {
+      max-height: 90vh;
+      overflow-y: auto;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .w3-modal-content .w3-container header {
+      background: var(--utm-blue) !important;
+      border-radius: 12px 12px 0 0 !important;
+    }
+
+    .w3-modal-content .w3-container footer {
+      background: #f8f9fa;
+      border-radius: 0 0 12px 12px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .card {
+        margin: 16px;
+        padding: 16px;
+      }
+
+      .form-row {
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .form-group {
+        min-width: 100%;
+      }
+
+      .btn-group {
+        flex-direction: column;
+      }
+
+      .w3-button {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .stats-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+      }
+
+      table.w3-table {
+        font-size: 13px;
+      }
+
+      table.w3-table th, table.w3-table td {
+        padding: 10px 6px;
+      }
+
+      .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .card-header h3 {
+        margin: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="w3-container">
+    <!-- Header -->
+    <div class="card">
+      <div class="card-header">
+        <i class="fas fa-book-open"></i>
+        <h3>View Subjects</h3>
+      </div>
+      <p>Browse subjects by academic session and semester. Search and filter by course code, name, or program.</p>
+    </div>
+
+    <!-- API Info -->
+    <div class="info-box">
+      <strong><i class="fas fa-plug"></i> API Information</strong><br>
+      • Endpoint: <code>entity=subjek&sesi=yyyy/yyyy&semester=[1|2]</code><br>
+      • Authentication: <span class="w3-tag w3-green">Not Required</span><br>
+      • Data Source: TTMS Public API
+    </div>
+
+    <!-- Filters & Controls -->
+    <div class="card">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="sessionSelect"><i class="fas fa-calendar-alt"></i> Academic Session</label>
+          <select class="w3-select w3-border" id="sessionSelect">
+            <!-- Populated by JS -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="semesterSelect"><i class="fas fa-book"></i> Semester</label>
+          <select class="w3-select w3-border" id="semesterSelect">
+            <option value="1">Semester 1</option>
+            <option value="2" selected>Semester 2</option>
+            <option value="3">Special Semester</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="facultyFilter"><i class="fas fa-university"></i> Filter by Faculty</label>
+          <select class="w3-select w3-border" id="facultyFilter">
+            <option value="">All Faculties</option>
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group" style="flex: 2;">
+          <label for="searchInput"><i class="fas fa-search"></i> Search Subjects</label>
+          <input type="text" class="w3-input w3-border" id="searchInput" placeholder="Search by course code, name, or program...">
+        </div>
+        <div class="form-group">
+          <label for="searchBySelect"><i class="fas fa-filter"></i> Search By</label>
+          <select class="w3-select w3-border" id="searchBySelect">
+            <option value="all">All Fields</option>
+            <option value="code">Course Code</option>
+            <option value="name">Subject Name</option>
+            <option value="program">Program Code</option>
+            <option value="level">Study Level</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button class="w3-button btn-primary" id="loadSubjectsBtn">
+          <i class="fas fa-sync-alt"></i> Load Subjects
+        </button>
+        <button class="w3-button btn-success" id="applySearchBtn">
+          <i class="fas fa-search"></i> Search
+        </button>
+        <button class="w3-button btn-secondary" id="clearSearchBtn">
+          <i class="fas fa-times"></i> Clear All
+        </button>
+        <button class="w3-button btn-blue" id="exportBtn" style="display:none;">
+          <i class="fas fa-download"></i> Export CSV
+        </button>
+      </div>
+
+      <div class="w3-row" style="margin-top: 16px;">
+        <div class="w3-col s12 m6">
+          <div id="statsInfo" class="stats-info">
+            <i class="fas fa-info-circle"></i> Select session and click "Load Subjects"
+          </div>
+        </div>
+        <div class="w3-col s12 m6 w3-right">
+          <label>
+            <input type="checkbox" id="autoLoadCheckbox" checked> 
+            <span class="w3-small">Auto-load on change</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner" style="display:none;">
+      <i class="fas fa-spinner"></i>
+      <p id="loadingMessage">Loading subject data...</p>
+    </div>
+
+    <!-- Error Panel -->
+    <div id="errorContainer" class="error-panel" style="display:none;">
+      <h4><i class="fas fa-exclamation-triangle"></i> <span id="errorTitle">Error</span></h4>
+      <p id="errorMessage"></p>
+      <div id="errorDetails" style="display:none; margin-top:12px;">
+        <details>
+          <summary>Technical Details</summary>
+          <pre id="errorDetailsContent" style="background:#f8f8f8; padding:12px; border-radius:6px; overflow:auto; max-height:300px; font-size:13px;"></pre>
+        </details>
+      </div>
+      <button class="w3-button btn-secondary w3-tiny" onclick="hideError()">
+        <i class="fas fa-times"></i> Dismiss
+      </button>
+    </div>
+
+    <!-- Subjects Table -->
+    <div id="subjectsTableContainer">
+      <div class="empty-state">
+        <i class="fas fa-book"></i>
+        <h4>Ready to Load Subjects</h4>
+        <ol style="max-width:500px; margin:0 auto; text-align:left;">
+          <li>Select an academic session and semester</li>
+          <li>Click <strong>Load Subjects</strong> to fetch data</li>
+          <li>Use search to filter by course code, name, or program</li>
+          <li>Filter by faculty using the dropdown</li>
+          <li>Click on any subject to view more details</li>
+        </ol>
+        <p class="w3-tiny" style="margin-top:20px;">
+          <i class="fas fa-info-circle"></i> This is a public endpoint that doesn't require authentication.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Subject Details Modal -->
+  <div id="subjectDetailsModal" class="w3-modal">
+    <div class="w3-modal-content w3-card-4 w3-animate-zoom" style="max-width:800px; margin: 30px auto;">
+      <header class="w3-container w3-teal"> 
+        <span onclick="closeSubjectModal()" class="w3-button w3-display-topright">&times;</span>
+        <h3 id="modalTitle">Subject Details</h3>
+      </header>
+      <div class="w3-container" id="modalContent" style="padding:24px;">
+        <p>Loading details...</p>
+      </div>
+      <footer class="w3-container w3-padding w3-light-gray">
+        <button class="w3-button w3-gray" onclick="closeSubjectModal()">Close</button>
+        <button class="w3-button btn-blue" onclick="copySubjectDetails()">
+          <i class="fas fa-copy"></i> Copy Details
+        </button>
+      </footer>
+    </div>
+  </div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script>
+    // Initialize when page loads
+    $(document).ready(function() {
+      initSubjectsPage();
+    });
+    
+    function initSubjectsPage() {
+      console.log("📚 Initializing View Subjects page (No Auth Required)");
+      
+      // Generate academic years
+      const academicYears = generateAcademicYears();
+      const currentYear = new Date().getFullYear();
+      const defaultSession = `${currentYear}/${currentYear + 1}`;
+      
+      // Populate session select
+      const sessionSelect = document.getElementById('sessionSelect');
+      sessionSelect.innerHTML = academicYears.map(year => 
+        `<option value="${year}" ${year === defaultSession ? 'selected' : ''}>${year}</option>`
+      ).join('');
+      
+      // Initialize variables
+      let currentSubjectsData = [];
+      let allFaculties = new Set();
+      let isLoading = false;
+      
+      // Event listeners
+      document.getElementById('loadSubjectsBtn').onclick = fetchSubjectsData;
+      document.getElementById('applySearchBtn').onclick = applySearch;
+      document.getElementById('clearSearchBtn').onclick = clearAllFilters;
+      document.getElementById('exportBtn').onclick = exportData;
+      
+      // Auto-load when session/semester changes if checkbox is checked
+      document.getElementById('sessionSelect').addEventListener('change', function() {
+        if (document.getElementById('autoLoadCheckbox').checked && currentSubjectsData.length > 0) {
+          fetchSubjectsData();
+        }
+      });
+      
+      document.getElementById('semesterSelect').addEventListener('change', function() {
+        if (document.getElementById('autoLoadCheckbox').checked && currentSubjectsData.length > 0) {
+          fetchSubjectsData();
+        }
+      });
+      
+      // Enter key support for search
+      document.getElementById('searchInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') applySearch();
+      });
+      
+      // Faculty filter change
+      document.getElementById('facultyFilter').addEventListener('change', function() {
+        applyFilters();
+      });
+      
+      // Generate academic years function
+      function generateAcademicYears() {
+        const currentYear = new Date().getFullYear();
+        const years = [];
+        for (let i = currentYear - 5; i <= currentYear + 1; i++) {
+          years.push(`${i}/${i + 1}`);
+        }
+        return years;
+      }
+      
+      // Fetch subjects data from API (NO AUTH REQUIRED)
+      async function fetchSubjectsData() {
+        if (isLoading) return;
+        
+        const sesi = document.getElementById('sessionSelect').value;
+        const semester = document.getElementById('semesterSelect').value;
+        
+        // Validate inputs
+        if (!sesi || !semester) {
+          showError("Invalid Selection", "Please select both session and semester.");
+          return;
+        }
+        
+        // Show loading
+        showLoading(true, `Loading subjects for ${sesi} Semester ${semester}...`);
+        hideError();
+        
+        try {
+          // Construct API URL - NO SESSION ID NEEDED!
+          const apiUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=subjek&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}`;
+          
+          console.log("🔗 [Subjects] Fetching from (no auth):", apiUrl);
+          
+          const response = await fetch(apiUrl);
+          
+          if (!response.ok) {
+            throw new Error(`API Error: HTTP ${response.status} - ${response.statusText}`);
+          }
+          
+          const responseText = await response.text();
+          
+          if (!responseText.trim()) {
+            throw new Error("Empty response from server");
+          }
+          
+          let data;
+          try {
+            data = JSON.parse(responseText);
+          } catch (e) {
+            console.error("❌ JSON Parse Error:", e);
+            console.error("❌ Response (first 500 chars):", responseText.substring(0, 500));
+            
+            // Try to clean the response if it has issues
+            const cleanedText = responseText.replace(/[\x00-\x1F\x7F]/g, '');
+            try {
+              data = JSON.parse(cleanedText);
+              console.log("✅ Successfully parsed cleaned JSON");
+            } catch (e2) {
+              throw new Error(`Invalid JSON response. The API might return HTML instead of JSON. Error: ${e.message}`);
+            }
+          }
+          
+          // Handle different response formats
+          if (!Array.isArray(data)) {
+            if (data && data.data && Array.isArray(data.data)) {
+              data = data.data;
+              console.log("✅ Using data.data array");
+            } else if (data && data.subjek && Array.isArray(data.subjek)) {
+              data = data.subjek;
+              console.log("✅ Using data.subjek array");
+            } else if (data && data.items && Array.isArray(data.items)) {
+              data = data.items;
+              console.log("✅ Using data.items array");
+            } else if (typeof data === 'object' && data !== null) {
+              // Convert object to array of values
+              data = Object.values(data);
+              console.log("✅ Converted object to array");
+            } else {
+              console.log("⚠️ Response format:", typeof data, data);
+              throw new Error(`Expected array but got: ${typeof data}`);
+            }
+          }
+          
+          console.log(`✅ [Subjects] Received ${data.length} subject(s) without authentication`);
+          
+          // Store data
+          currentSubjectsData = data;
+          
+          // Extract unique faculties
+          extractFaculties(data);
+          
+          // Render data
+          renderSubjectsTable(data);
+          updateStats(data);
+          
+          // Show success message and export button
+          document.getElementById('statsInfo').innerHTML = `
+            <i class="fas fa-check-circle" style="color:#4CAF50;"></i> 
+            Successfully loaded <strong>${data.length}</strong> subjects for ${sesi} Semester ${semester}
+          `;
+          
+          document.getElementById('exportBtn').style.display = 'inline-block';
+          
+        } catch (error) {
+          console.error("🔥 [Error] Fetch subjects failed:", error);
+          
+          let errorMsg = error.message;
+          let details = `URL: ${apiUrl}\n\nError: ${error.message}\n\nStack: ${error.stack}`;
+          
+          // Check for common errors
+          if (error.message.includes('JSON') || error.message.includes('parse')) {
+            errorMsg = "The API returned invalid JSON data. The endpoint might be returning HTML or an error page.";
+            details += "\n\nTip: Try opening the API URL directly in your browser to see what it returns.";
+          } else if (error.message.includes('CORS')) {
+            errorMsg = "Cross-Origin Request Blocked. The TTMS API might not allow requests from your origin.";
+            details += "\n\nTip: This might be a CORS issue. Try using a CORS proxy or check browser console.";
+          } else if (error.message.includes('NetworkError')) {
+            errorMsg = "Network error. Please check your internet connection.";
+            details += "\n\nTip: The TTMS server might be down or unreachable.";
+          }
+          
+          showError("Failed to Load Subjects", errorMsg);
+          document.getElementById('errorDetailsContent').textContent = details;
+          document.getElementById('errorDetails').style.display = 'block';
+          
+          document.getElementById('statsInfo').innerHTML = `
+            <i class="fas fa-exclamation-triangle" style="color:#d32f2f;"></i> 
+            Failed to load subjects
+          `;
+        } finally {
+          showLoading(false);
+          isLoading = false;
+        }
+      }
+      
+      // Extract unique faculties from data
+      function extractFaculties(data) {
+        allFaculties.clear();
+        allFaculties.add('All Faculties');
+        
+        data.forEach(subject => {
+          const faculty = subject.fakulti || subject.faculty || subject.kod_fakulti || subject.department || '';
+          if (faculty && faculty.trim()) {
+            allFaculties.add(faculty.trim());
+          }
+        });
+        
+        // Update faculty filter dropdown
+        const facultyFilter = document.getElementById('facultyFilter');
+        facultyFilter.innerHTML = '';
+        
+        Array.from(allFaculties).sort().forEach(faculty => {
+          const option = document.createElement('option');
+          option.value = faculty === 'All Faculties' ? '' : faculty;
+          option.textContent = faculty;
+          facultyFilter.appendChild(option);
+        });
+      }
+      
+      // Render subjects table
+      function renderSubjectsTable(data, highlightTerm = '', highlightField = '') {
+        const container = document.getElementById('subjectsTableContainer');
+        
+        if (!Array.isArray(data) || data.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-book-slash"></i>
+              <h4>No Subjects Found</h4>
+              <p>No subject records found for the selected session/semester.</p>
+              <p>Try selecting a different academic session or semester.</p>
+              <p><small>The TTMS API might not have subject data for this session, or the endpoint format might have changed.</small></p>
+              <button class="w3-button btn-primary w3-small" onclick="testApiEndpoint()">
+                <i class="fas fa-vial"></i> Test API Endpoint
+              </button>
+            </div>`;
+          return;
+        }
+        
+        // Debug: Show first record structure
+        console.log("📊 First subject record:", data[0]);
+        
+        // Determine available fields
+        const firstRecord = data[0];
+        const hasCode = 'kod_subjek' in firstRecord || 'course_code' in firstRecord || 'code' in firstRecord;
+        const hasName = 'nama_subjek' in firstRecord || 'subject_name' in firstRecord || 'name' in firstRecord;
+        const hasProgram = 'kod_program' in firstRecord || 'program_code' in firstRecord || 'program' in firstRecord;
+        const hasFaculty = 'fakulti' in firstRecord || 'faculty' in firstRecord || 'department' in firstRecord;
+        const hasLevel = 'peringkat' in firstRecord || 'study_level' in firstRecord || 'level' in firstRecord;
+        const hasCredit = 'kredit' in firstRecord || 'credit_hours' in firstRecord || 'credits' in firstRecord;
+        
+        let html = `<div class="table-container"><table class="w3-table w3-bordered w3-striped">`;
+        
+        html += `<thead><tr>
+          <th>#</th>
+          ${hasCode ? '<th>Course Code</th>' : ''}
+          ${hasName ? '<th>Subject Name</th>' : ''}
+          ${hasProgram ? '<th>Program</th>' : ''}
+          ${hasFaculty ? '<th>Faculty</th>' : ''}
+          ${hasLevel ? '<th>Level</th>' : ''}
+          ${hasCredit ? '<th>Credits</th>' : ''}
+          <th>Actions</th>
+        </tr></thead><tbody>`;
+        
+        data.forEach((subject, index) => {
+          const code = subject.kod_subjek || subject.course_code || subject.code || 'N/A';
+          const name = subject.nama_subjek || subject.subject_name || subject.name || 'N/A';
+          const program = subject.kod_program || subject.program_code || subject.program || 'N/A';
+          const faculty = subject.fakulti || subject.faculty || subject.department || 'N/A';
+          const level = subject.peringkat || subject.study_level || subject.level || 'N/A';
+          const credits = subject.kredit || subject.credit_hours || subject.credits || 'N/A';
+          
+          // Check if this row should be highlighted
+          const shouldHighlight = highlightTerm && (
+            (highlightField === 'all' && (
+              code.toLowerCase().includes(highlightTerm.toLowerCase()) ||
+              name.toLowerCase().includes(highlightTerm.toLowerCase()) ||
+              program.toLowerCase().includes(highlightTerm.toLowerCase()) ||
+              level.toLowerCase().includes(highlightTerm.toLowerCase())
+            )) ||
+            (highlightField === 'code' && code.toLowerCase().includes(highlightTerm.toLowerCase())) ||
+            (highlightField === 'name' && name.toLowerCase().includes(highlightTerm.toLowerCase())) ||
+            (highlightField === 'program' && program.toLowerCase().includes(highlightTerm.toLowerCase())) ||
+            (highlightField === 'level' && level.toLowerCase().includes(highlightTerm.toLowerCase()))
+          );
+          
+          html += `
+            <tr ${shouldHighlight ? 'style="background-color:#fff9c4;"' : ''} 
+                onclick="viewSubjectDetails(${index})">
+              <td>${index + 1}</td>
+              ${hasCode ? `<td><strong>${code}</strong></td>` : ''}
+              ${hasName ? `<td>${name}</td>` : ''}
+              ${hasProgram ? `<td>${program}</td>` : ''}
+              ${hasFaculty ? `<td>${faculty}</td>` : ''}
+              ${hasLevel ? `<td>${level}</td>` : ''}
+              ${hasCredit ? `<td class="w3-center">${credits}</td>` : ''}
+              <td>
+                <button class="w3-button btn-blue action-btn" onclick="event.stopPropagation(); viewSubjectDetails(${index})">
+                  <i class="fas fa-eye"></i> View
+                </button>
+                <button class="w3-button btn-success action-btn" onclick="event.stopPropagation(); copySubjectCode('${code}', '${name}')">
+                  <i class="fas fa-copy"></i> Copy
+                </button>
+              </td>
+            </tr>`;
+        });
+        
+        html += `</tbody></table></div>`;
+        
+        // Add summary stats
+        const totalCredits = data.reduce((sum, subject) => {
+          const credits = parseInt(subject.kredit || subject.credit_hours || subject.credits || 0);
+          return sum + credits;
+        }, 0);
+        
+        html += `
+          <div class="subject-summary">
+            <div class="w3-row">
+              <div class="w3-col m6">
+                <p><i class="fas fa-database"></i> <strong>Total Records:</strong> ${data.length}</p>
+                <p><i class="fas fa-graduation-cap"></i> <strong>Total Credit Hours:</strong> ${totalCredits}</p>
+              </div>
+              <div class="w3-col m6">
+                <p><i class="fas fa-university"></i> <strong>Unique Faculties:</strong> ${allFaculties.size - 1}</p>
+                <p><i class="fas fa-info-circle"></i> <strong>Available Fields:</strong> ${Object.keys(firstRecord).length}</p>
+              </div>
+            </div>
+            ${Object.keys(firstRecord).length > 0 ? 
+              `<p class="w3-tiny"><i class="fas fa-code"></i> Field names: ${Object.keys(firstRecord).join(', ')}</p>` : ''}
+          </div>`;
+        
+        container.innerHTML = html;
+      }
+      
+      // Apply search and filters
+      function applySearch() {
+        const searchTerm = document.getElementById('searchInput').value.trim();
+        const searchBy = document.getElementById('searchBySelect').value;
+        const facultyFilter = document.getElementById('facultyFilter').value;
+        
+        applyFilters(searchTerm, searchBy, facultyFilter);
+      }
+      
+      // Apply all filters
+      function applyFilters(searchTerm = '', searchBy = 'all', facultyFilter = '') {
+        if (currentSubjectsData.length === 0) {
+          alert("Please load subjects first!");
+          return;
+        }
+        
+        let filtered = currentSubjectsData;
+        
+        // Apply faculty filter first
+        if (facultyFilter) {
+          filtered = filtered.filter(subject => {
+            const faculty = subject.fakulti || subject.faculty || subject.department || '';
+            return faculty.toLowerCase().includes(facultyFilter.toLowerCase());
+          });
+        }
+        
+        // Apply search filter
+        if (searchTerm) {
+          filtered = filtered.filter(subject => {
+            const code = (subject.kod_subjek || subject.course_code || subject.code || '').toString().toLowerCase();
+            const name = (subject.nama_subjek || subject.subject_name || subject.name || '').toLowerCase();
+            const program = (subject.kod_program || subject.program_code || subject.program || '').toLowerCase();
+            const level = (subject.peringkat || subject.study_level || subject.level || '').toLowerCase();
+            const faculty = (subject.fakulti || subject.faculty || subject.department || '').toLowerCase();
+            const term = searchTerm.toLowerCase();
+            
+            switch(searchBy) {
+              case 'code':
+                return code.includes(term);
+              case 'name':
+                return name.includes(term);
+              case 'program':
+                return program.includes(term);
+              case 'level':
+                return level.includes(term);
+              case 'all':
+                return code.includes(term) || 
+                       name.includes(term) || 
+                       program.includes(term) || 
+                       level.includes(term) ||
+                       faculty.includes(term);
+              default:
+                return true;
+            }
+          });
+        }
+        
+        renderSubjectsTable(filtered, searchTerm, searchBy);
+        updateStats(filtered, searchTerm || facultyFilter);
+      }
+      
+      // Clear all filters
+      function clearAllFilters() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('facultyFilter').value = '';
+        document.getElementById('searchBySelect').value = 'all';
+        
+        if (currentSubjectsData.length > 0) {
+          renderSubjectsTable(currentSubjectsData);
+          updateStats(currentSubjectsData);
+        }
+      }
+      
+      // Update statistics display
+      function updateStats(data, filterText = '') {
+        if (!data || data.length === 0) {
+          return;
+        }
+        
+        // Count by faculty
+        const facultyCounts = {};
+        const levelCounts = {};
+        let totalCredits = 0;
+        
+        data.forEach(subject => {
+          const faculty = subject.fakulti || subject.faculty || subject.department || 'Unknown';
+          const level = subject.peringkat || subject.study_level || subject.level || 'Unknown';
+          const credits = parseInt(subject.kredit || subject.credit_hours || subject.credits || 0);
+          
+          facultyCounts[faculty] = (facultyCounts[faculty] || 0) + 1;
+          levelCounts[level] = (levelCounts[level] || 0) + 1;
+          totalCredits += credits;
+        });
+        
+        // Update stats info
+        let statsHtml = `<i class="fas fa-chart-bar"></i> `;
+        
+        if (filterText) {
+          statsHtml += `Showing <strong>${data.length}</strong> subjects (filtered)`;
+        } else {
+          statsHtml += `Loaded <strong>${data.length}</strong> subjects`;
+        }
+        
+        statsHtml += ` • <strong>${totalCredits}</strong> total credits • <strong>${Object.keys(facultyCounts).length}</strong> faculties`;
+        
+        document.getElementById('statsInfo').innerHTML = statsHtml;
+      }
+      
+      // Export data to CSV
+      function exportData() {
+        if (currentSubjectsData.length === 0) {
+          alert("No data to export!");
+          return;
+        }
+        
+        try {
+          // Get headers from first object
+          const headers = Object.keys(currentSubjectsData[0]);
+          
+          // Convert to CSV
+          const csvRows = [];
+          
+          // Add headers
+          csvRows.push(headers.join(','));
+          
+          // Add data rows
+          currentSubjectsData.forEach(subject => {
+            const row = headers.map(header => {
+              const value = subject[header];
+              // Escape quotes and wrap in quotes if contains comma or quotes
+              const escaped = ('' + value).replace(/"/g, '""');
+              return `"${escaped}"`;
+            });
+            csvRows.push(row.join(','));
+          });
+          
+          const csvContent = csvRows.join('\n');
+          const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          
+          const sesi = document.getElementById('sessionSelect').value;
+          const semester = document.getElementById('semesterSelect').value;
+          const filename = `subjects_${sesi.replace('/', '-')}_sem${semester}_${new Date().toISOString().slice(0,10)}.csv`;
+          
+          link.href = url;
+          link.setAttribute('download', filename);
+          link.style.visibility = 'hidden';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          alert(`✅ Exported ${currentSubjectsData.length} subjects to ${filename}`);
+          
+        } catch (error) {
+          console.error("Export failed:", error);
+          alert("Export failed: " + error.message);
+        }
+      }
+      
+      // View subject sections with client-side filtering
+      window.viewSubjectDetails = async function(index) {
+        if (!currentSubjectsData || !currentSubjectsData[index]) {
+          alert("Subject data not available");
+          return;
+        }
+
+        const subject = currentSubjectsData[index];
+        const kod_subjek = subject.kod_subjek || subject.course_code || subject.code;
+        const sesi = document.getElementById('sessionSelect').value;
+        const semester = document.getElementById('semesterSelect').value;
+
+        if (!kod_subjek) {
+          alert("Invalid subject code");
+          return;
+        }
+
+        const modal = document.getElementById('subjectDetailsModal');
+        const title = document.getElementById('modalTitle');
+        const content = document.getElementById('modalContent');
+
+        // Show loading in modal
+        title.textContent = `Loading Sections: ${kod_subjek}`;
+        content.innerHTML = `
+          <div class="loading-spinner" style="padding:0;">
+            <i class="fas fa-spinner"></i>
+            <p class="w3-small">Loading section data for ${kod_subjek}<br>
+            <small>Session: ${sesi} • Semester: ${semester}</small></p>
+          </div>`;
+
+        modal.style.display = 'block';
+
+        // 🔴 NO filtering in API — fetch ALL sections for this subject
+        const sectionUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=subjek_seksyen&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}&kod_subjek=${encodeURIComponent(kod_subjek)}`;
+
+        console.log("🔗 [Sections] Fetching all sections (filtering locally):", sectionUrl);
+
+        try {
+          const response = await fetch(sectionUrl);
+          if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+
+          const text = await response.text();
+          if (!text.trim()) throw new Error("Empty response");
+
+          let sectionData = JSON.parse(text);
+
+          // Handle wrapper objects
+          if (sectionData && !Array.isArray(sectionData) && sectionData.seksyen_list) {
+            // This is the expected structure (like your example)
+            // Keep the top-level object and its seksyen_list
+          } else if (Array.isArray(sectionData)) {
+            // Some endpoints return array directly — wrap it
+            sectionData = {
+              kod_subjek: kod_subjek,
+              nama_subjek: subject.nama_subjek || subject.name || 'Unknown',
+              seksyen_list: sectionData,
+              bil_seksyen: sectionData.length,
+              bil_pelajar: sectionData.reduce((sum, s) => sum + (s.bil_pelajar || 0), 0)
+            };
+          } else {
+            throw new Error("Unexpected response format");
+          }
+
+          // ✅ CLIENT-SIDE FILTERING: Remove invalid sections
+          let validSections = (sectionData.seksyen_list || []).filter(seksyen => {
+            const lecturer = (seksyen.pensyarah || '').toString().trim();
+            const sectionNum = (seksyen.seksyen || '').toString().trim();
+
+            // Skip if section number is missing or lecturer is empty/placeholder
+            if (!sectionNum) return false;
+            if (!lecturer || lecturer === '—' || lecturer === 'N/A' || lecturer === '-') return false;
+
+            return true;
+          });
+
+          const totalStudents = validSections.reduce((sum, s) => sum + (parseInt(s.bil_pelajar) || 0), 0);
+
+          // Build modal content
+          let html = `
+            <div class="info-box">
+              <h4 style="margin:0;">
+                <i class="fas fa-book-open"></i> ${sectionData.nama_subjek || 'Unknown Subject'}
+              </h4>
+              <p><strong>Course Code:</strong> ${kod_subjek}</p>
+              <p><strong>Session:</strong> ${sesi} • <strong>Semester:</strong> ${semester}</p>
+              <p><strong>Valid Sections:</strong> ${validSections.length} / ${sectionData.seksyen_list?.length || 0}</p>
+            </div>`;
+
+          if (validSections.length === 0) {
+            html += `
+              <div class="empty-state" style="padding:20px;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h5>No Valid Sections</h5>
+                <p>All sections were filtered out because they had:</p>
+                <ul style="text-align:left; max-width:400px; margin:0 auto;">
+                  <li>No assigned lecturer</li>
+                  <li>Missing section number</li>
+                  <li>Placeholder lecturer names (e.g., "—")</li>
+                </ul>
+                <p class="w3-tiny">Original data contained ${sectionData.seksyen_list?.length || 0} section(s).</p>
+              </div>`;
+          } else {
+            html += `
+              <p><strong>Valid sections with lecturers and student counts:</strong></p>
+              <div class="table-container">
+                <table class="w3-table w3-bordered w3-striped">
+                  <thead>
+                    <tr class="w3-teal">
+                      <th>Section</th>
+                      <th>Lecturer</th>
+                      <th>Students</th>
+                    </tr>
+                  </thead>
+                  <tbody>`;
+
+            validSections.forEach(seksyen => {
+              html += `
+                <tr>
+                  <td><strong>${seksyen.seksyen || '—'}</strong></td>
+                  <td>${seksyen.pensyarah || '—'}</td>
+                  <td class="w3-center">${seksyen.bil_pelajar || 0}</td>
+                </tr>`;
+            });
+
+            html += `</tbody></table></div>`;
+
+            // Add stats summary
+            html += `
+              <div class="subject-summary" style="margin-top:20px;">
+                <div class="w3-row">
+                  <div class="w3-col m6">
+                    <p><i class="fas fa-users"></i> <strong>Total Students:</strong> ${totalStudents}</p>
+                  </div>
+                  <div class="w3-col m6">
+                    <p><i class="fas fa-chalkboard-teacher"></i> <strong>Lecturers:</strong> ${validSections.length}</p>
+                  </div>
+                </div>
+              </div>`;
+          }
+
+          // Add raw data toggle (optional)
+          html += `
+            <details class="w3-margin-top">
+              <summary class="w3-button w3-small w3-light-gray">
+                <i class="fas fa-code"></i> View Raw Section Data (${sectionData.seksyen_list?.length || 0} sections)
+              </summary>
+              <pre style="background:#f8f8f8; padding:10px; overflow:auto; max-height:200px; font-size:11px;">${JSON.stringify(sectionData, null, 2)}</pre>
+            </details>`;
+
+          title.textContent = `Sections: ${kod_subjek} - ${sectionData.nama_subjek || ''}`;
+          content.innerHTML = html;
+
+          // Store for copy if needed
+          window.currentSubjectForCopy = sectionData;
+
+        } catch (error) {
+          console.error("🔥 [Section Load Error]:", error);
+          content.innerHTML = `
+            <div class="error-panel">
+              <h4><i class="fas fa-exclamation-triangle"></i> Error Loading Sections</h4>
+              <p><strong>Subject:</strong> ${kod_subjek}</p>
+              <p><strong>Session:</strong> ${sesi} • <strong>Semester:</strong> ${semester}</p>
+              <p><strong>Error:</strong> ${error.message}</p>
+              <button class="w3-button w3-gray w3-small" onclick="window.closeSubjectModal()">
+                <i class="fas fa-times"></i> Close
+              </button>
+            </div>`;
+        }
+      };
+      
+      // Close subject modal
+      window.closeSubjectModal = function() {
+        document.getElementById('subjectDetailsModal').style.display = 'none';
+      };
+      
+      // Copy subject details
+      window.copySubjectDetails = function() {
+        if (!window.currentSubjectForCopy) return;
+        
+        const text = JSON.stringify(window.currentSubjectForCopy, null, 2);
+        copyToClipboard(text);
+        alert("Subject details copied to clipboard!");
+      };
+      
+      // Copy subject code
+      window.copySubjectCode = function(code, name) {
+        const text = `${code} - ${name}`;
+        copyToClipboard(text);
+        alert(`Copied: ${text}`);
+      };
+      
+      // Copy to clipboard helper
+      function copyToClipboard(text) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+      
+      // Test API endpoint
+      window.testApiEndpoint = async function() {
+        const sesi = document.getElementById('sessionSelect').value;
+        const semester = document.getElementById('semesterSelect').value;
+        const apiUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=subjek&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}`;
+        
+        alert(`Testing API Endpoint:\n\n${apiUrl}\n\nOpening in new tab...`);
+        window.open(apiUrl, '_blank');
+      };
+      
+      // UI helper functions
+      function showLoading(show, message = '') {
+        isLoading = show;
+        const spinner = document.getElementById('loadingSpinner');
+        
+        if (show) {
+          spinner.style.display = 'flex';
+          if (message) {
+            document.getElementById('loadingMessage').innerHTML = message;
+          }
+          document.getElementById('loadSubjectsBtn').disabled = true;
+        } else {
+          spinner.style.display = 'none';
+          document.getElementById('loadSubjectsBtn').disabled = false;
+        }
+      }
+      
+      function showError(title, message) {
+        document.getElementById('errorTitle').textContent = title;
+        document.getElementById('errorMessage').textContent = message;
+        document.getElementById('errorContainer').style.display = 'block';
+      }
+      
+      function hideError() {
+        document.getElementById('errorContainer').style.display = 'none';
+        document.getElementById('errorDetails').style.display = 'none';
+      }
+    }
+  </script>
+</body>
+</html>
