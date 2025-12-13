@@ -6,8 +6,8 @@
   <title>TTMS - System Reports</title>
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Load Google Charts -->
-  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <!-- Load Chart.js from CDN (fast & reliable) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
       --utm-blue: #003366;
@@ -161,24 +161,6 @@
       height: 220px;
       margin: 12px 0;
       position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #fafafa;
-      border-radius: 8px;
-      border: 1px dashed #ccc;
-      overflow: hidden;
-    }
-    .chart-fallback {
-      text-align: center;
-      padding: 16px;
-      color: #666;
-      font-size: 0.9em;
-    }
-    .chart-fallback i {
-      font-size: 20px;
-      margin-bottom: 6px;
-      color: #999;
     }
     .report-section {
       margin-top: 8px;
@@ -197,7 +179,6 @@
       font-size: 1em !important;
       white-space: nowrap;
     }
-    /* Ensure tables are scrollable on mobile */
     .table-wrapper {
       overflow-x: auto;
       margin: 8px 0;
@@ -215,7 +196,7 @@
         grid-template-columns: 1fr;
       }
       .w3-select, .w3-input {
-        font-size: 16px; /* Prevent zoom on iOS */
+        font-size: 16px;
       }
       .card {
         margin: 8px;
@@ -223,6 +204,9 @@
       }
       body {
         padding: 0;
+      }
+      .chart-container {
+        height: 180px;
       }
     }
   </style>
@@ -284,11 +268,8 @@
     <div class="card report-section">
       <h4><i class="fas fa-exclamation-triangle" style="color:#d32f2f;"></i> Unusual Enrollments</h4>
       <p>Sections with ≤5 or ≥80 students.</p>
-      <div id="unusualEnrollChart" class="chart-container">
-        <div class="chart-fallback">
-          <i class="fas fa-chart-bar"></i>
-          <p>Chart loads after report</p>
-        </div>
+      <div class="chart-container">
+        <canvas id="unusualEnrollChart"></canvas>
       </div>
       <div class="table-wrapper">
         <div id="unusualEnrollTable">
@@ -304,11 +285,8 @@
     <div class="card report-section">
       <h4><i class="fas fa-exclamation-circle" style="color:#ff9800;"></i> Incomplete Sections</h4>
       <p>No lecturer or zero students.</p>
-      <div id="incompleteSectionsChart" class="chart-container">
-        <div class="chart-fallback">
-          <i class="fas fa-chart-pie"></i>
-          <p>Chart loads after report</p>
-        </div>
+      <div class="chart-container">
+        <canvas id="incompleteSectionsChart"></canvas>
       </div>
       <div class="table-wrapper">
         <div id="incompleteSectionsTable">
@@ -331,43 +309,8 @@
   <script>
     let allLecturers = [], assignments = [], allSections = [], sectionDetails = [];
     let currentSesi = '', currentSemester = '';
-    let googleChartsReady = false;
-    let pendingChartData = null;
-
-    // Google Charts init with timeout fallback
-    let chartLoadTimeout = setTimeout(() => {
-      if (!googleChartsReady) {
-        log("⚠️ Google Charts load timeout");
-        showChartFallback("unusualEnrollChart");
-        showChartFallback("incompleteSectionsChart");
-      }
-    }, 5000);
-
-    if (typeof google !== 'undefined' && google.charts) {
-      google.charts.load('current', { packages: ['corechart'] });
-      google.charts.setOnLoadCallback(() => {
-        clearTimeout(chartLoadTimeout);
-        googleChartsReady = true;
-        log("✅ Charts loaded");
-        if (pendingChartData) {
-          drawCharts(pendingChartData.unusual, pendingChartData.incomplete);
-          pendingChartData = null;
-        }
-      });
-    } else {
-      clearTimeout(chartLoadTimeout);
-      showChartFallback("unusualEnrollChart");
-      showChartFallback("incompleteSectionsChart");
-    }
-
-    function showChartFallback(id) {
-      document.getElementById(id).innerHTML = `
-        <div class="chart-fallback">
-          <i class="fas fa-exclamation-triangle" style="color:#d32f2f;"></i>
-          <p>Charts blocked or offline</p>
-          <p>Try disabling ad blocker</p>
-        </div>`;
-    }
+    let unusualChart = null;
+    let incompleteChart = null;
 
     function log(msg) {
       const logDiv = document.getElementById('debugLog');
@@ -409,7 +352,7 @@
       document.getElementById('showJsonUrls').addEventListener('click', showJsonUrls);
     });
 
-    // === Rest of your logic (same as before, but compact for mobile) ===
+    // === AUTH & DATA PROCESSING (same as before) ===
     async function authenticateUser(sessionId) {
       if (!sessionId) throw new Error("No session ID");
       try {
@@ -476,6 +419,7 @@
       return processedSections;
     }
 
+    // === MAIN REPORT GENERATION ===
     async function generateReports() {
       currentSesi = document.getElementById('reportSession').value;
       currentSemester = document.getElementById('reportSemester').value;
@@ -537,15 +481,9 @@
         renderIncompleteSections(incomplete);
         updateSummaryStats(unusual.length, incomplete.length);
 
-        if (googleChartsReady) {
-          drawCharts(unusual, incomplete);
-        } else {
-          pendingChartData = { unusual, incomplete };
-          document.getElementById('unusualEnrollChart').innerHTML = 
-            '<div class="chart-fallback"><i class="fas fa-hourglass-half"></i><p>Loading charts...</p></div>';
-          document.getElementById('incompleteSectionsChart').innerHTML = 
-            '<div class="chart-fallback"><i class="fas fa-hourglass-half"></i><p>Loading charts...</p></div>';
-        }
+        // Draw charts using Chart.js
+        drawUnusualEnrollChart(unusual);
+        drawIncompleteSectionsChart(incomplete);
 
         window.reportData = { unusual, incomplete, allSections, sesi: currentSesi, semester: currentSemester };
         document.getElementById('exportBtn').style.display = 'inline-block';
@@ -568,49 +506,104 @@
       }
     }
 
-    // === CHARTS ===
-    function drawCharts(unusual, incomplete) {
-      if (typeof google === 'undefined' || !google.visualization) return;
-      document.getElementById('unusualEnrollChart').innerHTML = '';
-      document.getElementById('incompleteSectionsChart').innerHTML = '';
-      drawUnusualEnrollChart(unusual);
-      drawIncompleteSectionsChart(incomplete);
-    }
-
+    // === CHART.JS CHARTS ===
     function drawUnusualEnrollChart(sections) {
-      const container = document.getElementById('unusualEnrollChart');
+      const ctx = document.getElementById('unusualEnrollChart').getContext('2d');
+
+      // Destroy previous chart if exists
+      if (unusualChart) unusualChart.destroy();
+
       if (sections.length === 0) {
-        container.innerHTML = '<div class="empty-state" style="padding:16px;"><i class="fas fa-check"></i><p>No issues</p></div>';
+        unusualChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: ['No Data'],
+            datasets: [{
+              label: 'Students',
+              data: [0],
+              backgroundColor: ['#e0e0e0']
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              title: { display: true, text: 'No unusual enrollments', font: { size: 14 } },
+              legend: { display: false }
+            },
+            scales: { x: { display: false }, y: { display: false, beginAtZero: true } }
+          }
+        });
         return;
       }
-      const data = new google.visualization.DataTable();
-      data.addColumn('string', 'Section');
-      data.addColumn('number', 'Students');
-      data.addColumn({ type: 'string', role: 'style' });
-      sections.forEach(sec => {
-        const n = parseInt(sec.bil_pelajar) || 0;
-        const color = n <= 5 ? '#f44336' : '#4caf50';
-        data.addRow([`${sec.kod_subjek}-${sec.seksyen}`, n, color]);
+
+      const labels = sections.map(s => `${s.kod_subjek}-${s.seksyen}`);
+      const data = sections.map(s => parseInt(s.bil_pelajar) || 0);
+      const backgroundColors = data.map(n => n <= 5 ? '#f44336' : '#4caf50');
+
+      unusualChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Students',
+            data: data,
+            backgroundColor: backgroundColors,
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: { display: true, text: 'Unusual Enrollments', font: { size: 14 } },
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (context) => `Students: ${context.raw}`
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { maxRotation: 45, minRotation: 45, font: { size: 10 } }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: { font: { size: 10 } }
+            }
+          }
+        }
       });
-      const options = {
-        title: 'Unusual Enrollments',
-        titleTextStyle: { fontSize: 14 },
-        legend: { position: 'none' },
-        hAxis: { textPosition: 'none', baselineColor: 'transparent' },
-        vAxis: { minValue: 0, textPosition: 'none' },
-        chartArea: { left: 5, top: 5, width: '95%', height: '90%' },
-        tooltip: { trigger: 'none' }
-      };
-      const chart = new google.visualization.ColumnChart(container);
-      chart.draw(data, options);
     }
 
     function drawIncompleteSectionsChart(sections) {
-      const container = document.getElementById('incompleteSectionsChart');
+      const ctx = document.getElementById('incompleteSectionsChart').getContext('2d');
+
+      if (incompleteChart) incompleteChart.destroy();
+
       if (sections.length === 0) {
-        container.innerHTML = '<div class="empty-state" style="padding:16px;"><i class="fas fa-check"></i><p>All complete</p></div>';
+        incompleteChart = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: ['Complete'],
+            datasets: [{
+              data: [1],
+              backgroundColor: ['#e0e0e0']
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              title: { display: true, text: 'All sections complete', font: { size: 14 } },
+              legend: { display: false }
+            }
+          }
+        });
         return;
       }
+
       let noLecturerOnly = 0, zeroStudentsOnly = 0, bothIssues = 0;
       sections.forEach(sec => {
         const lecturer = (sec.pensyarah || '').trim().toLowerCase();
@@ -620,25 +613,53 @@
         else if (hasNoLecturer) noLecturerOnly++;
         else if (hasZeroStudents) zeroStudentsOnly++;
       });
-      const data = new google.visualization.DataTable();
-      data.addColumn('string', 'Issue');
-      data.addColumn('number', 'Count');
-      if (noLecturerOnly > 0) data.addRow(['No Lecturer', noLecturerOnly]);
-      if (zeroStudentsOnly > 0) data.addRow(['Zero Students', zeroStudentsOnly]);
-      if (bothIssues > 0) data.addRow(['Both', bothIssues]);
-      const options = {
-        title: 'Incomplete Sections',
-        titleTextStyle: { fontSize: 14 },
-        pieHole: 0.5,
-        chartArea: { left: 0, top: 5, width: '100%', height: '90%' },
-        legend: { position: 'bottom', textStyle: { fontSize: 10 } },
-        colors: ['#ff9800', '#f44336', '#9c27b0']
-      };
-      const chart = new google.visualization.PieChart(container);
-      chart.draw(data, options);
+
+      const labels = [];
+      const data = [];
+      const colors = [];
+
+      if (noLecturerOnly > 0) {
+        labels.push('No Lecturer');
+        data.push(noLecturerOnly);
+        colors.push('#ff9800');
+      }
+      if (zeroStudentsOnly > 0) {
+        labels.push('Zero Students');
+        data.push(zeroStudentsOnly);
+        colors.push('#f44336');
+      }
+      if (bothIssues > 0) {
+        labels.push('Both Issues');
+        data.push(bothIssues);
+        colors.push('#9c27b0');
+      }
+
+      incompleteChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            backgroundColor: colors,
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: { display: true, text: 'Incomplete Sections', font: { size: 14 } },
+            legend: {
+              position: 'bottom',
+              labels: { font: { size: 10 }, padding: 10 }
+            }
+          },
+          cutout: '50%'
+        }
+      });
     }
 
-    // === TABLES ===
+    // === TABLES (same as before) ===
     function renderUnusualEnrollments(sections) {
       const container = document.getElementById('unusualEnrollTable');
       if (sections.length === 0) {
@@ -729,12 +750,14 @@
       URL.revokeObjectURL(a.href);
     }
 
+    // Handle resize
     let resizeTimer;
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
-        if (window.reportData && googleChartsReady) {
-          drawCharts(window.reportData.unusual, window.reportData.incomplete);
+        if (window.reportData) {
+          drawUnusualEnrollChart(window.reportData.unusual);
+          drawIncompleteSectionsChart(window.reportData.incomplete);
         }
       }, 250);
     });
