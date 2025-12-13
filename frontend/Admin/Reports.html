@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>TTMS - System Reports</title>
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Load Google Charts -->
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <style>
+    :root {
+      --utm-blue: #003366;
+      --light-bg: #f8f9fc;
+      --input-border: #d1d5db;
+      --error-red: #d32f2f;
+      --warning-orange: #ff9800;
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--light-bg);
+      color: #333;
+      line-height: 1.5;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 16px;
+      margin: 12px;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .card-header i {
+      color: var(--utm-blue);
+      font-size: 20px;
+    }
+    .card-header h3 {
+      margin: 0;
+      font-size: 1.3em;
+    }
+    .btn-primary { background-color: var(--utm-blue) !important; color: white !important; }
+    .btn-orange { background-color: var(--warning-orange) !important; color: white !important; }
+    .btn-blue { background-color: #17a2b8 !important; color: white !important; }
+    .btn-primary:hover { background-color: #002244 !important; }
+    .btn-orange:hover { background-color: #e68900 !important; }
+    .btn-blue:hover { background-color: #138496 !important; }
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .form-group {
+      flex: 1;
+      min-width: 140px;
+    }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.9em;
+      margin-bottom: 6px;
+      color: #444;
+    }
+    .w3-select, .w3-input {
+      width: 100%;
+      border: 1px solid var(--input-border);
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 1em;
+      background: white;
+    }
+    table.w3-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      margin-top: 10px;
+      font-size: 0.9em;
+    }
+    table.w3-table thead tr {
+      background-color: var(--utm-blue) !important;
+      color: white;
+    }
+    table.w3-table th, table.w3-table td {
+      padding: 10px 8px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    .missing-lecturer { background-color: #fff3e0 !important; }
+    .zero-enroll { background-color: #ffebee !important; }
+    .low-enroll { background-color: #ffebee !important; }
+    .high-enroll { background-color: #e8f5e9 !important; }
+    .empty-state {
+      text-align: center;
+      padding: 24px 16px;
+      color: #666;
+      background: #fafafa;
+      border-radius: 10px;
+      margin: 12px 0;
+      font-size: 1em;
+    }
+    .loading-spinner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      color: var(--utm-blue);
+    }
+    .loading-spinner i {
+      font-size: 24px;
+      margin-bottom: 10px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .error-panel {
+      background: #ffebee;
+      border-left: 4px solid var(--error-red);
+      padding: 14px;
+      border-radius: 10px;
+      margin: 16px 12px;
+      font-size: 0.95em;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin: 16px 12px;
+    }
+    .stat-card {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 14px;
+      text-align: center;
+      border-left: 3px solid var(--utm-blue);
+    }
+    .stat-card h4 {
+      margin: 0;
+      font-size: 1.6em;
+      color: var(--utm-blue);
+    }
+    .debug-panel {
+      background: #f1f8e9;
+      border-left: 4px solid #7cb342;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 16px 12px;
+      font-size: 0.8em;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .chart-container {
+      height: 220px;
+      margin: 12px 0;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fafafa;
+      border-radius: 8px;
+      border: 1px dashed #ccc;
+      overflow: hidden;
+    }
+    .chart-fallback {
+      text-align: center;
+      padding: 16px;
+      color: #666;
+      font-size: 0.9em;
+    }
+    .chart-fallback i {
+      font-size: 20px;
+      margin-bottom: 6px;
+      color: #999;
+    }
+    .report-section {
+      margin-top: 8px;
+    }
+    .report-section h4 {
+      font-size: 1.15em;
+      margin: 0 0 8px 0;
+    }
+    .report-section p {
+      font-size: 0.95em;
+      margin-bottom: 10px;
+      color: #555;
+    }
+    .w3-button {
+      padding: 10px 16px !important;
+      font-size: 1em !important;
+      white-space: nowrap;
+    }
+    /* Ensure tables are scrollable on mobile */
+    .table-wrapper {
+      overflow-x: auto;
+      margin: 8px 0;
+      -webkit-overflow-scrolling: touch;
+    }
+    @media (max-width: 480px) {
+      .form-group {
+        min-width: 100%;
+      }
+      .form-row {
+        flex-direction: column;
+        gap: 10px;
+      }
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      .w3-select, .w3-input {
+        font-size: 16px; /* Prevent zoom on iOS */
+      }
+      .card {
+        margin: 8px;
+        padding: 14px;
+      }
+      body {
+        padding: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="w3-container" style="padding: 0; max-width: 100%;">
+    <div class="card">
+      <div class="card-header">
+        <i class="fas fa-chart-line"></i>
+        <h3>TTMS Reports</h3>
+      </div>
+      <p style="font-size:0.95em; margin:0;">Unusual enrollments & incomplete sections.</p>
+    </div>
+
+    <div class="card">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="reportSession"><i class="fas fa-calendar-alt"></i> Session</label>
+          <select class="w3-select w3-border" id="reportSession"></select>
+        </div>
+        <div class="form-group">
+          <label for="reportSemester"><i class="fas fa-book"></i> Semester</label>
+          <select class="w3-select w3-border" id="reportSemester">
+            <option value="1">Sem 1</option>
+            <option value="2" selected>Sem 2</option>
+            <option value="3">Special</option>
+          </select>
+        </div>
+        <div class="form-group" style="display:flex; align-items:flex-end;">
+          <button class="w3-button btn-primary w3-block" id="loadReportBtn" style="padding:12px !important;">
+            <i class="fas fa-sync-alt"></i> Generate
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Debug Panel -->
+    <div class="debug-panel">
+      <strong><i class="fas fa-bug"></i> Log</strong>
+      <div id="debugLog" style="font-family: monospace; white-space: pre-wrap;"></div>
+      <button class="w3-button w3-small w3-grey" id="showJsonUrls" style="margin-top:8px; display:none; font-size:0.85em;">
+        <i class="fas fa-link"></i> JSON URLs
+      </button>
+    </div>
+
+    <div id="loadingSpinner" class="loading-spinner" style="display:none;">
+      <i class="fas fa-spinner"></i>
+      <p>Loading...</p>
+    </div>
+
+    <div id="errorContainer" class="error-panel" style="display:none;">
+      <h4><i class="fas fa-exclamation-triangle"></i> <span id="errorTitle">Error</span></h4>
+      <p id="errorMessage" style="margin:0;"></p>
+    </div>
+
+    <div id="summaryStats" class="stats-grid" style="display:none;"></div>
+
+    <!-- Report 1 -->
+    <div class="card report-section">
+      <h4><i class="fas fa-exclamation-triangle" style="color:#d32f2f;"></i> Unusual Enrollments</h4>
+      <p>Sections with ≤5 or ≥80 students.</p>
+      <div id="unusualEnrollChart" class="chart-container">
+        <div class="chart-fallback">
+          <i class="fas fa-chart-bar"></i>
+          <p>Chart loads after report</p>
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <div id="unusualEnrollTable">
+          <div class="empty-state">
+            <i class="fas fa-users"></i>
+            <p>Tap "Generate" to load</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Report 2 -->
+    <div class="card report-section">
+      <h4><i class="fas fa-exclamation-circle" style="color:#ff9800;"></i> Incomplete Sections</h4>
+      <p>No lecturer or zero students.</p>
+      <div id="incompleteSectionsChart" class="chart-container">
+        <div class="chart-fallback">
+          <i class="fas fa-chart-pie"></i>
+          <p>Chart loads after report</p>
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <div id="incompleteSectionsTable">
+          <div class="empty-state">
+            <i class="fas fa-list"></i>
+            <p>Tap "Generate" to load</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="text-align:center; margin:12px;">
+      <button class="w3-button btn-blue" id="exportBtn" style="display:none; width:100%; max-width:300px;">
+        <i class="fas fa-download"></i> Export CSV
+      </button>
+    </div>
+  </div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script>
+    let allLecturers = [], assignments = [], allSections = [], sectionDetails = [];
+    let currentSesi = '', currentSemester = '';
+    let googleChartsReady = false;
+    let pendingChartData = null;
+
+    // Google Charts init with timeout fallback
+    let chartLoadTimeout = setTimeout(() => {
+      if (!googleChartsReady) {
+        log("⚠️ Google Charts load timeout");
+        showChartFallback("unusualEnrollChart");
+        showChartFallback("incompleteSectionsChart");
+      }
+    }, 5000);
+
+    if (typeof google !== 'undefined' && google.charts) {
+      google.charts.load('current', { packages: ['corechart'] });
+      google.charts.setOnLoadCallback(() => {
+        clearTimeout(chartLoadTimeout);
+        googleChartsReady = true;
+        log("✅ Charts loaded");
+        if (pendingChartData) {
+          drawCharts(pendingChartData.unusual, pendingChartData.incomplete);
+          pendingChartData = null;
+        }
+      });
+    } else {
+      clearTimeout(chartLoadTimeout);
+      showChartFallback("unusualEnrollChart");
+      showChartFallback("incompleteSectionsChart");
+    }
+
+    function showChartFallback(id) {
+      document.getElementById(id).innerHTML = `
+        <div class="chart-fallback">
+          <i class="fas fa-exclamation-triangle" style="color:#d32f2f;"></i>
+          <p>Charts blocked or offline</p>
+          <p>Try disabling ad blocker</p>
+        </div>`;
+    }
+
+    function log(msg) {
+      const logDiv = document.getElementById('debugLog');
+      if (logDiv) {
+        const time = new Date().toISOString().slice(11, 19);
+        logDiv.innerHTML += `[${time}] ${msg}\n`;
+        logDiv.scrollTop = logDiv.scrollHeight;
+      }
+    }
+
+    function showLoading(show) {
+      document.getElementById('loadingSpinner').style.display = show ? 'flex' : 'none';
+      document.getElementById('loadReportBtn').disabled = show;
+    }
+
+    function showError(title, message) {
+      document.getElementById('errorTitle').textContent = title;
+      document.getElementById('errorMessage').textContent = message;
+      document.getElementById('errorContainer').style.display = 'block';
+    }
+
+    function hideError() {
+      document.getElementById('errorContainer').style.display = 'none';
+    }
+
+    $(document).ready(() => {
+      const currentYear = new Date().getFullYear();
+      const academicYears = [];
+      for (let i = currentYear - 5; i <= currentYear + 1; i++) {
+        academicYears.push(`${i}/${i + 1}`);
+      }
+      const defaultSession = `${currentYear}/${currentYear + 1}`;
+      document.getElementById('reportSession').innerHTML = academicYears.map(year =>
+        `<option value="${year}" ${year === defaultSession ? 'selected' : ''}>${year}</option>`
+      ).join('');
+
+      document.getElementById('loadReportBtn').addEventListener('click', generateReports);
+      document.getElementById('exportBtn').addEventListener('click', exportReports);
+      document.getElementById('showJsonUrls').addEventListener('click', showJsonUrls);
+    });
+
+    // === Rest of your logic (same as before, but compact for mobile) ===
+    async function authenticateUser(sessionId) {
+      if (!sessionId) throw new Error("No session ID");
+      try {
+        const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=authentication&session_id=${encodeURIComponent(sessionId)}`;
+        const res = await fetch(url);
+        const txt = await res.text();
+        if (res.ok && txt.trim()) {
+          try {
+            const data = JSON.parse(txt);
+            if (Array.isArray(data) && data[0]?.session_id) return data[0].session_id.trim();
+          } catch (e) {}
+        }
+        if (txt.includes('<form') && (txt.includes('login') || txt.includes('Login'))) {
+          throw new Error("Session expired");
+        }
+        return sessionId;
+      } catch (err) {
+        throw new Error(`Auth failed: ${err.message}`);
+      }
+    }
+
+    function findLecturerName(no_pekerja) {
+      if (!no_pekerja) return null;
+      const lecturer = allLecturers.find(l => l.no_pekerja == no_pekerja);
+      return lecturer ? lecturer.nama : null;
+    }
+
+    function processSectionDetails(sectionDetailsData) {
+      const processedSections = [];
+      sectionDetailsData.forEach(subject => {
+        const kod_subjek = subject.kod_subjek;
+        const nama_subjek = subject.nama_subjek;
+        if (subject.seksyen_list && Array.isArray(subject.seksyen_list)) {
+          subject.seksyen_list.forEach(section => {
+            const assignment = assignments.find(a => 
+              a.kod_subjek === kod_subjek && 
+              a.seksyen === section.seksyen &&
+              a.sesi === currentSesi &&
+              a.semester == currentSemester
+            );
+            let lecturerName = section.pensyarah || '';
+            let no_pekerja = null;
+            if (assignment && assignment.no_pekerja) {
+              no_pekerja = assignment.no_pekerja;
+              const lecturerFromList = findLecturerName(no_pekerja);
+              if (lecturerFromList) {
+                lecturerName = lecturerFromList;
+              }
+            }
+            if (!lecturerName || lecturerName.trim() === '' || lecturerName.toUpperCase() === 'TBA') {
+              lecturerName = 'TBA';
+            }
+            processedSections.push({
+              kod_subjek: kod_subjek,
+              nama_subjek: nama_subjek,
+              seksyen: section.seksyen,
+              pensyarah: lecturerName,
+              no_pekerja: no_pekerja,
+              bil_pelajar: section.bil_pelajar || 0
+            });
+          });
+        }
+      });
+      return processedSections;
+    }
+
+    async function generateReports() {
+      currentSesi = document.getElementById('reportSession').value;
+      currentSemester = document.getElementById('reportSemester').value;
+      if (!currentSesi || !currentSemester) {
+        showError("Input Missing", "Select session & semester.");
+        return;
+      }
+
+      showLoading(true);
+      hideError();
+      document.getElementById('exportBtn').style.display = 'none';
+      document.getElementById('showJsonUrls').style.display = 'none';
+
+      try {
+        const raw = localStorage.getItem("TTMSFC_userSession");
+        if (!raw) throw new Error("No session. Log in.");
+        const sessionData = JSON.parse(raw);
+        const storedSessionId = sessionData.session_id || sessionData.password || sessionData.id;
+        if (!storedSessionId) throw new Error("Invalid session.");
+
+        const realSessionId = await authenticateUser(storedSessionId);
+        const baseUrl = "http://web.fc.utm.my/ttms/web_man_webservice_json.cgi";
+        const sid = encodeURIComponent(realSessionId);
+        const s = encodeURIComponent(currentSesi);
+        const sem = encodeURIComponent(currentSemester);
+
+        log(`Fetching: ${currentSesi} Sem ${currentSemester}`);
+        
+        const [lectRes, assignRes, sectionsRes] = await Promise.allSettled([
+          fetch(`${baseUrl}?entity=pensyarah&session_id=${sid}&sesi=${s}&semester=${sem}`),
+          fetch(`${baseUrl}?entity=pensyarah_subjek&session_id=${sid}&sesi=${s}&semester=${sem}`),
+          fetch(`${baseUrl}?entity=subjek_seksyen&sesi=${s}&semester=${sem}`)
+        ]);
+
+        allLecturers = (lectRes.status === 'fulfilled' && lectRes.value.ok) 
+          ? JSON.parse(await lectRes.value.text() || '[]') : [];
+        assignments = (assignRes.status === 'fulfilled' && assignRes.value.ok) 
+          ? JSON.parse(await assignRes.value.text() || '[]') : [];
+        sectionDetails = (sectionsRes.status === 'fulfilled' && sectionsRes.value.ok) 
+          ? JSON.parse(await sectionsRes.value.text() || '[]') : [];
+
+        if (sectionDetails.length === 0) {
+          throw new Error("No section data.");
+        }
+
+        allSections = processSectionDetails(sectionDetails);
+        const unusual = allSections.filter(sec => {
+          const n = parseInt(sec.bil_pelajar) || 0;
+          return n <= 5 || n >= 80;
+        });
+        const incomplete = allSections.filter(sec => {
+          const lecturer = (sec.pensyarah || '').trim().toLowerCase();
+          const hasNoLecturer = !lecturer || lecturer === 'tba' || lecturer === '';
+          const hasZeroStudents = (parseInt(sec.bil_pelajar) || 0) === 0;
+          return hasNoLecturer || hasZeroStudents;
+        });
+
+        renderUnusualEnrollments(unusual);
+        renderIncompleteSections(incomplete);
+        updateSummaryStats(unusual.length, incomplete.length);
+
+        if (googleChartsReady) {
+          drawCharts(unusual, incomplete);
+        } else {
+          pendingChartData = { unusual, incomplete };
+          document.getElementById('unusualEnrollChart').innerHTML = 
+            '<div class="chart-fallback"><i class="fas fa-hourglass-half"></i><p>Loading charts...</p></div>';
+          document.getElementById('incompleteSectionsChart').innerHTML = 
+            '<div class="chart-fallback"><i class="fas fa-hourglass-half"></i><p>Loading charts...</p></div>';
+        }
+
+        window.reportData = { unusual, incomplete, allSections, sesi: currentSesi, semester: currentSemester };
+        document.getElementById('exportBtn').style.display = 'inline-block';
+        document.getElementById('showJsonUrls').style.display = 'inline-block';
+        log("✅ Done!");
+      } catch (error) {
+        let msg = error.message || "Unknown error";
+        if (msg.includes("session") || msg.includes("Authentication") || msg.includes("expired")) {
+          msg = "Session expired. Please log in again.";
+          if (confirm("Re-login?")) {
+            localStorage.removeItem("TTMSFC_userSession");
+            window.location.replace("../index.html");
+            return;
+          }
+        }
+        showError("Error", msg);
+        log(`❌ ${msg}`);
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // === CHARTS ===
+    function drawCharts(unusual, incomplete) {
+      if (typeof google === 'undefined' || !google.visualization) return;
+      document.getElementById('unusualEnrollChart').innerHTML = '';
+      document.getElementById('incompleteSectionsChart').innerHTML = '';
+      drawUnusualEnrollChart(unusual);
+      drawIncompleteSectionsChart(incomplete);
+    }
+
+    function drawUnusualEnrollChart(sections) {
+      const container = document.getElementById('unusualEnrollChart');
+      if (sections.length === 0) {
+        container.innerHTML = '<div class="empty-state" style="padding:16px;"><i class="fas fa-check"></i><p>No issues</p></div>';
+        return;
+      }
+      const data = new google.visualization.DataTable();
+      data.addColumn('string', 'Section');
+      data.addColumn('number', 'Students');
+      data.addColumn({ type: 'string', role: 'style' });
+      sections.forEach(sec => {
+        const n = parseInt(sec.bil_pelajar) || 0;
+        const color = n <= 5 ? '#f44336' : '#4caf50';
+        data.addRow([`${sec.kod_subjek}-${sec.seksyen}`, n, color]);
+      });
+      const options = {
+        title: 'Unusual Enrollments',
+        titleTextStyle: { fontSize: 14 },
+        legend: { position: 'none' },
+        hAxis: { textPosition: 'none', baselineColor: 'transparent' },
+        vAxis: { minValue: 0, textPosition: 'none' },
+        chartArea: { left: 5, top: 5, width: '95%', height: '90%' },
+        tooltip: { trigger: 'none' }
+      };
+      const chart = new google.visualization.ColumnChart(container);
+      chart.draw(data, options);
+    }
+
+    function drawIncompleteSectionsChart(sections) {
+      const container = document.getElementById('incompleteSectionsChart');
+      if (sections.length === 0) {
+        container.innerHTML = '<div class="empty-state" style="padding:16px;"><i class="fas fa-check"></i><p>All complete</p></div>';
+        return;
+      }
+      let noLecturerOnly = 0, zeroStudentsOnly = 0, bothIssues = 0;
+      sections.forEach(sec => {
+        const lecturer = (sec.pensyarah || '').trim().toLowerCase();
+        const hasNoLecturer = !lecturer || lecturer === 'tba' || lecturer === '';
+        const hasZeroStudents = (parseInt(sec.bil_pelajar) || 0) === 0;
+        if (hasNoLecturer && hasZeroStudents) bothIssues++;
+        else if (hasNoLecturer) noLecturerOnly++;
+        else if (hasZeroStudents) zeroStudentsOnly++;
+      });
+      const data = new google.visualization.DataTable();
+      data.addColumn('string', 'Issue');
+      data.addColumn('number', 'Count');
+      if (noLecturerOnly > 0) data.addRow(['No Lecturer', noLecturerOnly]);
+      if (zeroStudentsOnly > 0) data.addRow(['Zero Students', zeroStudentsOnly]);
+      if (bothIssues > 0) data.addRow(['Both', bothIssues]);
+      const options = {
+        title: 'Incomplete Sections',
+        titleTextStyle: { fontSize: 14 },
+        pieHole: 0.5,
+        chartArea: { left: 0, top: 5, width: '100%', height: '90%' },
+        legend: { position: 'bottom', textStyle: { fontSize: 10 } },
+        colors: ['#ff9800', '#f44336', '#9c27b0']
+      };
+      const chart = new google.visualization.PieChart(container);
+      chart.draw(data, options);
+    }
+
+    // === TABLES ===
+    function renderUnusualEnrollments(sections) {
+      const container = document.getElementById('unusualEnrollTable');
+      if (sections.length === 0) {
+        container.innerHTML = `<div class="empty-state"><i class="fas fa-check-circle" style="color:#4CAF50;"></i><p>No unusual enrollments</p></div>`;
+        return;
+      }
+      let html = `<table class="w3-table w3-bordered w3-striped" style="min-width:500px;">`;
+      html += `<thead><tr><th>Code</th><th>Section</th><th>Students</th><th>Status</th></tr></thead><tbody>`;
+      sections.forEach(sec => {
+        const n = parseInt(sec.bil_pelajar) || 0;
+        const isLow = n <= 5;
+        html += `<tr class="${isLow ? 'low-enroll' : 'high-enroll'}">
+          <td>${sec.kod_subjek || '—'}</td>
+          <td>${sec.seksyen || '—'}</td>
+          <td class="w3-center"><strong>${n}</strong></td>
+          <td><span class="w3-tag w3-small ${isLow ? 'w3-red' : 'w3-green'}">${isLow ? 'Low' : 'High'}</span></td>
+        </tr>`;
+      });
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    function renderIncompleteSections(sections) {
+      const container = document.getElementById('incompleteSectionsTable');
+      if (sections.length === 0) {
+        container.innerHTML = `<div class="empty-state"><i class="fas fa-check-circle" style="color:#4CAF50;"></i><p>All sections complete</p></div>`;
+        return;
+      }
+      let html = `<table class="w3-table w3-bordered w3-striped" style="min-width:500px;">`;
+      html += `<thead><tr><th>Code</th><th>Section</th><th>Lecturer</th><th>Students</th><th>Issue</th></tr></thead><tbody>`;
+      sections.forEach(sec => {
+        const lecturer = sec.pensyarah || '—';
+        const enrolled = parseInt(sec.bil_pelajar) || 0;
+        const hasNoLecturer = !lecturer || lecturer === 'TBA' || lecturer === '—';
+        const hasZeroStudents = enrolled === 0;
+        const issues = [];
+        if (hasNoLecturer) issues.push("No Lecturer");
+        if (hasZeroStudents) issues.push("Zero Students");
+        html += `<tr class="${hasNoLecturer ? 'missing-lecturer' : 'zero-enroll'}">
+          <td>${sec.kod_subjek || '—'}</td>
+          <td>${sec.seksyen || '—'}</td>
+          <td>${lecturer}</td>
+          <td class="w3-center"><strong>${enrolled}</strong></td>
+          <td><span class="w3-tag w3-small w3-orange">${issues.join(" + ")}</span></td>
+        </tr>`;
+      });
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    function updateSummaryStats(unusual, incomplete) {
+      document.getElementById('summaryStats').innerHTML = `
+        <div class="stat-card"><h4>${unusual}</h4><p>Unusual</p></div>
+        <div class="stat-card"><h4 style="color:#ff9800;">${incomplete}</h4><p>Incomplete</p></div>`;
+      document.getElementById('summaryStats').style.display = 'grid';
+    }
+
+    function showJsonUrls() {
+      const sessionData = JSON.parse(localStorage.getItem("TTMSFC_userSession") || '{"session_id":""}');
+      const sid = encodeURIComponent(sessionData.session_id || sessionData.password || '');
+      const s = encodeURIComponent(currentSesi);
+      const sem = encodeURIComponent(currentSemester);
+      const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=subjek_seksyen&sesi=${s}&semester=${sem}`;
+      alert(`Section Data URL:\n${url}\n\n(Lecturer & assignment URLs use session_id)`);
+    }
+
+    function exportReports() {
+      const { unusual, incomplete, sesi, semester } = window.reportData;
+      let csv = 'UNUSUAL ENROLLMENTS\nCode,Section,Students,Status\n';
+      unusual.forEach(s => {
+        const n = parseInt(s.bil_pelajar) || 0;
+        csv += `"${s.kod_subjek || ''}","${s.seksyen || ''}",${n},${n <= 5 ? 'Low' : 'High'}\n`;
+      });
+      csv += '\nINCOMPLETE SECTIONS\nCode,Section,Lecturer,Students,Issue\n';
+      incomplete.forEach(s => {
+        const lecturer = s.pensyarah || '';
+        const enrolled = parseInt(s.bil_pelajar) || 0;
+        const issues = [];
+        if (!lecturer || lecturer === 'TBA') issues.push('No Lecturer');
+        if (enrolled === 0) issues.push('Zero Students');
+        csv += `"${s.kod_subjek || ''}","${s.seksyen || ''}","${lecturer}",${enrolled},"${issues.join('+')}"\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `ttms_mobile_report_${sesi.replace('/', '-')}S${semester}.csv`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        if (window.reportData && googleChartsReady) {
+          drawCharts(window.reportData.unusual, window.reportData.incomplete);
+        }
+      }, 250);
+    });
+  </script>
+</body>
+</html>
