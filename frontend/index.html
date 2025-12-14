@@ -152,6 +152,9 @@
       const login = $("#login").val().trim();
       const password = $("#password").val().trim();
 
+      // Clear previous message
+      $("#msg").text("");
+
       if (!login || !password) {
         $("#msg").text("Please fill in both fields.");
         return;
@@ -160,14 +163,13 @@
       // 🔵 ADMIN MODE: login = "admin" + password = session_id
       if (login.toLowerCase() === "admin" && isLikelySessionId(password)) {
         const adminSession = {
-          login: "admin",               // ✅ critical for Admin.html
+          login: "admin",
           login_name: "admin",
-          session_id: password,         // real session ID from user
+          session_id: password,
           inferredRole: "admin",
           isManualAdmin: true
         };
         localStorage.setItem("TTMSFC_userSession", JSON.stringify(adminSession));
-        $("#msg").text("");
         window.location.replace("Admin/Admin.html");
         return;
       }
@@ -177,14 +179,30 @@
 
       fetch(url)
         .then((res) => {
-          if (!res.ok) throw new Error("Network or server error");
-          return res.json();
+          if (!res.ok) {
+            // Most likely: wrong credentials (400/401/404)
+            throw new Error("credentials");
+          }
+          return res.text();
+        })
+        .then(text => {
+          // If response is empty or not JSON, treat as invalid credentials
+          if (!text.trim()) {
+            throw new Error("credentials");
+          }
+          try {
+            const json = JSON.parse(text);
+            // If API returns empty array → invalid credentials
+            if (!Array.isArray(json) || json.length === 0) {
+              throw new Error("credentials");
+            }
+            return json;
+          } catch (e) {
+            // Failed to parse → likely not a valid user
+            throw new Error("credentials");
+          }
         })
         .then((jsonInst) => {
-          if (!Array.isArray(jsonInst) || jsonInst.length === 0) {
-            throw new Error("Invalid credentials or account not found");
-          }
-
           const apiUser = jsonInst[0];
           let inferredRole = "student";
           const desc = (apiUser.description || "").toLowerCase().trim();
@@ -199,13 +217,12 @@
 
           const sessionData = {
             ...apiUser,
-            login: apiUser.login_name,    // ✅ ensure `login` exists
+            login: apiUser.login_name,
             session_id: apiUser.session_id,
             inferredRole: inferredRole
           };
 
           localStorage.setItem("TTMSFC_userSession", JSON.stringify(sessionData));
-          $("#msg").text("");
 
           if (inferredRole === "lecturer") {
             window.location.replace("Lecturer/Lecturer.html");
@@ -216,8 +233,14 @@
           }
         })
         .catch((err) => {
-          console.error("Login failed:", err);
-          $("#msg").text("Login failed! " + err.message);
+          // Distinguish between credential errors and network errors
+          if (err.message === "credentials") {
+            $("#msg").text("Login failed. Matric/Staff ID or password is incorrect.");
+          } else {
+            // Network or unexpected error
+            $("#msg").text("Unable to connect to the server. Please check your internet connection.");
+            console.error("Login error:", err);
+          }
         });
     });
 
