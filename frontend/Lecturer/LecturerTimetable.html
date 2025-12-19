@@ -1,624 +1,991 @@
-<div class="timetable-container">
-  <div class="header">
-    <h1>📚 My Teaching Schedule</h1>
-    <p>View and manage your teaching timetable</p>
-  </div>
-
-  <div class="controls-card">
-    <div class="controls-grid">
-      <div class="form-group">
-        <label>Academic Session</label>
-        <select id="sessionSelect">
-          <option value="2021/2022">2021/2022</option>
-          <option value="2022/2023">2022/2023</option>
-          <option value="2023/2024">2023/2024</option>
-          <option value="2024/2025" selected>2024/2025</option>
-          <option value="2025/2026">2025/2026</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Semester</label>
-        <select id="semesterSelect">
-          <option value="1" selected>Semester 1</option>
-          <option value="2">Semester 2</option>
-        </select>
-      </div>
-    </div>
-
-    <button class="load-btn" id="loadTimetableBtn">
-      🔍 Load Timetable
-    </button>
-  </div>
-
-  <div class="content-card">
-    <div id="timetableContent">
-      <div class="alert alert-info">
-        <span>ℹ️</span>
-        <div>
-          <strong>Welcome!</strong> Select an academic session and semester above, then click "Load Timetable" to view your teaching schedule.
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<style>
-  .timetable-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 16px;
-  }
-
-  .header {
-    background: white;
-    border-radius: 20px;
-    padding: 30px;
-    margin-bottom: 20px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.12);
-  }
-
-  .header h1 {
-    font-size: 28px;
-    color: #003366; /* UTM blue */
-    margin-bottom: 8px;
-  }
-
-  .header p {
-    color: #666;
-    font-size: 14px;
-  }
-
-  .controls-card {
-    background: white;
-    border-radius: 20px;
-    padding: 25px;
-    margin-bottom: 20px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.12);
-  }
-
-  .controls-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin-bottom: 20px;
-  }
-
-  .form-group {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .form-group label {
-    font-size: 13px;
-    font-weight: 600;
-    color: #555;
-    margin-bottom: 8px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .form-group select {
-    padding: 12px 15px;
-    border: 2px solid #e0e0e0;
-    border-radius: 12px;
-    font-size: 15px;
-    background: white;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    appearance: none;
-    background-image: url("image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23003366' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 15px center;
-    padding-right: 40px;
-  }
-
-  .form-group select:focus {
-    outline: none;
-    border-color: #003366; /* UTM blue */
-    box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.15);
-  }
-
-  .load-btn {
-    background: linear-gradient(135deg, #003366 0%, #002244 100%); /* UTM blue gradient */
-    color: white;
-    border: none;
-    padding: 15px 30px;
-    border-radius: 12px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    width: 100%;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    box-shadow: 0 4px 15px rgba(0, 51, 102, 0.3);
-  }
-
-  .load-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 51, 102, 0.4);
-  }
-
-  .load-btn:active {
-    transform: translateY(0);
-  }
-
-  .content-card {
-    background: white;
-    border-radius: 20px;
-    padding: 25px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.12);
-    min-height: 200px;
-  }
-
-  .alert {
-    padding: 20px;
-    border-radius: 12px;
-    margin: 20px 0;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 14px;
-    line-height: 1.6;
-  }
-
-  .alert-error {
-    background: #ffebee;
-    color: #c62828;
-    border-left: 4px solid #c62828;
-  }
-
-  .alert-warning {
-    background: #fff8e1;
-    color: #ed6c02;
-    border-left: 4px solid #ed6c02;
-  }
-
-  .alert-success {
-    background: #e8f5e9;
-    color: #2e7d32;
-    border-left: 4px solid #2e7d32;
-  }
-
-  .alert-info {
-    background: #e3f2fd;
-    color: #003366; /* UTM blue */
-    border-left: 4px solid #1565c0;
-  }
-
-  .loading {
-    text-align: center;
-    padding: 40px;
-    color: #666;
-  }
-
-  .spinner {
-    border: 3px solid #f3f3f3;
-    border-top: 3px solid #003366; /* UTM blue */
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 15px;
-  }
-
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-
-  .timetable-header {
-    margin-bottom: 25px;
-    padding-bottom: 15px;
-    border-bottom: 2px solid #f0f0f0;
-  }
-
-  .timetable-header h2 {
-    color: #003366; /* UTM blue */
-    font-size: 22px;
-    margin-bottom: 5px;
-  }
-
-  .timetable-header p {
-    color: #666;
-    font-size: 14px;
-  }
-
-  .table-container {
-    overflow-x: auto;
-    margin-bottom: 20px;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-  }
-
-  thead th {
-    background: linear-gradient(135deg, #003366 0%, #002244 100%); /* UTM blue */
-    color: white;
-    padding: 15px 12px;
-    text-align: left;
-    font-weight: 600;
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    white-space: nowrap;
-  }
-
-  tbody tr {
-    border-bottom: 1px solid #f0f0f0;
-    transition: background 0.2s ease;
-  }
-
-  tbody tr:hover {
-    background: #f8fbff;
-  }
-
-  tbody td {
-    padding: 15px 12px;
-    font-size: 14px;
-    color: #555;
-  }
-
-  .subject-code {
-    font-weight: 600;
-    color: #003366; /* UTM blue */
-  }
-
-  .section-badge {
-    display: inline-block;
-    padding: 4px 10px;
-    background: #e3f2fd;
-    color: #1565c0;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-  }
-
-  .day-badge {
-    display: inline-block;
-    padding: 4px 10px;
-    background: #f0f4ff;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 500;
-    color: #003366;
-  }
-
-  .stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-    margin-top: 25px;
-  }
-
-  .stat-card {
-    background: linear-gradient(135deg, #003366 0%, #002244 100%); /* UTM blue */
-    color: white;
-    padding: 20px;
-    border-radius: 12px;
-    text-align: center;
-  }
-
-  .stat-card h3 {
-    font-size: 32px;
-    margin-bottom: 5px;
-  }
-
-  .stat-card p {
-    font-size: 13px;
-    opacity: 0.9;
-  }
-
-  /* Mobile Responsive */
-  @media (max-width: 768px) {
-    .timetable-container {
-      padding: 0 12px;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="refresh" content="900" />
+  <title>TTMS - My Teaching Schedule</title>
+  <style>
+    :root {
+      --utm-blue: #003366;
+      --utm-blue-dark: #002244;
+      --utm-gold: #C9A85C;
+      --light-bg: #f8f9fc;
+      --input-border: #d1d5db;
+      --error-red: #d32f2f;
+      --success-green: #2e7d32;
+      --warning-orange: #ed6c02;
+      --info-blue: #1565c0;
+      --dark: #1f2937;
+      --light: #f3f4f6;
+      --white: #ffffff;
+      --sidebar-width: 280px;
+      --header-height: 70px;
     }
 
-    .header {
-      padding: 20px;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
-    .header h1 {
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: var(--light-bg);
+      color: #333;
+      overflow-x: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: linear-gradient(180deg, var(--utm-blue) 0%, var(--utm-blue-dark) 100%);
+      box-shadow: 4px 0 15px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow-y: auto;
+    }
+
+    .sidebar-header {
+      padding: 30px 25px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(0, 0, 0, 0.15);
+    }
+
+    .sidebar-title {
+      color: white;
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sidebar-subtitle {
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 14px;
+      font-weight: 400;
+    }
+
+    .sidebar-user {
+      padding: 20px 25px;
+      background: rgba(255, 255, 255, 0.15);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .user-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--utm-gold) 0%, #8B6F3E 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: 22px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     }
 
-    .controls-grid {
-      grid-template-columns: 1fr;
+    .user-name {
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
     }
 
-    .controls-card, .content-card {
-      padding: 20px;
-    }
-
-    table {
+    .user-role {
+      color: rgba(255, 255, 255, 0.8);
       font-size: 13px;
     }
 
-    thead th, tbody td {
-      padding: 10px 8px;
+    .sidebar-nav {
+      padding: 20px 0;
     }
 
-    .timetable-header h2 {
-      font-size: 18px;
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 14px 25px;
+      color: rgba(255, 255, 255, 0.9);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      border-left: 4px solid transparent;
+      font-size: 15px;
+      font-weight: 500;
     }
 
-    .table-container {
-      -webkit-overflow-scrolling: touch;
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-left-color: var(--utm-gold);
+      color: white;
     }
 
-    thead th {
-      font-size: 11px;
-      padding: 12px 8px;
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.25);
+      border-left-color: var(--utm-gold);
+      color: white;
+      font-weight: 600;
     }
 
-    .stats {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .header h1 {
+    .nav-icon {
+      margin-right: 12px;
       font-size: 20px;
+      width: 24px;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.9);
     }
 
-    tbody td {
-      font-size: 12px;
+    .nav-logout {
+      margin-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      padding-top: 20px;
+    }
+
+    /* Main Content */
+    .main-wrapper {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .top-header {
+      position: sticky;
+      top: 0;
+      height: var(--header-height);
+      background: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      padding: 0 30px;
+      z-index: 100;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 24px;
+      color: var(--utm-blue);
+      cursor: pointer;
+      padding: 8px;
+      margin-right: 15px;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+
+    .menu-toggle:hover {
+      background: #f0f4ff;
+    }
+
+    .header-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--utm-blue);
+    }
+
+    .header-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .header-time {
+      font-size: 14px;
+      color: #555;
+      padding: 8px 16px;
+      background: #f0f4ff;
+      border-radius: 8px;
+      border: 1px solid #dde4f0;
+    }
+
+    .main-content {
+      padding: 30px;
+      max-width: 1400px;
+    }
+
+    /* ===== TIMETABLE-SPECIFIC STYLES (YOUR CSS) ===== */
+    .timetable-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    .header {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+    }
+
+    .header h1 {
+      font-size: 28px;
+      color: #003366; /* UTM blue */
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .controls-card {
+      background: white;
+      border-radius: 20px;
+      padding: 25px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-group select {
+      padding: 12px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      font-size: 15px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      appearance: none;
+      background-image: url("image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23003366' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 15px center;
+      padding-right: 40px;
+    }
+
+    .form-group select:focus {
+      outline: none;
+      border-color: #003366; /* UTM blue */
+      box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.15);
     }
 
     .load-btn {
-      padding: 14px 25px;
-      font-size: 15px;
+      background: linear-gradient(135deg, #003366 0%, #002244 100%); /* UTM blue gradient */
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 4px 15px rgba(0, 51, 102, 0.3);
     }
-  }
-</style>
 
-<script>
-  (function() {
-    console.log("📅 Lecturer Timetable (UTM Branded) fragment loaded");
+    .load-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 51, 102, 0.4);
+    }
 
-    document.getElementById('loadTimetableBtn').addEventListener('click', loadTimetable);
+    .load-btn:active {
+      transform: translateY(0);
+    }
 
-    async function loadTimetable() {
-      const sessionStr = localStorage.getItem("TTMSFC_userSession");
-      if (!sessionStr) {
-        document.getElementById("timetableContent").innerHTML = `
-          <div class="alert alert-error">
-            <span>❌</span>
-            <div>
-              <strong>Session Expired</strong><br>
-              Please log in again.
-            </div>
-          </div>
-        `;
-        return;
+    .content-card {
+      background: white;
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+      min-height: 200px;
+    }
+
+    .alert {
+      padding: 20px;
+      border-radius: 12px;
+      margin: 20px 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .alert-error {
+      background: #ffebee;
+      color: #c62828;
+      border-left: 4px solid #c62828;
+    }
+
+    .alert-warning {
+      background: #fff8e1;
+      color: #ed6c02;
+      border-left: 4px solid #ed6c02;
+    }
+
+    .alert-success {
+      background: #e8f5e9;
+      color: #2e7d32;
+      border-left: 4px solid #2e7d32;
+    }
+
+    .alert-info {
+      background: #e3f2fd;
+      color: #003366; /* UTM blue */
+      border-left: 4px solid #1565c0;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #003366; /* UTM blue */
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 15px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .timetable-header {
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .timetable-header h2 {
+      color: #003366; /* UTM blue */
+      font-size: 22px;
+      margin-bottom: 5px;
+    }
+
+    .timetable-header p {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      margin-bottom: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    thead th {
+      background: linear-gradient(135deg, #003366 0%, #002244 100%); /* UTM blue */
+      color: white;
+      padding: 15px 12px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #f0f0f0;
+      transition: background 0.2s ease;
+    }
+
+    tbody tr:hover {
+      background: #f8fbff;
+    }
+
+    tbody td {
+      padding: 15px 12px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .subject-code {
+      font-weight: 600;
+      color: #003366; /* UTM blue */
+    }
+
+    .section-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background: #e3f2fd;
+      color: #1565c0;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .day-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background: #f0f4ff;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #003366;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 25px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #003366 0%, #002244 100%); /* UTM blue */
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .stat-card h3 {
+      font-size: 32px;
+      margin-bottom: 5px;
+    }
+
+    .stat-card p {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
       }
 
-      let user;
-      try {
-        user = JSON.parse(sessionStr);
-      } catch (e) {
-        document.getElementById("timetableContent").innerHTML = `
-          <div class="alert alert-error">
-            <span>❌</span>
-            <div>
-              <strong>Invalid Session</strong><br>
-              Please log in again.
-            </div>
-          </div>
-        `;
-        return;
+      .sidebar.open {
+        transform: translateX(0);
       }
 
-      const noPekerja = user.no_pekerja;
-      if (!noPekerja || noPekerja === "NOT SET") {
-        document.getElementById("timetableContent").innerHTML = `
-          <div class="alert alert-error">
-            <span>❌</span>
-            <div>
-              <strong>Profile Incomplete</strong><br>
-              Staff ID (no_pekerja) is missing.
-            </div>
-          </div>
-        `;
-        return;
+      .main-wrapper {
+        margin-left: 0;
       }
 
-      const sesi = document.getElementById("sessionSelect").value;
-      const semester = document.getElementById("semesterSelect").value;
+      .menu-toggle {
+        display: block;
+      }
 
-      document.getElementById("timetableContent").innerHTML = `
-        <div class="loading">
-          <div class="spinner"></div>
-          <p>Loading your teaching timetable...</p>
+      .top-header {
+        padding: 0 20px;
+      }
+
+      .main-content {
+        padding: 20px;
+      }
+
+      .header-time {
+        display: none;
+      }
+
+      .timetable-container {
+        padding: 0 12px;
+      }
+
+      .header {
+        padding: 20px;
+      }
+
+      .header h1 {
+        font-size: 22px;
+      }
+
+      .controls-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .controls-card, .content-card {
+        padding: 20px;
+      }
+
+      table {
+        font-size: 13px;
+      }
+
+      thead th, tbody td {
+        padding: 10px 8px;
+      }
+
+      .timetable-header h2 {
+        font-size: 18px;
+      }
+
+      .table-container {
+        -webkit-overflow-scrolling: touch;
+      }
+
+      thead th {
+        font-size: 11px;
+        padding: 12px 8px;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header h1 {
+        font-size: 20px;
+      }
+
+      tbody td {
+        font-size: 12px;
+      }
+
+      .load-btn {
+        padding: 14px 25px;
+        font-size: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Overlay -->
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">
+        <span>🎓</span>
+        <span>TTMS</span>
+      </div>
+      <div class="sidebar-subtitle">Lecturer Portal</div>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="user-avatar" id="userAvatar">L</div>
+      <div class="user-name" id="userName">Loading...</div>
+      <div class="user-role">Lecturer</div>
+    </div>
+
+    <div class="sidebar-nav">
+      <a class="nav-item" href="Lecturer.html">
+        <span class="nav-icon">📊</span>
+        <span>Dashboard</span>
+      </a>
+      <a class="nav-item active" href="LecturerTimetable.html">
+        <span class="nav-icon">📅</span>
+        <span>My Timetable</span>
+      </a>
+      <a class="nav-item" href="LecturerEnrollment.html">
+        <span class="nav-icon">👥</span>
+        <span>Course Enrollment</span>
+      </a>
+      
+      <div class="nav-logout">
+        <a class="nav-item" id="navLogout">
+          <span class="nav-icon">🚪</span>
+          <span>Logout</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="main-wrapper">
+    <header class="top-header">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <h1 class="header-title">My Teaching Schedule</h1>
+      <div class="header-actions">
+        <div class="header-time" id="currentTime">--:--</div>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <div class="timetable-container">
+        <div class="header">
+          <h1>📚 My Teaching Schedule</h1>
+          <p>View and manage your teaching timetable</p>
         </div>
-      `;
 
-      try {
-        const urlPensyarah = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pensyarah_subjek&no_pekerja=${noPekerja}`;
-        const resPensyarah = await fetch(urlPensyarah);
-        const dataPensyarah = await resPensyarah.json();
+        <div class="controls-card">
+          <div class="controls-grid">
+            <div class="form-group">
+              <label>Academic Session</label>
+              <select id="sessionSelect">
+                <option value="2021/2022">2021/2022</option>
+                <option value="2022/2023">2022/2023</option>
+                <option value="2023/2024">2023/2024</option>
+                <option value="2024/2025" selected>2024/2025</option>
+                <option value="2025/2026">2025/2026</option>
+              </select>
+            </div>
 
-        if (!Array.isArray(dataPensyarah) || dataPensyarah.length === 0) {
-          document.getElementById("timetableContent").innerHTML = `
-            <div class="alert alert-warning">
-              <span>⚠️</span>
+            <div class="form-group">
+              <label>Semester</label>
+              <select id="semesterSelect">
+                <option value="1" selected>Semester 1</option>
+                <option value="2">Semester 2</option>
+              </select>
+            </div>
+          </div>
+
+          <button class="load-btn" id="loadTimetableBtn">
+            🔍 Load Timetable
+          </button>
+        </div>
+
+        <div class="content-card">
+          <div id="timetableContent">
+            <div class="alert alert-info">
+              <span>ℹ️</span>
               <div>
-                <strong>No Assignments Found</strong><br>
-                You are not teaching any subjects.
+                <strong>Welcome!</strong> Select an academic session and semester above, then click "Load Timetable" to view your teaching schedule.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Sidebar Toggle
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('overlay');
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('active');
+    }
+
+    function closeSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('overlay');
+      sidebar.classList.remove('open');
+      overlay.classList.remove('active');
+    }
+
+    // Update Time
+    function updateTime() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: true 
+      });
+      document.getElementById('currentTime').textContent = timeStr;
+    }
+    updateTime();
+    setInterval(updateTime, 60000);
+
+    // Session Check
+    const session = localStorage.getItem("TTMSFC_userSession");
+    if (!session) {
+      alert("Please log in first.");
+      window.location.replace("../index.html");
+    }
+
+    let user;
+    try {
+      user = JSON.parse(session);
+      const role = user.inferredRole || "unknown";
+      if (role !== "lecturer") {
+        alert("Access denied: Lecturer access only.");
+        localStorage.removeItem("TTMSFC_userSession");
+        window.location.replace("../index.html");
+      }
+    } catch (e) {
+      alert("Invalid session. Please log in again.");
+      localStorage.removeItem("TTMSFC_userSession");
+      window.location.replace("../index.html");
+    }
+
+    // Set UI
+    const userName = user.full_name || user.login || "Lecturer";
+    const initials = userName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    
+    document.getElementById("userName").textContent = userName;
+    document.getElementById("userAvatar").textContent = initials;
+
+    // Logout
+    document.getElementById("navLogout").onclick = function() {
+      if (confirm("Are you sure you want to logout?")) {
+        localStorage.removeItem("TTMSFC_userSession");
+        window.location.replace("../index.html");
+      }
+    };
+
+    // ===== YOUR TIMETABLE LOGIC =====
+    (function() {
+      console.log("📅 Lecturer Timetable (UTM Branded) loaded");
+
+      document.getElementById('loadTimetableBtn').addEventListener('click', loadTimetable);
+
+      async function loadTimetable() {
+        const sessionStr = localStorage.getItem("TTMSFC_userSession");
+        if (!sessionStr) {
+          document.getElementById("timetableContent").innerHTML = `
+            <div class="alert alert-error">
+              <span>❌</span>
+              <div>
+                <strong>Session Expired</strong><br>
+                Please log in again.
               </div>
             </div>
           `;
           return;
         }
 
-        const currentSubjects = dataPensyarah.filter(subj =>
-          subj.sesi === sesi && subj.semester == semester
-        );
-
-        if (currentSubjects.length === 0) {
+        let user;
+        try {
+          user = JSON.parse(sessionStr);
+        } catch (e) {
           document.getElementById("timetableContent").innerHTML = `
-            <div class="alert alert-warning">
-              <span>⚠️</span>
+            <div class="alert alert-error">
+              <span>❌</span>
               <div>
-                <strong>No Teaching Assignments</strong><br>
-                No classes found for <strong>${sesi} Semester ${semester}</strong>.
+                <strong>Invalid Session</strong><br>
+                Please log in again.
               </div>
             </div>
           `;
           return;
         }
 
-        const timetablePromises = currentSubjects.map(async (subj) => {
-          const urlJadual = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=jadual_subjek&sesi=${sesi}&semester=${semester}&kod_subjek=${subj.kod_subjek}&seksyen=${subj.seksyen}`;
-          const res = await fetch(urlJadual);
-          const data = await res.json();
+        const noPekerja = user.no_pekerja;
+        if (!noPekerja || noPekerja === "NOT SET") {
+          document.getElementById("timetableContent").innerHTML = `
+            <div class="alert alert-error">
+              <span>❌</span>
+              <div>
+                <strong>Profile Incomplete</strong><br>
+                Staff ID (no_pekerja) is missing.
+              </div>
+            </div>
+          `;
+          return;
+        }
 
-          const validEntries = (Array.isArray(data) ? data : [])
-            .filter(entry => 
-              entry.hari && parseInt(entry.hari) >= 1 && parseInt(entry.hari) <= 5 &&
-              entry.masa && !isNaN(entry.masa)
-            );
+        const sesi = document.getElementById("sessionSelect").value;
+        const semester = document.getElementById("semesterSelect").value;
 
-          return validEntries.map(entry => ({
-            ...entry,
-            kod_subjek: subj.kod_subjek,
-            nama_subjek: subj.nama_subjek,
-            seksyen: subj.seksyen,
-            bil_pelajar: subj.bil_pelajar
-          }));
+        document.getElementById("timetableContent").innerHTML = `
+          <div class="loading">
+            <div class="spinner"></div>
+            <p>Loading your teaching timetable...</p>
+          </div>
+        `;
+
+        try {
+          const urlPensyarah = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pensyarah_subjek&no_pekerja=${noPekerja}`;
+          const resPensyarah = await fetch(urlPensyarah);
+          const dataPensyarah = await resPensyarah.json();
+
+          if (!Array.isArray(dataPensyarah) || dataPensyarah.length === 0) {
+            document.getElementById("timetableContent").innerHTML = `
+              <div class="alert alert-warning">
+                <span>⚠️</span>
+                <div>
+                  <strong>No Assignments Found</strong><br>
+                  You are not teaching any subjects.
+                </div>
+              </div>
+            `;
+            return;
+          }
+
+          const currentSubjects = dataPensyarah.filter(subj =>
+            subj.sesi === sesi && subj.semester == semester
+          );
+
+          if (currentSubjects.length === 0) {
+            document.getElementById("timetableContent").innerHTML = `
+              <div class="alert alert-warning">
+                <span>⚠️</span>
+                <div>
+                  <strong>No Teaching Assignments</strong><br>
+                  No classes found for <strong>${sesi} Semester ${semester}</strong>.
+                </div>
+              </div>
+            `;
+            return;
+          }
+
+          const timetablePromises = currentSubjects.map(async (subj) => {
+            const urlJadual = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=jadual_subjek&sesi=${sesi}&semester=${semester}&kod_subjek=${subj.kod_subjek}&seksyen=${subj.seksyen}`;
+            const res = await fetch(urlJadual);
+            const data = await res.json();
+
+            const validEntries = (Array.isArray(data) ? data : [])
+              .filter(entry => 
+                entry.hari && parseInt(entry.hari) >= 1 && parseInt(entry.hari) <= 5 &&
+                entry.masa && !isNaN(entry.masa)
+              );
+
+            return validEntries.map(entry => ({
+              ...entry,
+              kod_subjek: subj.kod_subjek,
+              nama_subjek: subj.nama_subjek,
+              seksyen: subj.seksyen,
+              bil_pelajar: subj.bil_pelajar
+            }));
+          });
+
+          const timetableArrays = await Promise.all(timetablePromises);
+          const allEntries = timetableArrays.flat();
+
+          if (allEntries.length === 0) {
+            document.getElementById("timetableContent").innerHTML = `
+              <div class="alert alert-warning">
+                <span>⚠️</span>
+                <div>
+                  <strong>No Scheduled Classes</strong><br>
+                  No timetable entries found for ${sesi} Semester ${semester}.
+                </div>
+              </div>
+            `;
+            return;
+          }
+
+          displayTimetable(allEntries, sesi, semester);
+
+        } catch (err) {
+          console.error("Timetable error:", err);
+          document.getElementById("timetableContent").innerHTML = `
+            <div class="alert alert-error">
+              <span>❌</span>
+              <div>
+                <strong>Failed to Load Timetable</strong><br>
+                ${err.message || 'Network or server error.'}
+                <small style="opacity: 0.8; margin-top: 8px; display: block;">💡 Tip: This works best on UTM network</small>
+              </div>
+            </div>
+          `;
+        }
+      }
+
+      function displayTimetable(data, sesi, semester) {
+        const hariMap = {
+          1: "Monday",
+          2: "Tuesday",
+          3: "Wednesday",
+          4: "Thursday",
+          5: "Friday"
+        };
+
+        const masaMap = {
+          2: "08:00 - 09:00",
+          3: "09:00 - 10:00",
+          4: "10:00 - 11:00",
+          5: "11:00 - 12:00",
+          6: "12:00 - 13:00",
+          7: "13:00 - 14:00",
+          8: "14:00 - 15:00",
+          9: "15:00 - 16:00",
+          10: "16:00 - 17:00"
+        };
+
+        data.sort((a, b) => {
+          const dayDiff = parseInt(a.hari) - parseInt(b.hari);
+          if (dayDiff !== 0) return dayDiff;
+          return parseInt(a.masa) - parseInt(b.masa);
         });
 
-        const timetableArrays = await Promise.all(timetablePromises);
-        const allEntries = timetableArrays.flat();
+        const uniqueSubjects = new Set(data.map(d => d.kod_subjek)).size;
+        const totalStudents = data.reduce((sum, d) => sum + (parseInt(d.bil_pelajar) || 0), 0);
 
-        if (allEntries.length === 0) {
-          document.getElementById("timetableContent").innerHTML = `
-            <div class="alert alert-warning">
-              <span>⚠️</span>
-              <div>
-                <strong>No Scheduled Classes</strong><br>
-                No timetable entries found for ${sesi} Semester ${semester}.
-              </div>
-            </div>
-          `;
-          return;
-        }
-
-        displayTimetable(allEntries, sesi, semester);
-
-      } catch (err) {
-        console.error("Timetable error:", err);
-        document.getElementById("timetableContent").innerHTML = `
-          <div class="alert alert-error">
-            <span>❌</span>
-            <div>
-              <strong>Failed to Load Timetable</strong><br>
-              ${err.message || 'Network or server error.'}
-              <small style="opacity: 0.8; margin-top: 8px; display: block;">💡 Tip: This works best on UTM network</small>
-            </div>
+        let html = `
+          <div class="timetable-header">
+            <h2>📅 ${sesi} - Semester ${semester}</h2>
+            <p>Your complete teaching schedule</p>
           </div>
+
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Subject Code</th>
+                  <th>Subject Name</th>
+                  <th>Section</th>
+                  <th>Day</th>
+                  <th>Time</th>
+                  <th>Room</th>
+                  <th>Students</th>
+                </tr>
+              </thead>
+              <tbody>
         `;
-      }
-    }
 
-    function displayTimetable(data, sesi, semester) {
-      const hariMap = {
-        1: "Monday",
-        2: "Tuesday",
-        3: "Wednesday",
-        4: "Thursday",
-        5: "Friday"
-      };
+        data.forEach(item => {
+          const day = hariMap[parseInt(item.hari)] || `Day ${item.hari}`;
+          const time = masaMap[parseInt(item.masa)] || `Slot ${item.masa}`;
+          const room = item.ruang?.nama_ruang_singkatan || item.ruang?.kod_ruang || '—';
+          const students = item.bil_pelajar || '—';
 
-      const masaMap = {
-        2: "08:00 - 09:00",
-        3: "09:00 - 10:00",
-        4: "10:00 - 11:00",
-        5: "11:00 - 12:00",
-        6: "12:00 - 13:00",
-        7: "13:00 - 14:00",
-        8: "14:00 - 15:00",
-        9: "15:00 - 16:00",
-        10: "16:00 - 17:00"
-      };
-
-      data.sort((a, b) => {
-        const dayDiff = parseInt(a.hari) - parseInt(b.hari);
-        if (dayDiff !== 0) return dayDiff;
-        return parseInt(a.masa) - parseInt(b.masa);
-      });
-
-      const uniqueSubjects = new Set(data.map(d => d.kod_subjek)).size;
-      const totalStudents = data.reduce((sum, d) => sum + (parseInt(d.bil_pelajar) || 0), 0);
-
-      let html = `
-        <div class="timetable-header">
-          <h2>📅 ${sesi} - Semester ${semester}</h2>
-          <p>Your complete teaching schedule</p>
-        </div>
-
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Subject Code</th>
-                <th>Subject Name</th>
-                <th>Section</th>
-                <th>Day</th>
-                <th>Time</th>
-                <th>Room</th>
-                <th>Students</th>
-              </tr>
-            </thead>
-            <tbody>
-      `;
-
-      data.forEach(item => {
-        const day = hariMap[parseInt(item.hari)] || `Day ${item.hari}`;
-        const time = masaMap[parseInt(item.masa)] || `Slot ${item.masa}`;
-        const room = item.ruang?.nama_ruang_singkatan || item.ruang?.kod_ruang || '—';
-        const students = item.bil_pelajar || '—';
+          html += `
+            <tr>
+              <td><span class="subject-code">${item.kod_subjek || '—'}</span></td>
+              <td>${item.nama_subjek || '—'}</td>
+              <td><span class="section-badge">${item.seksyen || '—'}</span></td>
+              <td><span class="day-badge">${day}</span></td>
+              <td>${time}</td>
+              <td>${room}</td>
+              <td>${students}</td>
+            </tr>
+          `;
+        });
 
         html += `
-          <tr>
-            <td><span class="subject-code">${item.kod_subjek || '—'}</span></td>
-            <td>${item.nama_subjek || '—'}</td>
-            <td><span class="section-badge">${item.seksyen || '—'}</span></td>
-            <td><span class="day-badge">${day}</span></td>
-            <td>${time}</td>
-            <td>${room}</td>
-            <td>${students}</td>
-          </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="stats">
+            <div class="stat-card">
+              <h3>${data.length}</h3>
+              <p>Teaching Slots</p>
+            </div>
+            <div class="stat-card">
+              <h3>${uniqueSubjects}</h3>
+              <p>Unique Subjects</p>
+            </div>
+            <div class="stat-card">
+              <h3>${totalStudents}</h3>
+              <p>Total Students</p>
+            </div>
+          </div>
         `;
-      });
 
-      html += `
-            </tbody>
-          </table>
-        </div>
-
-        <div class="stats">
-          <div class="stat-card">
-            <h3>${data.length}</h3>
-            <p>Teaching Slots</p>
-          </div>
-          <div class="stat-card">
-            <h3>${uniqueSubjects}</h3>
-            <p>Unique Subjects</p>
-          </div>
-          <div class="stat-card">
-            <h3>${totalStudents}</h3>
-            <p>Total Students</p>
-          </div>
-        </div>
-      `;
-
-      document.getElementById("timetableContent").innerHTML = html;
-    }
-  })();
-</script>
+        document.getElementById("timetableContent").innerHTML = html;
+      }
+    })();
+  </script>
+</body>
+</html>

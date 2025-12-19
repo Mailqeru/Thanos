@@ -1,16 +1,578 @@
-<div class="w3-container">
-  <div class="w3-card w3-padding w3-light-grey">
-    <h4>🔑 Your Login Info</h4>
-    <p><strong>Account:</strong> <span id="loginDisplay">...</span></p>
-    <p><strong>Password (Session ID):</strong> <span id="sessionIdDisplay">...</span></p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TTMS - View Lecturers</title>
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --utm-blue: #003366;
+      --utm-gold: #C9A85C;
+      --light-bg: #f8f9fc;
+      --input-border: #d1d5db;
+      --error-red: #d32f2f;
+      --success-green: #4CAF50;
+      --warning-yellow: #FFC107;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--light-bg);
+      color: #333;
+    }
+
+    .w3-sidebar {
+      background-color: var(--utm-blue) !important;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+
+    .w3-sidebar .w3-bar-item {
+      color: white !important;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .w3-sidebar .w3-bar-item:hover,
+    .w3-sidebar .w3-bar-item.w3-red {
+      background-color: var(--utm-gold) !important;
+      color: var(--utm-blue) !important;
+    }
+
+    .w3-main {
+      background-color: #fff;
+      min-height: 100vh;
+    }
+
+    .w3-teal {
+      background-color: var(--utm-blue) !important;
+    }
+
+    .search-box {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 25px;
+      border: 1px solid #e0e0e0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 16px;
+      align-items: flex-end;
+    }
+
+    .control-group {
+      flex: 1;
+      min-width: 180px;
+    }
+
+    .control-group label {
+      font-weight: 600;
+      font-size: 0.95em;
+      color: #444;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .w3-input, .w3-select {
+      width: 100%;
+      border: 1px solid var(--input-border);
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 1em;
+    }
+
+    .w3-input:focus, .w3-select:focus {
+      border-color: var(--utm-blue);
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(0,51,102,0.2);
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .w3-button {
+      border-radius: 6px;
+      font-weight: 600;
+      padding: 10px 18px;
+      transition: all 0.2s ease;
+    }
+
+    .w3-teal { background-color: var(--utm-blue) !important; }
+    .w3-green { background-color: var(--success-green) !important; }
+    .w3-gray { background-color: #6c757d !important; }
+
+    .stats-box {
+      background: #e8f5e9;
+      padding: 14px;
+      border-radius: 8px;
+      margin: 20px 0;
+      border-left: 4px solid var(--success-green);
+      font-size: 0.95em;
+    }
+
+    .debug-box {
+      background: #f0f8ff;
+      border-left: 4px solid var(--utm-blue);
+      padding: 14px;
+      margin: 20px 0;
+      border-radius: 8px;
+      font-size: 0.95em;
+    }
+
+    .highlight { background-color: #fff9c4 !important; }
+
+    .lecturer-link {
+      color: var(--utm-blue);
+      text-decoration: underline;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    table.w3-table thead tr {
+      background-color: var(--utm-blue) !important;
+      color: white;
+    }
+
+    table.w3-table tbody tr:nth-child(even) {
+      background-color: #fafafa;
+    }
+
+    .w3-panel.w3-pale-yellow,
+    .w3-panel.w3-pale-red,
+    .w3-panel.w3-light-blue {
+      border-radius: 8px;
+      margin: 15px 0;
+      padding: 20px;
+    }
+
+    .w3-panel.w3-pale-red { border-left: 4px solid var(--error-red); }
+    .w3-panel.w3-pale-yellow { border-left: 4px solid var(--warning-yellow); }
+    .w3-panel.w3-light-blue { border-left: 4px solid var(--utm-blue); }
+
+    .loading-spinner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      color: var(--utm-blue);
+    }
+
+    .loading-spinner i {
+      font-size: 24px;
+      margin-bottom: 10px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .error-panel {
+      background: #ffebee;
+      border-left: 4px solid var(--error-red);
+      padding: 14px;
+      border-radius: 10px;
+      margin: 16px 0;
+      font-size: 0.95em;
+    }
+
+    @media (max-width: 768px) {
+      .controls-row { flex-direction: column; align-items: stretch; }
+      .action-buttons { flex-direction: column; }
+      .w3-sidebar { width: 250px !important; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <div class="w3-sidebar w3-bar-block w3-collapse w3-card" style="width:240px;" id="mySidebar">
+    <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">Close &times;</button>
+    <a href="Admin.html" class="w3-bar-item w3-button">Dashboard</a>
+    <a href="ViewLecturers.html" class="w3-bar-item w3-button w3-red">View Lecturers</a>
+    <a href="ViewStudents.html" class="w3-bar-item w3-button">View Students</a>
+    <a href="ViewSubjects.html" class="w3-bar-item w3-button">View Subjects</a>
+    <a href="RoomUtilization.html" class="w3-bar-item w3-button">Room Utilization</a>
+    <a href="Reports.html" class="w3-bar-item w3-button">Reports</a>
+    <a href="#" class="w3-bar-item w3-button" id="navLogout">Logout</a>
   </div>
 
-  <div class="w3-card w3-padding w3-pink w3-margin-top">
-    <h4>✅ Real Session ID Used for Data</h4>
-    <p><strong>Session ID:</strong> <span id="sessionUsedDisplay">Loading...</span></p>
+  <!-- Main Content -->
+  <div class="w3-main" style="margin-left:240px">
+    <div class="w3-teal">
+      <button class="w3-button w3-teal w3-xlarge w3-hide-large" onclick="w3_open()">&#9776;</button>
+      <div class="w3-container">
+        <h1>View Lecturers</h1>
+      </div>
+    </div>
+
+    <div class="w3-container" style="padding: 20px;">
+      <div class="search-box">
+        <h3><i class="fas fa-search"></i> Search & Filter Lecturers</h3>
+        <div class="controls-row">
+          <div class="control-group">
+            <label for="sessionSelect"><i class="fas fa-calendar-alt"></i> Academic Session</label>
+            <select class="w3-select w3-border" id="sessionSelect"></select>
+          </div>
+          <div class="control-group">
+            <label for="semesterSelect"><i class="fas fa-book"></i> Semester</label>
+            <select class="w3-select w3-border" id="semesterSelect">
+              <option value="1">Semester 1</option>
+              <option value="2">Semester 2</option>
+              <option value="3">Special Semester</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <label for="searchBySelect"><i class="fas fa-filter"></i> Search By</label>
+            <select class="w3-select w3-border" id="searchBySelect">
+              <option value="name">Lecturer Name</option>
+              <option value="staffId">Staff ID</option>
+              <option value="both">Both Name & ID</option>
+            </select>
+          </div>
+        </div>
+        <div class="controls-row">
+          <div class="control-group" style="flex: 2;">
+            <label for="searchInput"><i class="fas fa-search"></i> Search Term</label>
+            <input type="text" class="w3-input w3-border" id="searchInput" placeholder="Enter lecturer name or staff ID...">
+          </div>
+        </div>
+        <div class="action-buttons">
+          <button class="w3-button w3-teal" id="loadLecturersBtn"><i class="fas fa-sync-alt"></i> Load Lecturers</button>
+          <button class="w3-button w3-green" id="applySearchBtn"><i class="fas fa-search"></i> Apply Search</button>
+          <button class="w3-button w3-gray" id="clearSearchBtn"><i class="fas fa-times"></i> Clear Search</button>
+        </div>
+        <div class="refresh-info"><i class="fas fa-info-circle"></i> Data auto-refreshes every 25 minutes</div>
+      </div>
+
+      <div class="w3-card w3-padding w3-light-grey">
+        <h4>🔑 Your Login Info</h4>
+        <p><strong>Account:</strong> <span id="loginDisplay">...</span></p>
+        <p><strong>Password (Session ID):</strong> <span id="sessionIdDisplay">...</span></p>
+      </div>
+
+      <div class="w3-card w3-padding w3-pink w3-margin-top">
+        <h4>✅ Real Session ID Used for Data</h4>
+        <p><strong>Session ID:</strong> <span id="sessionUsedDisplay">Loading...</span></p>
+      </div>
+
+      <div id="loadingSpinner" class="loading-spinner" style="display:none;">
+        <i class="fas fa-spinner"></i>
+        <p>Loading lecturers...</p>
+      </div>
+
+      <div id="errorContainer" class="error-panel" style="display:none;">
+        <h4><i class="fas fa-exclamation-triangle"></i> <span id="errorTitle">Error</span></h4>
+        <p id="errorMessage" style="margin:0;"></p>
+      </div>
+
+      <div id="lecturerTableContainer" class="w3-margin-top">
+        <p class="w3-center w3-text-grey"><i class="fas fa-spinner fa-spin"></i> Click "Load Lecturers" to begin</p>
+      </div>
+    </div>
   </div>
 
-  <div id="lecturerTableContainer" class="w3-margin-top">
-    <p>Loading lecturers...</p>
-  </div>
-</div>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script>
+    // Sidebar toggle
+    function w3_open() {
+      document.getElementById("mySidebar").style.display = "block";
+    }
+    function w3_close() {
+      document.getElementById("mySidebar").style.display = "none";
+    }
+
+    // Session validation
+    const rawSession = localStorage.getItem("TTMSFC_userSession");
+    if (!rawSession) {
+      alert("Please log in first.");
+      window.location.replace("../index.html");
+    }
+
+    let user;
+    try {
+      user = JSON.parse(rawSession);
+    } catch (e) {
+      localStorage.removeItem("TTMSFC_userSession");
+      window.location.replace("../index.html");
+    }
+
+    if (user.inferredRole !== "admin") {
+      alert("Admin access required.");
+      window.location.replace("../index.html");
+    }
+
+    // Set UI
+    document.getElementById("loginDisplay").textContent = user.login || "—";
+    document.getElementById("sessionIdDisplay").textContent = user.session_id || "—";
+
+    // Logout
+    document.getElementById("navLogout").onclick = function() {
+      if (confirm("Logout now?")) {
+        localStorage.removeItem("TTMSFC_userSession");
+        window.location.replace("../index.html");
+      }
+    };
+
+    // ===== YOUR LECTURER LOGIC =====
+    let autoRefreshInterval = null;
+    let currentLecturerData = [];
+    let currentSessionId = null;
+    let currentSesi = '';
+    let currentSemester = '';
+
+    // Generate academic years
+    function generateAcademicYears() {
+      const currentYear = new Date().getFullYear();
+      const years = [];
+      for (let i = currentYear - 5; i <= currentYear + 1; i++) {
+        years.push(`${i}/${i + 1}`);
+      }
+      return years;
+    }
+
+    // Filter lecturers
+    function filterLecturers(data, searchTerm, searchBy) {
+      if (!searchTerm.trim()) return data;
+      const term = searchTerm.toLowerCase().trim();
+      return data.filter(lect => {
+        switch(searchBy) {
+          case 'name': return (lect.nama || '').toLowerCase().includes(term);
+          case 'staffId': return (lect.no_pekerja || '').toString().includes(term);
+          case 'both': return (lect.nama || '').toLowerCase().includes(term) || (lect.no_pekerja || '').toString().includes(term);
+          default: return true;
+        }
+      });
+    }
+
+    // Show lecturer subjects
+    function showLecturerSubjects(staffId, realSessionId, sesi, semester) {
+      if (!realSessionId) {
+        alert("Real session not loaded yet. Please click 'Load Lecturers' first.");
+        return;
+      }
+
+      const container = document.getElementById("lecturerTableContainer");
+      container.innerHTML = `<p class="w3-center"><i class="fas fa-spinner fa-spin"></i> Loading subjects for staff ID: ${staffId}<br>Filtering for: Session <strong>${sesi}</strong>, Semester <strong>${semester}</strong></p>`;
+
+      const subjectUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pensyarah_subjek&session_id=${encodeURIComponent(realSessionId)}&no_pekerja=${encodeURIComponent(staffId)}`;
+
+      fetch(subjectUrl)
+        .then(response => {
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          return response.text();
+        })
+        .then(text => {
+          if (!text.trim()) throw new Error("Empty response");
+          let subjects = JSON.parse(text);
+          if (!Array.isArray(subjects)) throw new Error("Subjects response is not an array");
+
+          const filteredSubjects = subjects.filter(subj =>
+            (subj.sesi || '').toString() === sesi.toString() &&
+            (subj.semester || '').toString() === semester.toString()
+          );
+
+          if (filteredSubjects.length === 0) {
+            container.innerHTML = `<div class="w3-panel w3-pale-yellow w3-border">
+              <h3>ℹ️ No Subjects Found</h3>
+              <p>Lecturer <code>${staffId}</code> has no subjects in <strong>${sesi} Semester ${semester}</strong>.</p>
+              <button class="w3-button w3-teal" onclick="initLecturersPageWithFilters('${sesi}', '${semester}');">← Back to Lecturers</button>
+            </div>`;
+            return;
+          }
+
+          let html = `<div class="w3-panel w3-light-blue">
+            <h3><i class="fas fa-book"></i> Subjects for Staff ID: ${staffId}</h3>
+            <p><strong>Session:</strong> ${sesi} | <strong>Semester:</strong> ${semester}</p>
+            <button class="w3-button w3-teal w3-small" onclick="initLecturersPageWithFilters('${sesi}', '${semester}');">← Back to Lecturers</button>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="w3-table w3-bordered w3-striped w3-white">
+              <thead><tr><th>No.</th><th>Subject Code</th><th>Subject Name</th><th>Credits</th><th>Section</th><th>Session</th><th>Semester</th><th>Students</th></tr></thead>
+              <tbody>`;
+
+          filteredSubjects.forEach((subj, i) => {
+            html += `<tr><td>${i + 1}</td><td>${subj.kod_subjek || '—'}</td><td>${subj.nama_subjek || '—'}</td><td>${subj.kredit || '—'}</td><td>${subj.seksyen || '—'}</td><td>${subj.sesi || '—'}</td><td>${subj.semester || '—'}</td><td>${subj.bil_pelajar || 0}</td></tr>`;
+          });
+
+          html += `</tbody></table></div>`;
+          container.innerHTML = html;
+        })
+        .catch(err => {
+          console.error("🔥 [Error] Loading subjects:", err);
+          container.innerHTML = `<div class="w3-panel w3-pale-red w3-border">
+            <h3>❌ Failed to Load Subjects</h3>
+            <p><strong>Staff ID:</strong> ${staffId}</p>
+            <p><strong>Filter:</strong> ${sesi} Semester ${semester}</p>
+            <p><strong>Error:</strong> ${err.message}</p>
+            <button class="w3-button w3-teal" onclick="initLecturersPageWithFilters('${sesi}', '${semester}');">← Back to Lecturers</button>
+          </div>`;
+        });
+    }
+
+    // Initialize with filters
+    function initLecturersPageWithFilters(sesi, semester) {
+      initLecturersPage();
+      setTimeout(() => {
+        if (sesi) document.getElementById("sessionSelect").value = sesi;
+        if (semester) document.getElementById("semesterSelect").value = semester;
+      }, 100);
+    }
+
+    // Initialize lecturers page
+    function initLecturersPage() {
+      clearAutoRefresh();
+      const academicYears = generateAcademicYears();
+      const currentYear = new Date().getFullYear();
+      const defaultSession = `${currentYear}/${currentYear + 1}`;
+
+      const controlsHTML = ``; // Already in HTML
+
+      document.getElementById("loadLecturersBtn").onclick = fetchLecturerData;
+      document.getElementById("applySearchBtn").onclick = applySearch;
+      document.getElementById("clearSearchBtn").onclick = clearSearch;
+      document.getElementById("searchInput").addEventListener('keypress', e => { if (e.key === 'Enter') applySearch(); });
+
+      // Populate session dropdown
+      document.getElementById("sessionSelect").innerHTML = academicYears.map(year => 
+        `<option value="${year}" ${year === defaultSession ? 'selected' : ''}>${year}</option>`
+      ).join('');
+
+      function fetchLecturerData() {
+        currentSesi = document.getElementById("sessionSelect").value;
+        currentSemester = document.getElementById("semesterSelect").value;
+        document.getElementById("lecturerTableContainer").innerHTML = `<p class="w3-center"><i class="fas fa-spinner fa-spin"></i> Loading lecturers for ${currentSesi} Semester ${currentSemester}...</p>`;
+
+        const password = user.session_id || user.password || user.id;
+        if (!password) {
+          showError("Invalid session", "Session ID not found in session data.");
+          return;
+        }
+
+        const authUrl = `http://web.fc.utm.my/ttms/auth-admin.php?session_id=${encodeURIComponent(password)}`;
+        fetch(authUrl)
+          .then(response => {
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            return response.text();
+          })
+          .then(text => {
+            const patterns = [/name\s*=\s*["']session_id["']\s+value\s*=\s*["']([^"']+)/i, /value\s*=\s*["']([^"']+)["']\s+name\s*=\s*["']session_id["']/i, /"session_id"\s*:\s*"([^"]+)"/];
+            let realSessionId = null;
+            for (const pattern of patterns) {
+              const match = text.match(pattern);
+              if (match && match[1]) { realSessionId = match[1].trim(); break; }
+            }
+            if (!realSessionId) throw new Error("Could not extract real session ID.");
+            currentSessionId = realSessionId;
+            document.getElementById("sessionUsedDisplay").textContent = realSessionId;
+
+            const dataUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pensyarah&session_id=${encodeURIComponent(realSessionId)}&sesi=${encodeURIComponent(currentSesi)}&semester=${encodeURIComponent(currentSemester)}`;
+            return fetch(dataUrl);
+          })
+          .then(response => {
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            return response.text();
+          })
+          .then(text => {
+            if (!text.trim()) throw new Error("Empty response");
+            let data = JSON.parse(text);
+            if (!Array.isArray(data)) throw new Error("Expected array");
+            currentLecturerData = data;
+            renderLecturerTable(data);
+            clearAutoRefresh();
+            autoRefreshInterval = setInterval(fetchLecturerData, 25 * 60 * 1000);
+          })
+          .catch(err => {
+            console.error("🔥 [Error]:", err);
+            document.getElementById("lecturerTableContainer").innerHTML = `<div class="w3-panel w3-pale-red w3-border"><h3>❌ Error Loading Lecturers</h3><p><strong>Session:</strong> ${currentSesi} | <strong>Semester:</strong> ${currentSemester}</p><p><strong>Error:</strong> ${err.message}</p></div>`;
+          });
+      }
+
+      function renderLecturerTable(data, searchTerm = '', searchBy = 'name') {
+        const container = document.getElementById("lecturerTableContainer");
+        if (!Array.isArray(data) || data.length === 0) {
+          container.innerHTML = `<div class="w3-panel w3-pale-yellow w3-border"><h3>ℹ️ No Lecturers Found</h3><p>No lecturers are assigned for the selected session.</p></div>`;
+          return;
+        }
+
+        let html = `<div class="stats-box"><strong>📊 Statistics:</strong> ${data.length} lecturer(s) found${searchTerm ? ` • ${data.length} matching "${searchTerm}"` : ''}</div>
+        <div style="overflow-x:auto;">
+          <table class="w3-table w3-bordered w3-striped w3-white">
+            <thead><tr><th>No.</th><th>Lecturer Name</th><th>Staff ID</th><th>Subjects</th><th>Sections</th><th>Students</th></tr></thead>
+            <tbody>`;
+
+        data.forEach((lect, i) => {
+          const name = lect.nama || '—';
+          const staffId = lect.no_pekerja || '—';
+          const shouldHighlight = searchTerm && (
+            (searchBy === 'name' && name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (searchBy === 'staffId' && staffId.toString().includes(searchTerm)) ||
+            (searchBy === 'both' && (name.toLowerCase().includes(searchTerm.toLowerCase()) || staffId.toString().includes(searchTerm)))
+          );
+          const displayName = staffId !== '—' ? `<a class="lecturer-link" data-staff-id="${staffId}">${name}</a>` : name;
+          html += `<tr ${shouldHighlight ? 'class="highlight"' : ''}><td>${i + 1}</td><td>${displayName}</td><td>${staffId}</td><td>${lect.bil_subjek || 0}</td><td>${lect.bil_seksyen || 0}</td><td>${lect.bil_pelajar || 0}</td></tr>`;
+        });
+
+        html += `</tbody></table></div>`;
+        container.innerHTML = html;
+
+        document.querySelectorAll(".lecturer-link").forEach(link => {
+          link.addEventListener("click", function() {
+            const staffId = this.getAttribute("data-staff-id");
+            showLecturerSubjects(staffId, currentSessionId, currentSesi, currentSemester);
+          });
+        });
+      }
+
+      function applySearch() {
+        const searchTerm = document.getElementById("searchInput").value;
+        const searchBy = document.getElementById("searchBySelect").value;
+        if (!currentLecturerData.length) { alert("Please load lecturers first!"); return; }
+        const filteredData = filterLecturers(currentLecturerData, searchTerm, searchBy);
+        renderLecturerTable(filteredData, searchTerm, searchBy);
+      }
+
+      function clearSearch() {
+        document.getElementById("searchInput").value = '';
+        if (currentLecturerData.length) renderLecturerTable(currentLecturerData);
+      }
+    }
+
+    function clearAutoRefresh() {
+      if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+        autoRefreshInterval = null;
+      }
+    }
+
+    function showLoading(show) {
+      document.getElementById('loadingSpinner').style.display = show ? 'flex' : 'none';
+      document.getElementById('loadLecturersBtn').disabled = show;
+    }
+
+    function showError(title, message) {
+      document.getElementById('errorTitle').textContent = title;
+      document.getElementById('errorMessage').textContent = message;
+      document.getElementById('errorContainer').style.display = 'block';
+    }
+
+    function hideError() {
+      document.getElementById('errorContainer').style.display = 'none';
+    }
+
+    // Initialize page
+    initLecturersPage();
+  </script>
+</body>
+</html>

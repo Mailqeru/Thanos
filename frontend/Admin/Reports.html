@@ -6,7 +6,6 @@
   <title>TTMS - System Reports</title>
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Load Chart.js from CDN (fast & reliable) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
@@ -23,6 +22,27 @@
       color: #333;
       line-height: 1.5;
     }
+    .w3-sidebar {
+      background-color: var(--utm-blue) !important;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+
+    .w3-sidebar .w3-bar-item {
+      color: white !important;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .w3-sidebar .w3-bar-item:hover,
+    .w3-sidebar .w3-bar-item.w3-red {
+      background-color: #C9A85C !important;
+      color: var(--utm-blue) !important;
+    }
+
+    .w3-main {
+      background-color: #fff;
+      min-height: 100vh;
+    }
+
     .card {
       background: white;
       border-radius: 12px;
@@ -212,101 +232,160 @@
   </style>
 </head>
 <body>
-  <div class="w3-container" style="padding: 0; max-width: 100%;">
-    <div class="card">
-      <div class="card-header">
-        <i class="fas fa-chart-line"></i>
-        <h3>TTMS Reports</h3>
-      </div>
-      <p style="font-size:0.95em; margin:0;">Unusual enrollments & incomplete sections.</p>
-    </div>
+  <!-- Sidebar -->
+  <div class="w3-sidebar w3-bar-block w3-collapse w3-card" style="width:240px;" id="mySidebar">
+    <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">Close &times;</button>
+    <a href="Admin.html" class="w3-bar-item w3-button">Dashboard</a>
+    <a href="ViewLecturers.html" class="w3-bar-item w3-button">View Lecturers</a>
+    <a href="ViewStudents.html" class="w3-bar-item w3-button">View Students</a>
+    <a href="ViewSubjects.html" class="w3-bar-item w3-button">View Subjects</a>
+    <a href="RoomUtilization.html" class="w3-bar-item w3-button">Room Utilization</a>
+    <a href="Reports.html" class="w3-bar-item w3-button w3-red">Reports</a>
+    <a href="#" class="w3-bar-item w3-button" id="navLogout">Logout</a>
+  </div>
 
-    <div class="card">
-      <div class="form-row">
-        <div class="form-group">
-          <label for="reportSession"><i class="fas fa-calendar-alt"></i> Session</label>
-          <select class="w3-select w3-border" id="reportSession"></select>
-        </div>
-        <div class="form-group">
-          <label for="reportSemester"><i class="fas fa-book"></i> Semester</label>
-          <select class="w3-select w3-border" id="reportSemester">
-            <option value="1">Sem 1</option>
-            <option value="2" selected>Sem 2</option>
-            <option value="3">Special</option>
-          </select>
-        </div>
-        <div class="form-group" style="display:flex; align-items:flex-end;">
-          <button class="w3-button btn-primary w3-block" id="loadReportBtn" style="padding:12px !important;">
-            <i class="fas fa-sync-alt"></i> Generate
-          </button>
-        </div>
+  <!-- Main Content -->
+  <div class="w3-main" style="margin-left:240px">
+    <div class="w3-teal" style="background-color: var(--utm-blue) !important;">
+      <button class="w3-button w3-teal w3-xlarge w3-hide-large" onclick="w3_open()">&#9776;</button>
+      <div class="w3-container">
+        <h1>System Reports</h1>
       </div>
     </div>
 
-    <!-- Debug Panel -->
-    <div class="debug-panel">
-      <strong><i class="fas fa-bug"></i> Log</strong>
-      <div id="debugLog" style="font-family: monospace; white-space: pre-wrap;"></div>
-      <button class="w3-button w3-small w3-grey" id="showJsonUrls" style="margin-top:8px; display:none; font-size:0.85em;">
-        <i class="fas fa-link"></i> JSON URLs
-      </button>
-    </div>
-
-    <div id="loadingSpinner" class="loading-spinner" style="display:none;">
-      <i class="fas fa-spinner"></i>
-      <p>Loading...</p>
-    </div>
-
-    <div id="errorContainer" class="error-panel" style="display:none;">
-      <h4><i class="fas fa-exclamation-triangle"></i> <span id="errorTitle">Error</span></h4>
-      <p id="errorMessage" style="margin:0;"></p>
-    </div>
-
-    <div id="summaryStats" class="stats-grid" style="display:none;"></div>
-
-    <!-- Report 1 -->
-    <div class="card report-section">
-      <h4><i class="fas fa-exclamation-triangle" style="color:#d32f2f;"></i> Unusual Enrollments</h4>
-      <p>Sections with ≤5 or ≥80 students.</p>
-      <div class="chart-container">
-        <canvas id="unusualEnrollChart"></canvas>
+    <div class="w3-container" style="padding: 0; max-width: 100%;">
+      <div class="card">
+        <div class="card-header">
+          <i class="fas fa-chart-line"></i>
+          <h3>TTMS Reports</h3>
+        </div>
+        <p style="font-size:0.95em; margin:0;">Unusual enrollments & incomplete sections.</p>
       </div>
-      <div class="table-wrapper">
-        <div id="unusualEnrollTable">
-          <div class="empty-state">
-            <i class="fas fa-users"></i>
-            <p>Tap "Generate" to load</p>
+
+      <div class="card">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="reportSession"><i class="fas fa-calendar-alt"></i> Session</label>
+            <select class="w3-select w3-border" id="reportSession"></select>
+          </div>
+          <div class="form-group">
+            <label for="reportSemester"><i class="fas fa-book"></i> Semester</label>
+            <select class="w3-select w3-border" id="reportSemester">
+              <option value="1">Sem 1</option>
+              <option value="2" selected>Sem 2</option>
+              <option value="3">Special</option>
+            </select>
+          </div>
+          <div class="form-group" style="display:flex; align-items:flex-end;">
+            <button class="w3-button btn-primary w3-block" id="loadReportBtn" style="padding:12px !important;">
+              <i class="fas fa-sync-alt"></i> Generate
+            </button>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Report 2 -->
-    <div class="card report-section">
-      <h4><i class="fas fa-exclamation-circle" style="color:#ff9800;"></i> Incomplete Sections</h4>
-      <p>No lecturer or zero students.</p>
-      <div class="chart-container">
-        <canvas id="incompleteSectionsChart"></canvas>
+      <!-- Debug Panel -->
+      <div class="debug-panel">
+        <strong><i class="fas fa-bug"></i> Log</strong>
+        <div id="debugLog" style="font-family: monospace; white-space: pre-wrap;"></div>
+        <button class="w3-button w3-small w3-grey" id="showJsonUrls" style="margin-top:8px; display:none; font-size:0.85em;">
+          <i class="fas fa-link"></i> JSON URLs
+        </button>
       </div>
-      <div class="table-wrapper">
-        <div id="incompleteSectionsTable">
-          <div class="empty-state">
-            <i class="fas fa-list"></i>
-            <p>Tap "Generate" to load</p>
+
+      <div id="loadingSpinner" class="loading-spinner" style="display:none;">
+        <i class="fas fa-spinner"></i>
+        <p>Loading...</p>
+      </div>
+
+      <div id="errorContainer" class="error-panel" style="display:none;">
+        <h4><i class="fas fa-exclamation-triangle"></i> <span id="errorTitle">Error</span></h4>
+        <p id="errorMessage" style="margin:0;"></p>
+      </div>
+
+      <div id="summaryStats" class="stats-grid" style="display:none;"></div>
+
+      <!-- Report 1 -->
+      <div class="card report-section">
+        <h4><i class="fas fa-exclamation-triangle" style="color:#d32f2f;"></i> Unusual Enrollments</h4>
+        <p>Sections with ≤5 or ≥80 students.</p>
+        <div class="chart-container">
+          <canvas id="unusualEnrollChart"></canvas>
+        </div>
+        <div class="table-wrapper">
+          <div id="unusualEnrollTable">
+            <div class="empty-state">
+              <i class="fas fa-users"></i>
+              <p>Tap "Generate" to load</p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="card" style="text-align:center; margin:12px;">
-      <button class="w3-button btn-blue" id="exportBtn" style="display:none; width:100%; max-width:300px;">
-        <i class="fas fa-download"></i> Export CSV
-      </button>
+      <!-- Report 2 -->
+      <div class="card report-section">
+        <h4><i class="fas fa-exclamation-circle" style="color:#ff9800;"></i> Incomplete Sections</h4>
+        <p>No lecturer or zero students.</p>
+        <div class="chart-container">
+          <canvas id="incompleteSectionsChart"></canvas>
+        </div>
+        <div class="table-wrapper">
+          <div id="incompleteSectionsTable">
+            <div class="empty-state">
+              <i class="fas fa-list"></i>
+              <p>Tap "Generate" to load</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="text-align:center; margin:12px;">
+        <button class="w3-button btn-blue" id="exportBtn" style="display:none; width:100%; max-width:300px;">
+          <i class="fas fa-download"></i> Export CSV
+        </button>
+      </div>
     </div>
   </div>
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script>
+    // Sidebar toggle
+    function w3_open() {
+      document.getElementById("mySidebar").style.display = "block";
+    }
+    function w3_close() {
+      document.getElementById("mySidebar").style.display = "none";
+    }
+
+    // Session validation
+    const rawSession = localStorage.getItem("TTMSFC_userSession");
+    if (!rawSession) {
+      alert("Please log in first.");
+      window.location.replace("../index.html");
+    }
+
+    let user;
+    try {
+      user = JSON.parse(rawSession);
+    } catch (e) {
+      localStorage.removeItem("TTMSFC_userSession");
+      window.location.replace("../index.html");
+    }
+
+    if (user.inferredRole !== "admin") {
+      alert("Admin access required.");
+      window.location.replace("../index.html");
+    }
+
+    // Logout
+    document.getElementById("navLogout").onclick = function() {
+      if (confirm("Logout now?")) {
+        localStorage.removeItem("TTMSFC_userSession");
+        window.location.replace("../index.html");
+      }
+    };
+
+    // ===== YOUR REPORTS LOGIC (UNCHANGED) =====
     let allLecturers = [], assignments = [], allSections = [], sectionDetails = [];
     let currentSesi = '', currentSemester = '';
     let unusualChart = null;
@@ -352,7 +431,7 @@
       document.getElementById('showJsonUrls').addEventListener('click', showJsonUrls);
     });
 
-    // === AUTH & DATA PROCESSING (same as before) ===
+    // === AUTH & DATA PROCESSING ===
     async function authenticateUser(sessionId) {
       if (!sessionId) throw new Error("No session ID");
       try {
@@ -659,7 +738,7 @@
       });
     }
 
-    // === TABLES (same as before) ===
+    // === TABLES ===
     function renderUnusualEnrollments(sections) {
       const container = document.getElementById('unusualEnrollTable');
       if (sections.length === 0) {
