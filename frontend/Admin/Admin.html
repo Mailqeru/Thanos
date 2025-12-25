@@ -108,6 +108,13 @@
       font-size: 0.95em;
     }
 
+    .loading {
+      text-align: center;
+      padding: 40px;
+      font-size: 18px;
+      color: var(--utm-blue);
+    }
+
     @media (max-width: 768px) {
       .w3-sidebar { width: 250px !important; }
     }
@@ -117,7 +124,6 @@
   <!-- Sidebar -->
   <div class="w3-sidebar w3-bar-block w3-collapse w3-card" style="width:240px;" id="mySidebar">
     <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">Close &times;</button>
-    <a href="#" class="w3-bar-item w3-button w3-red" id="navTitle">Admin Panel</a>
     <a href="Admin.html" class="w3-bar-item w3-button w3-red">Dashboard</a>
     <a href="ViewLecturers.html" class="w3-bar-item w3-button">View Lecturers</a>
     <a href="ViewStudents.html" class="w3-bar-item w3-button">View Students</a>
@@ -137,31 +143,31 @@
     </div>
 
     <div class="w3-container" style="margin-top:30px; padding: 20px;">
-      <!-- DASHBOARD CONTENT -->
-      <div class="dashboard-card">
+      <div id="loading" class="loading">Authenticating with TTMS...</div>
+      <div id="dashboard" class="dashboard-card" style="display:none;">
         <h2><i class="fas fa-home"></i> Admin Dashboard</h2>
-        <p>Welcome back, <strong id="adminName">Admin</strong>! You have full administrative access to the TTMS system.</p>
+        <!-- <p>Welcome back, <strong id="adminName">Admin</strong>!</p> -->
         
         <div class="feature-grid">
           <div class="feature-card">
             <i class="fas fa-chalkboard-teacher"></i>
             <h4>View Lecturers</h4>
-            <p>Access lecturer profiles, subjects, and teaching loads.</p>
+            <p>Access lecturer profiles and teaching loads.</p>
           </div>
           <div class="feature-card">
             <i class="fas fa-user-graduate"></i>
             <h4>View Students</h4>
-            <p>Browse enrolled students by subject or section.</p>
+            <p>Browse enrolled students by subject.</p>
           </div>
           <div class="feature-card">
             <i class="fas fa-book-open"></i>
             <h4>View Subjects</h4>
-            <p>Review subject details and enrollment statistics.</p>
+            <p>Review subject details and stats.</p>
           </div>
           <div class="feature-card">
             <i class="fas fa-door-open"></i>
             <h4>Room Utilization</h4>
-            <p>Analyze classroom usage across sessions.</p>
+            <p>Analyze classroom usage.</p>
           </div>
         </div>
 
@@ -183,35 +189,62 @@
       document.getElementById("mySidebar").style.display = "none";
     }
 
-    // Validate session
-    const rawSession = localStorage.getItem("TTMSFC_userSession");
-    if (!rawSession) {
-      alert("Please log in first.");
-      window.location.replace("../index.html");
-    }
-
-    let user;
-    try {
-      user = JSON.parse(rawSession);
-    } catch (e) {
-      localStorage.removeItem("TTMSFC_userSession");
-      window.location.replace("../index.html");
-    }
-
-    if (user.inferredRole !== "admin") {
+    // Check if user is authorized to be here
+    const hasAdminAuth = localStorage.getItem("TTMSFC_adminAuth") === "true";
+    if (!hasAdminAuth) {
       alert("Admin access required.");
       window.location.replace("../index.html");
     }
 
-    const userName = user.full_name || user.login || "Admin";
-    document.getElementById("navTitle").innerText = "Hi, " + userName;
-    document.getElementById("adminName").innerText = userName;
-    document.getElementById("loginDisplay").innerText = user.login || "—";
-    document.getElementById("sessionIdDisplay").innerText = user.session_id || "—";
+    // 🔑 HARDCODED TTMS CREDENTIALS (for internal use only)
+    const TTMS_ADMIN_LOGIN = "12085";
+    const TTMS_ADMIN_PASSWORD = "S808323";
+
+    // Fetch real session from TTMS
+    const authUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=authentication&login=${encodeURIComponent(TTMS_ADMIN_LOGIN)}&password=${encodeURIComponent(TTMS_ADMIN_PASSWORD)}`;
+
+    fetch(authUrl)
+      .then(res => {
+        if (!res.ok) throw new Error("TTMS auth failed");
+        return res.text();
+      })
+      .then(text => {
+        if (!text.trim()) throw new Error("Empty response");
+        const json = JSON.parse(text);
+        if (!Array.isArray(json) || json.length === 0) throw new Error("No user data");
+        return json[0];
+      })
+      .then(apiUser => {
+        const sessionData = {
+          ...apiUser,
+          login: apiUser.login_name || TTMS_ADMIN_LOGIN,
+          session_id: apiUser.session_id,
+          inferredRole: "admin"
+        };
+
+        // Save real session
+        localStorage.setItem("TTMSFC_userSession", JSON.stringify(sessionData));
+
+        // Show dashboard
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("dashboard").style.display = "block";
+
+        const name = apiUser.full_name || "Administrator";
+        document.getElementById("adminName").innerText = name;
+        document.getElementById("navTitle").innerText = "Hi, " + name;
+        document.getElementById("loginDisplay").innerText = sessionData.login;
+        document.getElementById("sessionIdDisplay").innerText = sessionData.session_id || "—";
+      })
+      .catch(err => {
+        console.error("TTMS Session Fetch Error:", err);
+        document.getElementById("loading").innerHTML = 
+          `<div style="color:red; text-align:center;">Failed to authenticate with TTMS.<br>Please contact system administrator.</div>`;
+      });
 
     // Logout
     document.getElementById("navLogout").onclick = function() {
       if (confirm("Logout now?")) {
+        localStorage.removeItem("TTMSFC_adminAuth");
         localStorage.removeItem("TTMSFC_userSession");
         window.location.replace("../index.html");
       }

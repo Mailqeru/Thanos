@@ -112,29 +112,29 @@
     </div>
 
     <div class="input-group">
-      <label for="login">Matric / Staff ID <em style="color:#888">(or 'admin')</em></label>
-      <input type="text" id="login" placeholder="e.g. A23CS0086 or 'admin'" autocomplete="off" required />
+      <label for="login">ID (Matric / Staff) or <em>admin</em></label>
+      <input type="text" id="login" placeholder="e.g. A23CS0086, 12345, or admin" autocomplete="off" required />
     </div>
 
     <div class="input-group">
-      <label for="password">Password (NRIC) <em style="color:#888">or Session ID</em></label>
-      <input type="password" id="password" placeholder="NRIC or active session ID" required />
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="NRIC, staff password, or admin123@" required />
     </div>
 
     <button class="btn-login" id="btnLogin">Login</button>
     <div id="msg" class="error-message"></div>
   </div>
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script>
-    // Auto-redirect if already logged in
+    // Auto-redirect if already logged in (student/lecturer)
     const existingSession = localStorage.getItem("TTMSFC_userSession");
     if (existingSession) {
       try {
         const user = JSON.parse(existingSession);
         if (user.inferredRole === "lecturer") {
           window.location.replace("Lecturer/Lecturer.html");
-        } else if (user.inferredRole === "admin") {
+        } else if (user.inferredRole === "admin" && !user.isManualAdmin) {
+          // Real TTMS admin (rare) — keep this for completeness
           window.location.replace("Admin/Admin.html");
         } else {
           window.location.replace("Student/Main.html");
@@ -144,61 +144,49 @@
       }
     }
 
-    function isLikelySessionId(str) {
-      return /^\d{12,16}$/.test(str.trim());
+    // Check if admin already authenticated via simple login
+    const adminAuth = localStorage.getItem("TTMSFC_adminAuth");
+    if (adminAuth === "true") {
+      window.location.replace("Admin/Admin.html");
     }
 
-    $("#btnLogin").click(function () {
-      const login = $("#login").val().trim();
-      const password = $("#password").val().trim();
+    function isNumericID(id) {
+      return /^\d+$/.test(id.trim());
+    }
 
-      // Clear previous message
-      $("#msg").text("");
+    document.getElementById("btnLogin").addEventListener("click", function () {
+      const login = document.getElementById("login").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const msg = document.getElementById("msg");
+      msg.textContent = "";
 
       if (!login || !password) {
-        $("#msg").text("Please fill in both fields.");
+        msg.textContent = "Please fill in both fields.";
         return;
       }
 
-      // 🔵 ADMIN MODE: login = "admin" + password = session_id
-      if (login.toLowerCase() === "admin" && isLikelySessionId(password)) {
-        const adminSession = {
-          login: "admin",
-          login_name: "admin",
-          session_id: password,
-          inferredRole: "admin",
-          isManualAdmin: true
-        };
-        localStorage.setItem("TTMSFC_userSession", JSON.stringify(adminSession));
+      // ✅ ADMIN SPECIAL LOGIN
+      if (login === "admin" && password === "admin123@") {
+        localStorage.setItem("TTMSFC_adminAuth", "true");
         window.location.replace("Admin/Admin.html");
         return;
       }
 
-      // 🟢 STUDENT/LECTURER MODE: use TTMS API
+      // 🟢 STUDENT / LECTURER: Use TTMS API
       const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=authentication&login=${encodeURIComponent(login)}&password=${encodeURIComponent(password)}`;
 
       fetch(url)
         .then((res) => {
-          if (!res.ok) {
-            // Most likely: wrong credentials (400/401/404)
-            throw new Error("credentials");
-          }
+          if (!res.ok) throw new Error("credentials");
           return res.text();
         })
         .then(text => {
-          // If response is empty or not JSON, treat as invalid credentials
-          if (!text.trim()) {
-            throw new Error("credentials");
-          }
+          if (!text.trim()) throw new Error("credentials");
           try {
             const json = JSON.parse(text);
-            // If API returns empty array → invalid credentials
-            if (!Array.isArray(json) || json.length === 0) {
-              throw new Error("credentials");
-            }
+            if (!Array.isArray(json) || json.length === 0) throw new Error("credentials");
             return json;
           } catch (e) {
-            // Failed to parse → likely not a valid user
             throw new Error("credentials");
           }
         })
@@ -207,17 +195,15 @@
           let inferredRole = "student";
           const desc = (apiUser.description || "").toLowerCase().trim();
 
+          // Infer role from description (lecturer/staff vs student)
           if (desc.includes("pensyarah") || desc.includes("lecturer") || desc.includes("staff")) {
             inferredRole = "lecturer";
-          } else if (desc.includes("admin") || desc.includes("pentadbir")) {
-            inferredRole = "admin";
-          } else if (desc.includes("pelajar") || desc.includes("student")) {
-            inferredRole = "student";
           }
+          // Note: We don't treat numeric ID as admin here — only via "admin" login
 
           const sessionData = {
             ...apiUser,
-            login: apiUser.login_name,
+            login: apiUser.login_name || login,
             session_id: apiUser.session_id,
             inferredRole: inferredRole
           };
@@ -226,26 +212,24 @@
 
           if (inferredRole === "lecturer") {
             window.location.replace("Lecturer/Lecturer.html");
-          } else if (inferredRole === "admin") {
-            window.location.replace("Admin/Admin.html");
           } else {
             window.location.replace("Student/Main.html");
           }
         })
         .catch((err) => {
-          // Distinguish between credential errors and network errors
           if (err.message === "credentials") {
-            $("#msg").text("Login failed. Matric/Staff ID or password is incorrect.");
+            msg.textContent = "Login failed. ID or password is incorrect.";
           } else {
-            // Network or unexpected error
-            $("#msg").text("Unable to connect to the server. Please check your internet connection.");
+            msg.textContent = "Unable to connect to the server.";
             console.error("Login error:", err);
           }
         });
     });
 
-    $("#password").keypress(function (e) {
-      if (e.which === 13) $("#btnLogin").click();
+    document.getElementById("password").addEventListener("keypress", function (e) {
+      if (e.key === "Enter") {
+        document.getElementById("btnLogin").click();
+      }
     });
   </script>
 </body>

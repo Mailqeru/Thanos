@@ -379,11 +379,13 @@
 
     // Logout
     document.getElementById("navLogout").onclick = function() {
-      if (confirm("Logout now?")) {
-        localStorage.removeItem("TTMSFC_userSession");
-        window.location.replace("../index.html");
-      }
-    };
+  if (confirm("Logout now?")) {
+    // Clear ALL authentication tokens
+    localStorage.removeItem("TTMSFC_userSession");
+    localStorage.removeItem("TTMSFC_adminAuth"); // ← ADD THIS
+    window.location.replace("../index.html");
+  }
+};
 
     // ===== YOUR REPORTS LOGIC (UNCHANGED) =====
     let allLecturers = [], assignments = [], allSections = [], sectionDetails = [];
