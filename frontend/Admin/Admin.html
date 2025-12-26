@@ -10,172 +10,669 @@
     :root {
       --utm-blue: #003366;
       --utm-gold: #C9A85C;
-      --light-bg: #f8f9fc;
-      --input-border: #d1d5db;
-      --error-red: #d32f2f;
-      --success-green: #4CAF50;
-      --warning-yellow: #FFC107;
+      --light-bg: #f5f7fa;
+      --card-bg: #ffffff;
+      --border-color: #e5e7eb;
+      --text-primary: #1f2937;
+      --text-secondary: #6b7280;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
     }
 
     body {
       margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background-color: var(--light-bg);
-      color: #333;
+      color: var(--text-primary);
+      line-height: 1.6;
     }
 
+    /* Sidebar Styles */
     .w3-sidebar {
-      background-color: var(--utm-blue) !important;
-      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+      background: linear-gradient(180deg, var(--utm-blue) 0%, #002244 100%) !important;
+      box-shadow: 2px 0 12px rgba(0,0,0,0.15);
+      z-index: 1000;
+    }
+
+    .sidebar-header {
+      padding: 24px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      text-align: center;
+    }
+
+    .sidebar-logo {
+      font-size: 28px;
+      color: var(--utm-gold);
+      margin-bottom: 8px;
+    }
+
+    .sidebar-title {
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0;
+      letter-spacing: 0.5px;
+    }
+
+    .sidebar-subtitle {
+      color: rgba(255,255,255,0.7);
+      font-size: 12px;
+      margin: 4px 0 0;
     }
 
     .w3-sidebar .w3-bar-item {
-      color: white !important;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.9) !important;
+      border-bottom: none;
+      padding: 16px 20px;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      position: relative;
     }
 
-    .w3-sidebar .w3-bar-item:hover,
-    .w3-sidebar .w3-bar-item.w3-red {
+    .w3-sidebar .w3-bar-item:hover {
+      background-color: rgba(201, 168, 92, 0.15) !important;
+      color: white !important;
+      padding-left: 28px;
+    }
+
+    .w3-sidebar .w3-bar-item.active {
       background-color: var(--utm-gold) !important;
       color: var(--utm-blue) !important;
+      font-weight: 600;
     }
 
-    .w3-main {
-      background-color: #fff;
-      min-height: 100vh;
+    .w3-sidebar .w3-bar-item i {
+      margin-right: 12px;
+      width: 20px;
+      text-align: center;
     }
 
+    /* Header Styles */
     .w3-teal {
-      background-color: var(--utm-blue) !important;
+      background: linear-gradient(135deg, var(--utm-blue) 0%, #004080 100%) !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
-    h1, h2, h3, h4 {
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+    }
+
+    .header-title {
+      margin: 0;
+      color: white;
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: white;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--utm-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
       color: var(--utm-blue);
     }
 
-    .dashboard-card {
-      background: white;
+    /* Main Content */
+    .w3-main {
+      background-color: var(--light-bg);
+      min-height: 100vh;
+      transition: margin-left 0.3s;
+    }
+
+    .content-wrapper {
+      padding: 32px;
+      max-width: 1400px;
+    }
+
+    /* Welcome Section */
+    .welcome-section {
+      background: linear-gradient(135deg, var(--utm-blue) 0%, #004080 100%);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 32px;
+      color: white;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .welcome-title {
+      font-size: 32px;
+      margin: 0 0 8px;
+      font-weight: 700;
+    }
+
+    .welcome-subtitle {
+      font-size: 16px;
+      opacity: 0.9;
+      margin: 0;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border-radius: 12px;
       padding: 24px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      margin-bottom: 20px;
+      box-shadow: var(--shadow-md);
       border-left: 4px solid var(--utm-blue);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      background: linear-gradient(135deg, var(--utm-blue) 0%, #004080 100%);
+      color: white;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin: 0 0 4px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0;
+      line-height: 1;
+    }
+
+    /* Feature Cards */
+    .section-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0 0 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-title i {
+      color: var(--utm-blue);
     }
 
     .feature-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 20px;
-      margin-top: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin-bottom: 32px;
     }
 
     .feature-card {
-      background: #f9fbfd;
-      border: 1px solid #e0e6ed;
-      border-radius: 8px;
-      padding: 16px;
-      text-align: center;
-      transition: transform 0.2s, box-shadow 0.2s;
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 28px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border-color);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: block;
     }
 
     .feature-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--utm-gold);
     }
 
-    .feature-card i {
+    .feature-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
       font-size: 28px;
       color: var(--utm-blue);
-      margin-bottom: 10px;
     }
 
     .feature-card h4 {
-      margin: 10px 0 6px;
-      font-size: 1.1em;
+      margin: 0 0 8px;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
     }
 
     .feature-card p {
-      font-size: 0.95em;
-      color: #666;
+      margin: 0;
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.5;
     }
 
-    .debug-box {
-      background: #f0f8ff;
-      border-left: 4px solid var(--utm-blue);
-      padding: 14px;
-      margin: 20px 0;
-      border-radius: 8px;
-      font-size: 0.95em;
+    .feature-card .arrow {
+      margin-top: 16px;
+      color: var(--utm-blue);
+      font-size: 14px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      opacity: 0;
+      transition: opacity 0.3s;
     }
 
-    .loading {
-      text-align: center;
-      padding: 40px;
-      font-size: 18px;
+    .feature-card:hover .arrow {
+      opacity: 1;
+    }
+
+    /* Session Info Card */
+    .session-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border-color);
+    }
+
+    .session-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .session-header i {
+      font-size: 24px;
       color: var(--utm-blue);
     }
 
+    .session-header h3 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .session-info {
+      display: grid;
+      gap: 16px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      background: var(--light-bg);
+      border-radius: 8px;
+    }
+
+    .info-label {
+      font-size: 14px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .info-value {
+      font-size: 14px;
+      color: var(--text-primary);
+      font-family: 'Courier New', monospace;
+      background: white;
+      padding: 4px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+    }
+
+    .role-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 16px;
+      background: var(--utm-blue);
+      color: white;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    /* Loading State */
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 400px;
+      gap: 20px;
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--border-color);
+      border-top-color: var(--utm-blue);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      font-size: 18px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    /* Error State */
+    .error-container {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      max-width: 500px;
+      margin: 40px auto;
+    }
+
+    .error-icon {
+      font-size: 48px;
+      color: var(--error);
+      margin-bottom: 16px;
+    }
+
+    .error-text {
+      color: #991b1b;
+      font-size: 16px;
+      margin: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+      .w3-sidebar { 
+        width: 240px !important; 
+      }
+      
+      .content-wrapper {
+        padding: 24px 20px;
+      }
+
+      .welcome-section {
+        padding: 24px;
+      }
+
+      .welcome-title {
+        font-size: 24px;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      }
+    }
+
     @media (max-width: 768px) {
-      .w3-sidebar { width: 250px !important; }
+      .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+
+      .user-info {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .stat-value {
+        font-size: 28px;
+      }
+
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
   <!-- Sidebar -->
-  <div class="w3-sidebar w3-bar-block w3-collapse w3-card" style="width:240px;" id="mySidebar">
-    <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">Close &times;</button>
-    <a href="Admin.html" class="w3-bar-item w3-button w3-red">Dashboard</a>
-    <a href="ViewLecturers.html" class="w3-bar-item w3-button">View Lecturers</a>
-    <a href="ViewStudents.html" class="w3-bar-item w3-button">View Students</a>
-    <a href="ViewSubjects.html" class="w3-bar-item w3-button">View Subjects</a>
-    <a href="RoomUtilization.html" class="w3-bar-item w3-button">Room Utilization</a>
-    <a href="Reports.html" class="w3-bar-item w3-button">Reports</a>
-    <a href="#" class="w3-bar-item w3-button" id="navLogout">Logout</a>
+  <div class="w3-sidebar w3-bar-block w3-collapse w3-card" style="width:260px;" id="mySidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <i class="fas fa-graduation-cap"></i>
+      </div>
+      <h2 class="sidebar-title">TTMS</h2>
+      <p class="sidebar-subtitle">Timetable Management System</p>
+    </div>
+    
+    <a href="Admin.html" class="w3-bar-item w3-button active">
+      <i class="fas fa-home"></i> Dashboard
+    </a>
+    <a href="ViewLecturers.html" class="w3-bar-item w3-button">
+      <i class="fas fa-chalkboard-teacher"></i> Lecturers
+    </a>
+    <a href="ViewStudents.html" class="w3-bar-item w3-button">
+      <i class="fas fa-user-graduate"></i> Students
+    </a>
+    <a href="ViewSubjects.html" class="w3-bar-item w3-button">
+      <i class="fas fa-book-open"></i> Subjects
+    </a>
+    <a href="RoomUtilization.html" class="w3-bar-item w3-button">
+      <i class="fas fa-door-open"></i> Room Utilization
+    </a>
+    <a href="Reports.html" class="w3-bar-item w3-button">
+      <i class="fas fa-chart-bar"></i> Reports
+    </a>
+    <a href="#" class="w3-bar-item w3-button" id="navLogout" style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </a>
   </div>
 
   <!-- Main Content -->
-  <div class="w3-main" style="margin-left:240px">
+  <div class="w3-main" style="margin-left:260px">
     <div class="w3-teal">
-      <button class="w3-button w3-teal w3-xlarge w3-hide-large" onclick="w3_open()">&#9776;</button>
+      <button class="w3-button w3-teal w3-xlarge w3-hide-large" onclick="w3_open()" style="padding: 16px;">&#9776;</button>
       <div class="w3-container">
-        <h1 id="pageHeader">Admin Dashboard</h1>
+        <div class="header-content">
+          <h1 class="header-title">Admin Dashboard</h1>
+          <div class="user-info">
+            <div class="user-avatar">A</div>
+            <div>
+              <div style="font-weight: 600; font-size: 14px;">Admin</div>
+              <div style="font-size: 12px; opacity: 0.9;">System Administrator</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="w3-container" style="margin-top:30px; padding: 20px;">
-      <div id="loading" class="loading">Authenticating with TTMS...</div>
-      <div id="dashboard" class="dashboard-card" style="display:none;">
-        <h2><i class="fas fa-home"></i> Admin Dashboard</h2>
-        <!-- <p>Welcome back, <strong id="adminName">Admin</strong>!</p> -->
-        
-        <div class="feature-grid">
-          <div class="feature-card">
-            <i class="fas fa-chalkboard-teacher"></i>
-            <h4>View Lecturers</h4>
-            <p>Access lecturer profiles and teaching loads.</p>
+    <div class="content-wrapper">
+      <!-- Loading State -->
+      <div id="loading" class="loading-container">
+        <div class="spinner"></div>
+        <div class="loading-text">Authenticating with TTMS...</div>
+      </div>
+
+      <!-- Dashboard Content -->
+      <div id="dashboard" style="display:none;">
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+          <h2 class="welcome-title">Welcome back, Admin!</h2>
+          <p class="welcome-subtitle">Here's what's happening with your timetable system today</p>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-header">
+              <div>
+                <p class="stat-label">Total Lecturers</p>
+                <h3 class="stat-value">—</h3>
+              </div>
+              <div class="stat-icon">
+                <i class="fas fa-chalkboard-teacher"></i>
+              </div>
+            </div>
           </div>
-          <div class="feature-card">
-            <i class="fas fa-user-graduate"></i>
-            <h4>View Students</h4>
-            <p>Browse enrolled students by subject.</p>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <div>
+                <p class="stat-label">Total Students</p>
+                <h3 class="stat-value">—</h3>
+              </div>
+              <div class="stat-icon">
+                <i class="fas fa-user-graduate"></i>
+              </div>
+            </div>
           </div>
-          <div class="feature-card">
-            <i class="fas fa-book-open"></i>
-            <h4>View Subjects</h4>
-            <p>Review subject details and stats.</p>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <div>
+                <p class="stat-label">Active Subjects</p>
+                <h3 class="stat-value">—</h3>
+              </div>
+              <div class="stat-icon">
+                <i class="fas fa-book-open"></i>
+              </div>
+            </div>
           </div>
-          <div class="feature-card">
-            <i class="fas fa-door-open"></i>
-            <h4>Room Utilization</h4>
-            <p>Analyze classroom usage.</p>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <div>
+                <p class="stat-label">Total Rooms</p>
+                <h3 class="stat-value">—</h3>
+              </div>
+              <div class="stat-icon">
+                <i class="fas fa-door-open"></i>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="debug-box" style="margin-top: 30px;">
-          <strong>🔐 Session Details:</strong><br>
-          • Account: <code id="loginDisplay">—</code><br>
-          • Role: <strong>Administrator</strong><br>
-          • Session ID: <code id="sessionIdDisplay">—</code>
+        <!-- Quick Actions -->
+        <h3 class="section-title">
+          <i class="fas fa-bolt"></i>
+          Quick Actions
+        </h3>
+        
+        <div class="feature-grid">
+          <a href="ViewLecturers.html" class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-chalkboard-teacher"></i>
+            </div>
+            <h4>View Lecturers</h4>
+            <p>View and manage lecturer profiles, teaching loads, and schedules</p>
+            <span class="arrow">View Details <i class="fas fa-arrow-right"></i></span>
+          </a>
+
+          <a href="ViewStudents.html" class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-user-graduate"></i>
+            </div>
+            <h4>View Students</h4>
+            <p>Browse enrolled students by subject and manage registrations</p>
+            <span class="arrow">View Details <i class="fas fa-arrow-right"></i></span>
+          </a>
+
+          <a href="ViewSubjects.html" class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-book-open"></i>
+            </div>
+            <h4>View Subjects</h4>
+            <p>Review subject details, enrollment statistics, and schedules</p>
+            <span class="arrow">View Details <i class="fas fa-arrow-right"></i></span>
+          </a>
+
+          <a href="RoomUtilization.html" class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-door-open"></i>
+            </div>
+            <h4>Room Utilization</h4>
+            <p>Analyze classroom usage patterns and optimize space allocation</p>
+            <span class="arrow">View Details <i class="fas fa-arrow-right"></i></span>
+          </a>
+
+          <a href="Reports.html" class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-chart-bar"></i>
+            </div>
+            <h4>System Reports</h4>
+            <p>Generate comprehensive reports and analytics</p>
+            <span class="arrow">View Details <i class="fas fa-arrow-right"></i></span>
+          </a>
+        </div>
+
+        <!-- Session Info -->
+        <!--<div class="session-card">
+          <div class="session-header">
+            <i class="fas fa-shield-alt"></i>
+            <h3>Session Information</h3>
+          </div>
+          <div class="session-info">
+            <div class="info-row">
+              <span class="info-label">Account ID</span>
+              <span class="info-value" id="loginDisplay">—</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Access Level</span>
+              <span class="role-badge">
+                <i class="fas fa-user-shield"></i>
+                Administrator
+              </span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Session ID</span>
+              <span class="info-value" id="sessionIdDisplay">—</span>
+            </div>
+          </div> -->
         </div>
       </div>
     </div>
@@ -189,18 +686,18 @@
       document.getElementById("mySidebar").style.display = "none";
     }
 
-    // Check if user is authorized to be here
+    // Check if user is authorized
     const hasAdminAuth = localStorage.getItem("TTMSFC_adminAuth") === "true";
     if (!hasAdminAuth) {
       alert("Admin access required.");
       window.location.replace("../index.html");
     }
 
-    // 🔑 HARDCODED TTMS CREDENTIALS (for internal use only)
+    // TTMS Credentials
     const TTMS_ADMIN_LOGIN = "12085";
     const TTMS_ADMIN_PASSWORD = "S808323";
 
-    // Fetch real session from TTMS
+    // Fetch session from TTMS
     const authUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=authentication&login=${encodeURIComponent(TTMS_ADMIN_LOGIN)}&password=${encodeURIComponent(TTMS_ADMIN_PASSWORD)}`;
 
     fetch(authUrl)
@@ -222,28 +719,30 @@
           inferredRole: "admin"
         };
 
-        // Save real session
         localStorage.setItem("TTMSFC_userSession", JSON.stringify(sessionData));
 
         // Show dashboard
         document.getElementById("loading").style.display = "none";
         document.getElementById("dashboard").style.display = "block";
 
-        const name = apiUser.full_name || "Administrator";
-        document.getElementById("adminName").innerText = name;
-        document.getElementById("navTitle").innerText = "Hi, " + name;
+        // Just use generic admin display, not lecturer name
         document.getElementById("loginDisplay").innerText = sessionData.login;
         document.getElementById("sessionIdDisplay").innerText = sessionData.session_id || "—";
       })
       .catch(err => {
         console.error("TTMS Session Fetch Error:", err);
-        document.getElementById("loading").innerHTML = 
-          `<div style="color:red; text-align:center;">Failed to authenticate with TTMS.<br>Please contact system administrator.</div>`;
+        document.getElementById("loading").innerHTML = `
+          <div class="error-container">
+            <div class="error-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <p class="error-text">Failed to authenticate with TTMS.<br>Please contact your system administrator.</p>
+          </div>
+        `;
       });
 
     // Logout
-    document.getElementById("navLogout").onclick = function() {
-      if (confirm("Logout now?")) {
+    document.getElementById("navLogout").onclick = function(e) {
+      e.preventDefault();
+      if (confirm("Are you sure you want to logout?")) {
         localStorage.removeItem("TTMSFC_adminAuth");
         localStorage.removeItem("TTMSFC_userSession");
         window.location.replace("../index.html");

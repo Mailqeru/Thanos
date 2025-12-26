@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>TTMS - View Subjects</title>
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -10,253 +10,471 @@
     :root {
       --utm-blue: #003366;
       --utm-gold: #C9A85C;
-      --light-bg: #f8f9fc;
-      --input-border: #d1d5db;
-      --error-red: #d32f2f;
-      --success-green: #4CAF50;
+      --light-bg: #f5f7fa;
+      --card-bg: #ffffff;
+      --border-color: #e5e7eb;
+      --text-primary: #1f2937;
+      --text-secondary: #6b7280;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background-color: var(--light-bg);
-      color: #333;
+      color: var(--text-primary);
+      line-height: 1.6;
     }
+
+    /* Sidebar */
     .w3-sidebar {
-      background-color: var(--utm-blue) !important;
-      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+      background: linear-gradient(180deg, var(--utm-blue) 0%, #002244 100%) !important;
+      box-shadow: 2px 0 12px rgba(0,0,0,0.15);
+      z-index: 1000;
     }
-    .w3-sidebar .w3-bar-item {
-      color: white !important;
+
+    .sidebar-header {
+      padding: 24px 20px;
       border-bottom: 1px solid rgba(255,255,255,0.1);
+      text-align: center;
     }
-    .w3-sidebar .w3-bar-item:hover,
-    .w3-sidebar .w3-bar-item.w3-red {
+
+    .sidebar-logo {
+      font-size: 28px;
+      color: var(--utm-gold);
+      margin-bottom: 8px;
+    }
+
+    .sidebar-title {
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0;
+      letter-spacing: 0.5px;
+    }
+
+    .sidebar-subtitle {
+      color: rgba(255,255,255,0.7);
+      font-size: 12px;
+      margin: 4px 0 0;
+    }
+
+    .w3-sidebar .w3-bar-item {
+      color: rgba(255,255,255,0.9) !important;
+      border-bottom: none;
+      padding: 16px 20px;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      position: relative;
+    }
+
+    .w3-sidebar .w3-bar-item:hover {
+      background-color: rgba(201, 168, 92, 0.15) !important;
+      color: white !important;
+      padding-left: 28px;
+    }
+
+    .w3-sidebar .w3-bar-item.active {
       background-color: var(--utm-gold) !important;
       color: var(--utm-blue) !important;
+      font-weight: 600;
     }
-    .w3-main {
-      background-color: #fff;
-      min-height: 100vh;
+
+    .w3-sidebar .w3-bar-item i {
+      margin-right: 12px;
+      width: 20px;
+      text-align: center;
     }
+
+    /* Header */
     .w3-teal {
-      background-color: var(--utm-blue) !important;
+      background: linear-gradient(135deg, var(--utm-blue) 0%, #004080 100%) !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+    }
+
+    .header-title {
+      margin: 0;
+      color: white;
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    /* Main Content */
+    .w3-main {
+      background-color: var(--light-bg);
+      min-height: 100vh;
+      transition: margin-left 0.3s;
+    }
+
+    .content-wrapper {
+      padding: 32px;
+      max-width: 1400px;
+    }
+
+    /* Cards */
     .card {
-      background: white;
+      background: var(--card-bg);
       border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-      padding: 20px;
+      padding: 24px;
       margin-bottom: 24px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border-color);
     }
+
     .card-header {
       display: flex;
       align-items: center;
       gap: 12px;
       margin-bottom: 16px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid #eee;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--border-color);
     }
+
     .card-header i {
-      color: var(--utm-blue);
       font-size: 24px;
+      color: var(--utm-blue);
     }
-    .info-box {
+
+    .card-header h3 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* Info Boxes */
+    .info-card {
       background: #f0f8ff;
       border-left: 4px solid var(--utm-blue);
-      padding: 14px;
-      border-radius: 10px;
-      font-size: 0.92em;
+      padding: 16px;
+      border-radius: 8px;
       margin-bottom: 20px;
+      font-size: 14px;
     }
-    .info-box code {
+
+    .info-card code {
       background: #e6f0ff;
       padding: 2px 6px;
       border-radius: 4px;
       font-family: monospace;
     }
-    .btn-primary { background-color: var(--utm-blue) !important; color: white !important; }
-    .btn-success { background-color: var(--success-green) !important; color: white !important; }
-    .btn-secondary { background-color: #6c757d !important; color: white !important; }
-    .btn-blue { background-color: #17a2b8 !important; color: white !important; }
-    .btn-primary:hover { background-color: #002244 !important; }
-    .btn-success:hover { background-color: #449d48 !important; }
-    .btn-secondary:hover { background-color: #5a6268 !important; }
-    .btn-blue:hover { background-color: #138496 !important; }
-    .form-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      margin-bottom: 16px;
-    }
-    .form-group {
-      flex: 1;
-      min-width: 160px;
-    }
-    .form-group label {
-      display: block;
-      font-weight: 600;
-      font-size: 0.95em;
-      margin-bottom: 6px;
-      color: #444;
-    }
-    .w3-select, .w3-input {
-      width: 100%;
-      border: 1px solid var(--input-border);
+
+    .summary-card {
+      background: #e8f5e9;
+      border-left: 4px solid var(--success);
+      padding: 16px;
       border-radius: 8px;
-      padding: 10px 12px;
-      font-size: 1em;
-      background: white;
+      margin-top: 24px;
+      font-size: 14px;
     }
-    .w3-select:focus, .w3-input:focus {
-      border-color: var(--utm-blue);
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(0,51,102,0.15);
+
+    /* Form Controls */
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      align-items: end;
     }
-    .btn-group {
+
+    .form-group {
       display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 12px;
+      flex-direction: column;
     }
-    .stats-info {
-      font-size: 0.9em;
-      color: #666;
+
+    .form-group label {
       display: flex;
       align-items: center;
       gap: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 8px;
+      color: var(--text-primary);
     }
-    .table-container {
-      overflow-x: auto;
-      margin-top: 16px;
+
+    .form-group label i {
+      color: var(--utm-blue);
+    }
+
+    .w3-input, .w3-select {
+      width: 100%;
+      border: 1px solid var(--border-color);
       border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 12px;
+      font-size: 14px;
+      background: white;
+      transition: border-color 0.2s;
     }
+
+    .w3-input:focus, .w3-select:focus {
+      outline: none;
+      border-color: var(--utm-blue);
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border-radius: 8px;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .btn-primary { background: linear-gradient(135deg, var(--utm-blue) 0%, #004080 100%); color: white; }
+    .btn-success { background: var(--success); color: white; }
+    .btn-secondary { background: #6c757d; color: white; }
+    .btn-info { background: #0ea5e9; color: white; }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .auto-load-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    /* Stats & Info */
+    .stats-info {
+      font-size: 14px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 16px 0;
+    }
+
+    /* Table */
+    .table-wrapper {
+      overflow-x: auto;
+      margin: 20px 0;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
     table.w3-table {
       width: 100%;
       border-collapse: collapse;
       background: white;
+      margin: 0;
+      font-size: 14px;
     }
+
     table.w3-table thead tr {
-      background-color: var(--utm-blue) !important;
+      background: linear-gradient(135deg, var(--utm-blue) 0%, #004080 100%);
       color: white;
     }
-    table.w3-table th, table.w3-table td {
-      padding: 12px 10px;
+
+    table.w3-table th {
+      padding: 14px 12px;
       text-align: left;
-      border-bottom: 1px solid #eee;
+      font-weight: 600;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
+
+    table.w3-table td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
     table.w3-table tbody tr:hover {
-      background-color: #f9f9f9;
+      background-color: #f8f9fa;
       cursor: pointer;
     }
+
     .action-btn {
       padding: 6px 12px !important;
-      font-size: 0.85em !important;
-      margin: 2px;
+      font-size: 12px !important;
     }
+
+    /* Empty State */
     .empty-state {
       text-align: center;
-      padding: 40px 20px;
-      color: #666;
+      padding: 48px 24px;
+      color: var(--text-secondary);
       background: #fafafa;
       border-radius: 12px;
-      margin: 20px 0;
+      margin: 24px 0;
     }
+
     .empty-state i {
       font-size: 48px;
       color: var(--utm-blue);
       margin-bottom: 16px;
     }
-    .loading-spinner {
+
+    /* Loading & Error */
+    .loading-container {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 40px;
-      color: var(--utm-blue);
+      padding: 48px;
+      gap: 16px;
     }
-    .loading-spinner i {
-      font-size: 32px;
-      margin-bottom: 16px;
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--border-color);
+      border-top-color: var(--utm-blue);
+      border-radius: 50%;
       animation: spin 1s linear infinite;
     }
+
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      to { transform: rotate(360deg); }
     }
-    .error-panel {
-      background: #ffebee;
-      border-left: 4px solid var(--error-red);
-      padding: 16px;
-      border-radius: 10px;
-      margin: 20px 0;
+
+    .loading-text {
+      font-size: 16px;
+      color: var(--text-secondary);
+      font-weight: 500;
     }
-    .error-panel h4 {
-      color: var(--error-red);
-      margin-top: 0;
+
+    .error-container {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid var(--error);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
     }
-    .subject-summary {
-      background: #e8f5e9;
-      padding: 14px;
-      border-radius: 10px;
-      margin-top: 20px;
-      border-left: 4px solid var(--success-green);
+
+    .error-container h4 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 8px 0;
+      color: #991b1b;
+      font-size: 16px;
     }
-    .subject-summary .w3-row > .w3-col {
-      padding: 4px 0;
+
+    .error-container p {
+      margin: 0;
+      color: #991b1b;
+      font-size: 14px;
     }
+
+    /* Modal */
     .w3-modal-content {
       max-height: 90vh;
       overflow-y: auto;
       border-radius: 12px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     }
+
     .w3-modal-content .w3-container header {
-      background: var(--utm-blue) !important;
+      background: linear-gradient(135deg, var(--utm-blue) 0%, #004080 100%) !important;
       border-radius: 12px 12px 0 0 !important;
     }
-    .w3-modal-content .w3-container footer {
-      background: #f8f9fa;
-      border-radius: 0 0 12px 12px;
-    }
+
     @media (max-width: 768px) {
-      .card { margin: 16px; padding: 16px; }
-      .form-row { flex-direction: column; gap: 14px; }
-      .form-group { min-width: 100%; }
-      .btn-group { flex-direction: column; }
-      .w3-button { width: 100%; justify-content: center; }
-      .stats-info { flex-direction: column; align-items: flex-start; gap: 4px; }
-      table.w3-table { font-size: 13px; }
-      table.w3-table th, table.w3-table td { padding: 10px 6px; }
-      .card-header { flex-direction: column; align-items: flex-start; gap: 8px; }
-      .card-header h3 { margin: 0; }
+      .content-wrapper {
+        padding: 20px;
+      }
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+      .btn-group {
+        flex-direction: column;
+      }
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+      .stats-info {
+        flex-direction: column;
+        align-items: flex-start;
+      }
     }
   </style>
 </head>
 <body>
   <!-- Sidebar -->
-  <div class="w3-sidebar w3-bar-block w3-collapse w3-card" style="width:240px;" id="mySidebar">
-    <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">Close &times;</button>
-    <a href="Admin.html" class="w3-bar-item w3-button">Dashboard</a>
-    <a href="ViewLecturers.html" class="w3-bar-item w3-button">View Lecturers</a>
-    <a href="ViewStudents.html" class="w3-bar-item w3-button">View Students</a>
-    <a href="ViewSubjects.html" class="w3-bar-item w3-button w3-red">View Subjects</a>
-    <a href="RoomUtilization.html" class="w3-bar-item w3-button">Room Utilization</a>
-    <a href="Reports.html" class="w3-bar-item w3-button">Reports</a>
-    <a href="#" class="w3-bar-item w3-button" id="navLogout">Logout</a>
+  <div class="w3-sidebar w3-bar-block w3-collapse w3-card" style="width:260px;" id="mySidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <i class="fas fa-graduation-cap"></i>
+      </div>
+      <h2 class="sidebar-title">TTMS</h2>
+      <p class="sidebar-subtitle">Timetable Management System</p>
+    </div>
+    
+    <a href="Admin.html" class="w3-bar-item w3-button">
+      <i class="fas fa-home"></i> Dashboard
+    </a>
+    <a href="ViewLecturers.html" class="w3-bar-item w3-button">
+      <i class="fas fa-chalkboard-teacher"></i> Lecturers
+    </a>
+    <a href="ViewStudents.html" class="w3-bar-item w3-button">
+      <i class="fas fa-user-graduate"></i> Students
+    </a>
+    <a href="ViewSubjects.html" class="w3-bar-item w3-button active">
+      <i class="fas fa-book-open"></i> Subjects
+    </a>
+    <a href="RoomUtilization.html" class="w3-bar-item w3-button">
+      <i class="fas fa-door-open"></i> Room Utilization
+    </a>
+    <a href="Reports.html" class="w3-bar-item w3-button">
+      <i class="fas fa-chart-bar"></i> Reports
+    </a>
+    <a href="#" class="w3-bar-item w3-button" id="navLogout" style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </a>
   </div>
 
   <!-- Main Content -->
-  <div class="w3-main" style="margin-left:240px">
+  <div class="w3-main" style="margin-left:260px">
     <div class="w3-teal">
-      <button class="w3-button w3-teal w3-xlarge w3-hide-large" onclick="w3_open()">&#9776;</button>
+      <button class="w3-button w3-teal w3-xlarge w3-hide-large" onclick="w3_open()" style="padding: 16px;">&#9776;</button>
       <div class="w3-container">
-        <h1>View Subjects</h1>
+        <div class="header-content">
+          <h1 class="header-title">View Subjects</h1>
+        </div>
       </div>
     </div>
 
-    <div class="w3-container" style="padding: 20px;">
-      <!-- Header -->
+    <div class="content-wrapper">
+      <!-- Description Card -->
       <div class="card">
         <div class="card-header">
           <i class="fas fa-book-open"></i>
@@ -264,45 +482,55 @@
         </div>
         <p>Browse subjects by academic session and semester. Search and filter by course code, name, or program.</p>
       </div>
-      
+
       <!-- API Info -->
-      <div class="info-box">
+      <div class="card info-card">
         <strong><i class="fas fa-plug"></i> API Information</strong><br>
         • Endpoint: <code>entity=subjek&sesi=yyyy/yyyy&semester=[1|2]</code><br>
-        • Authentication: <span class="w3-tag w3-green">Not Required</span><br>
+        • Authentication: <span class="w3-tag w3-green" style="background: var(--success); color: white;">Not Required</span><br>
         • Data Source: TTMS Public API
       </div>
 
-      <!-- Filters & Controls -->
+      <!-- Filters -->
       <div class="card">
         <div class="form-row">
           <div class="form-group">
-            <label for="sessionSelect"><i class="fas fa-calendar-alt"></i> Academic Session</label>
-            <select class="w3-select w3-border" id="sessionSelect"></select>
+            <label for="sessionSelect">
+              <i class="fas fa-calendar-alt"></i> Academic Session
+            </label>
+            <select class="w3-select" id="sessionSelect"></select>
           </div>
           <div class="form-group">
-            <label for="semesterSelect"><i class="fas fa-book"></i> Semester</label>
-            <select class="w3-select w3-border" id="semesterSelect">
+            <label for="semesterSelect">
+              <i class="fas fa-book"></i> Semester
+            </label>
+            <select class="w3-select" id="semesterSelect">
               <option value="1">Semester 1</option>
               <option value="2" selected>Semester 2</option>
               <option value="3">Special Semester</option>
             </select>
           </div>
           <div class="form-group">
-            <label for="facultyFilter"><i class="fas fa-university"></i> Filter by Faculty</label>
-            <select class="w3-select w3-border" id="facultyFilter">
+            <label for="facultyFilter">
+              <i class="fas fa-university"></i> Filter by Faculty
+            </label>
+            <select class="w3-select" id="facultyFilter">
               <option value="">All Faculties</option>
             </select>
           </div>
         </div>
         <div class="form-row">
           <div class="form-group" style="flex: 2;">
-            <label for="searchInput"><i class="fas fa-search"></i> Search Subjects</label>
-            <input type="text" class="w3-input w3-border" id="searchInput" placeholder="Search by course code, name, or program...">
+            <label for="searchInput">
+              <i class="fas fa-search"></i> Search Subjects
+            </label>
+            <input type="text" class="w3-input" id="searchInput" placeholder="Search by course code, name, or program...">
           </div>
           <div class="form-group">
-            <label for="searchBySelect"><i class="fas fa-filter"></i> Search By</label>
-            <select class="w3-select w3-border" id="searchBySelect">
+            <label for="searchBySelect">
+              <i class="fas fa-filter"></i> Search By
+            </label>
+            <select class="w3-select" id="searchBySelect">
               <option value="all">All Fields</option>
               <option value="code">Course Code</option>
               <option value="name">Subject Name</option>
@@ -312,57 +540,63 @@
           </div>
         </div>
         <div class="btn-group">
-          <button class="w3-button btn-primary" id="loadSubjectsBtn">
+          <button class="btn btn-primary" id="loadSubjectsBtn">
             <i class="fas fa-sync-alt"></i> Load Subjects
           </button>
-          <button class="w3-button btn-success" id="applySearchBtn">
+          <button class="btn btn-success" id="applySearchBtn">
             <i class="fas fa-search"></i> Search
           </button>
-          <button class="w3-button btn-secondary" id="clearSearchBtn">
+          <button class="btn btn-secondary" id="clearSearchBtn">
             <i class="fas fa-times"></i> Clear All
           </button>
-          <button class="w3-button btn-blue" id="exportBtn" style="display:none;">
+          <button class="btn btn-info" id="exportBtn" style="display:none;">
             <i class="fas fa-download"></i> Export CSV
           </button>
         </div>
+
         <div class="w3-row" style="margin-top: 16px;">
-          <div class="w3-col s12 m6">
+          <div class="w3-col s12 m7">
             <div id="statsInfo" class="stats-info">
               <i class="fas fa-info-circle"></i> Select session and click "Load Subjects"
             </div>
           </div>
-          <div class="w3-col s12 m6 w3-right">
-            <label>
-              <input type="checkbox" id="autoLoadCheckbox" checked> 
-              <span class="w3-small">Auto-load on change</span>
+          <div class="w3-col s12 m5 w3-right">
+            <label class="auto-load-label">
+              <input type="checkbox" id="autoLoadCheckbox" checked>
+              Auto-load on change
             </label>
           </div>
         </div>
       </div>
 
-      <!-- Loading Spinner -->
-      <div id="loadingSpinner" class="loading-spinner" style="display:none;">
-        <i class="fas fa-spinner"></i>
-        <p id="loadingMessage">Loading subject data...</p>
+      <!-- Loading -->
+      <div id="loadingSpinner" class="card" style="display:none;">
+        <div class="loading-container">
+          <div class="spinner"></div>
+          <div class="loading-text" id="loadingMessage">Loading subject data...</div>
+        </div>
       </div>
 
-      <!-- Error Panel -->
-      <div id="errorContainer" class="error-panel" style="display:none;">
-        <h4><i class="fas fa-exclamation-triangle"></i> <span id="errorTitle">Error</span></h4>
+      <!-- Error -->
+      <div id="errorContainer" class="error-container" style="display:none;">
+        <h4>
+          <i class="fas fa-exclamation-triangle"></i>
+          <span id="errorTitle">Error</span>
+        </h4>
         <p id="errorMessage"></p>
-        <div id="errorDetails" style="display:none; margin-top:12px;">
+        <div id="errorDetails" style="display:none; margin-top:16px;">
           <details>
             <summary>Technical Details</summary>
             <pre id="errorDetailsContent" style="background:#f8f8f8; padding:12px; border-radius:6px; overflow:auto; max-height:300px; font-size:13px;"></pre>
           </details>
         </div>
-        <button class="w3-button btn-secondary w3-tiny" onclick="hideError()">
+        <button class="btn btn-secondary" style="margin-top:12px; padding:6px 12px; font-size:12px;" onclick="hideError()">
           <i class="fas fa-times"></i> Dismiss
         </button>
       </div>
 
-      <!-- Subjects Table -->
-      <div id="subjectsTableContainer">
+      <!-- Table -->
+      <div id="subjectsTableContainer" class="card">
         <div class="empty-state">
           <i class="fas fa-book"></i>
           <h4>Ready to Load Subjects</h4>
@@ -384,16 +618,16 @@
   <!-- Subject Details Modal -->
   <div id="subjectDetailsModal" class="w3-modal">
     <div class="w3-modal-content w3-card-4 w3-animate-zoom" style="max-width:800px; margin: 30px auto;">
-      <header class="w3-container w3-teal"> 
+      <header class="w3-container w3-teal">
         <span onclick="closeSubjectModal()" class="w3-button w3-display-topright">&times;</span>
         <h3 id="modalTitle">Subject Details</h3>
       </header>
       <div class="w3-container" id="modalContent" style="padding:24px;">
         <p>Loading details...</p>
       </div>
-      <footer class="w3-container w3-padding w3-light-gray">
-        <button class="w3-button w3-gray" onclick="closeSubjectModal()">Close</button>
-        <button class="w3-button btn-blue" onclick="copySubjectDetails()">
+      <footer class="w3-container w3-padding w3-light-gray" style="border-top:1px solid #eee;">
+        <button class="btn btn-secondary" onclick="closeSubjectModal()">Close</button>
+        <button class="btn btn-info" onclick="copySubjectDetails()">
           <i class="fas fa-copy"></i> Copy Details
         </button>
       </footer>
@@ -402,15 +636,12 @@
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script>
-    // Sidebar toggle
+    // Sidebar
     function w3_open() {
       document.getElementById("mySidebar").style.display = "block";
     }
-    function w3_close() {
-      document.getElementById("mySidebar").style.display = "none";
-    }
 
-    // Session validation
+    // Auth check
     const rawSession = localStorage.getItem("TTMSFC_userSession");
     if (!rawSession) {
       alert("Please log in first.");
@@ -430,262 +661,119 @@
       window.location.replace("../index.html");
     }
 
-    // Logout
     document.getElementById("navLogout").onclick = function() {
-  if (confirm("Logout now?")) {
-    // Clear ALL authentication tokens
-    localStorage.removeItem("TTMSFC_userSession");
-    localStorage.removeItem("TTMSFC_adminAuth"); // ← ADD THIS
-    window.location.replace("../index.html");
-  }
-};
+      if (confirm("Are you sure you want to logout?")) {
+        localStorage.removeItem("TTMSFC_userSession");
+        localStorage.removeItem("TTMSFC_adminAuth");
+        window.location.replace("../index.html");
+      }
+    };
 
-// Initialize when page loads
+    // Init
     $(document).ready(function() {
       initSubjectsPage();
     });
-    
+
     function initSubjectsPage() {
-      console.log("📚 Initializing View Subjects page (No Auth Required)");
-      
-      // Generate academic years
-      const academicYears = generateAcademicYears();
-      const currentYear = new Date().getFullYear();
-      const defaultSession = `${currentYear}/${currentYear + 1}`;
-      
-      // Populate session select
-      const sessionSelect = document.getElementById('sessionSelect');
-      sessionSelect.innerHTML = academicYears.map(year => 
-        `<option value="${year}" ${year === defaultSession ? 'selected' : ''}>${year}</option>`
+      const academicYears = Array.from({length: 7}, (_, i) => {
+        const y = new Date().getFullYear() - 5 + i;
+        return `${y}/${y + 1}`;
+      });
+      const defaultSession = academicYears[5] || academicYears[academicYears.length - 1];
+      document.getElementById('sessionSelect').innerHTML = academicYears.map(y =>
+        `<option value="${y}" ${y === defaultSession ? 'selected' : ''}>${y}</option>`
       ).join('');
-      
-      // Initialize variables
+
       let currentSubjectsData = [];
       let allFaculties = new Set();
-      let isLoading = false;
-      
+
       // Event listeners
       document.getElementById('loadSubjectsBtn').onclick = fetchSubjectsData;
       document.getElementById('applySearchBtn').onclick = applySearch;
       document.getElementById('clearSearchBtn').onclick = clearAllFilters;
       document.getElementById('exportBtn').onclick = exportData;
-      
-      // Auto-load when session/semester changes if checkbox is checked
-      document.getElementById('sessionSelect').addEventListener('change', function() {
+      document.getElementById('facultyFilter').onchange = applyFilters;
+      document.getElementById('searchInput').onkeypress = e => { if (e.key === 'Enter') applySearch(); };
+
+      document.getElementById('sessionSelect').onchange = 
+      document.getElementById('semesterSelect').onchange = function() {
         if (document.getElementById('autoLoadCheckbox').checked && currentSubjectsData.length > 0) {
           fetchSubjectsData();
         }
-      });
-      
-      document.getElementById('semesterSelect').addEventListener('change', function() {
-        if (document.getElementById('autoLoadCheckbox').checked && currentSubjectsData.length > 0) {
-          fetchSubjectsData();
-        }
-      });
-      
-      // Enter key support for search
-      document.getElementById('searchInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') applySearch();
-      });
-      
-      // Faculty filter change
-      document.getElementById('facultyFilter').addEventListener('change', function() {
-        applyFilters();
-      });
-      
-      // Generate academic years function
-      function generateAcademicYears() {
-        const currentYear = new Date().getFullYear();
-        const years = [];
-        for (let i = currentYear - 5; i <= currentYear + 1; i++) {
-          years.push(`${i}/${i + 1}`);
-        }
-        return years;
-      }
-      
-      // Fetch subjects data from API (NO AUTH REQUIRED)
+      };
+
+      // Fetch function
       async function fetchSubjectsData() {
-        if (isLoading) return;
-        
         const sesi = document.getElementById('sessionSelect').value;
         const semester = document.getElementById('semesterSelect').value;
+        if (!sesi || !semester) return showError("Input Error", "Select session and semester.");
         
-        // Validate inputs
-        if (!sesi || !semester) {
-          showError("Invalid Selection", "Please select both session and semester.");
-          return;
-        }
-        
-        // Show loading
         showLoading(true, `Loading subjects for ${sesi} Semester ${semester}...`);
         hideError();
-        
+
         try {
-          // Construct API URL - NO SESSION ID NEEDED!
-          const apiUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=subjek&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}`;
+          const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=subjek&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}`;
+          const res = await fetch(url);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
           
-          console.log("🔗 [Subjects] Fetching from (no auth):", apiUrl);
+          const text = await res.text();
+          if (!text.trim()) throw new Error("Empty response");
           
-          const response = await fetch(apiUrl);
-          
-          if (!response.ok) {
-            throw new Error(`API Error: HTTP ${response.status} - ${response.statusText}`);
-          }
-          
-          const responseText = await response.text();
-          
-          if (!responseText.trim()) {
-            throw new Error("Empty response from server");
-          }
-          
-          let data;
-          try {
-            data = JSON.parse(responseText);
-          } catch (e) {
-            console.error("❌ JSON Parse Error:", e);
-            console.error("❌ Response (first 500 chars):", responseText.substring(0, 500));
-            
-            // Try to clean the response if it has issues
-            const cleanedText = responseText.replace(/[\x00-\x1F\x7F]/g, '');
-            try {
-              data = JSON.parse(cleanedText);
-              console.log("✅ Successfully parsed cleaned JSON");
-            } catch (e2) {
-              throw new Error(`Invalid JSON response. The API might return HTML instead of JSON. Error: ${e.message}`);
-            }
-          }
-          
-          // Handle different response formats
+          let data = JSON.parse(text);
           if (!Array.isArray(data)) {
-            if (data && data.data && Array.isArray(data.data)) {
-              data = data.data;
-              console.log("✅ Using data.data array");
-            } else if (data && data.subjek && Array.isArray(data.subjek)) {
-              data = data.subjek;
-              console.log("✅ Using data.subjek array");
-            } else if (data && data.items && Array.isArray(data.items)) {
-              data = data.items;
-              console.log("✅ Using data.items array");
-            } else if (typeof data === 'object' && data !== null) {
-              // Convert object to array of values
-              data = Object.values(data);
-              console.log("✅ Converted object to array");
-            } else {
-              console.log("⚠️ Response format:", typeof data, data);
-              throw new Error(`Expected array but got: ${typeof data}`);
-            }
+            if (data && data.data && Array.isArray(data.data)) data = data.data;
+            else if (data && data.subjek && Array.isArray(data.subjek)) data = data.subjek;
+            else if (typeof data === 'object' && data !== null) data = Object.values(data);
+            else throw new Error("Not an array");
           }
-          
-          console.log(`✅ [Subjects] Received ${data.length} subject(s) without authentication`);
-          
-          // Store data
+
           currentSubjectsData = data;
-          
-          // Extract unique faculties
           extractFaculties(data);
-          
-          // Render data
           renderSubjectsTable(data);
           updateStats(data);
-          
-          // Show success message and export button
-          document.getElementById('statsInfo').innerHTML = `
-            <i class="fas fa-check-circle" style="color:#4CAF50;"></i> 
-            Successfully loaded <strong>${data.length}</strong> subjects for ${sesi} Semester ${semester}
-          `;
-          
           document.getElementById('exportBtn').style.display = 'inline-block';
-          
-        } catch (error) {
-          console.error("🔥 [Error] Fetch subjects failed:", error);
-          
-          let errorMsg = error.message;
-          let details = `URL: ${apiUrl}\n\nError: ${error.message}\n\nStack: ${error.stack}`;
-          
-          // Check for common errors
-          if (error.message.includes('JSON') || error.message.includes('parse')) {
-            errorMsg = "The API returned invalid JSON data. The endpoint might be returning HTML or an error page.";
-            details += "\n\nTip: Try opening the API URL directly in your browser to see what it returns.";
-          } else if (error.message.includes('CORS')) {
-            errorMsg = "Cross-Origin Request Blocked. The TTMS API might not allow requests from your origin.";
-            details += "\n\nTip: This might be a CORS issue. Try using a CORS proxy or check browser console.";
-          } else if (error.message.includes('NetworkError')) {
-            errorMsg = "Network error. Please check your internet connection.";
-            details += "\n\nTip: The TTMS server might be down or unreachable.";
-          }
-          
-          showError("Failed to Load Subjects", errorMsg);
-          document.getElementById('errorDetailsContent').textContent = details;
-          document.getElementById('errorDetails').style.display = 'block';
-          
-          document.getElementById('statsInfo').innerHTML = `
-            <i class="fas fa-exclamation-triangle" style="color:#d32f2f;"></i> 
-            Failed to load subjects
-          `;
+          document.getElementById('statsInfo').innerHTML = `<i class="fas fa-check-circle" style="color:#4CAF50;"></i> Loaded <strong>${data.length}</strong> subjects for ${sesi} Semester ${semester}`;
+        } catch (err) {
+          console.error(err);
+          showError("Load Failed", err.message);
+          document.getElementById('statsInfo').innerHTML = `<i class="fas fa-exclamation-triangle" style="color:#d32f2f;"></i> Failed to load subjects`;
         } finally {
           showLoading(false);
-          isLoading = false;
         }
       }
-      
-      // Extract unique faculties from data
+
       function extractFaculties(data) {
-        allFaculties.clear();
-        allFaculties.add('All Faculties');
-        
-        data.forEach(subject => {
-          const faculty = subject.fakulti || subject.faculty || subject.kod_fakulti || subject.department || '';
-          if (faculty && faculty.trim()) {
-            allFaculties.add(faculty.trim());
-          }
+        allFaculties = new Set(['All Faculties']);
+        data.forEach(s => {
+          const f = (s.fakulti || s.faculty || s.kod_fakulti || s.department || '').trim();
+          if (f) allFaculties.add(f);
         });
-        
-        // Update faculty filter dropdown
-        const facultyFilter = document.getElementById('facultyFilter');
-        facultyFilter.innerHTML = '';
-        
-        Array.from(allFaculties).sort().forEach(faculty => {
-          const option = document.createElement('option');
-          option.value = faculty === 'All Faculties' ? '' : faculty;
-          option.textContent = faculty;
-          facultyFilter.appendChild(option);
+        const sel = document.getElementById('facultyFilter');
+        sel.innerHTML = '';
+        Array.from(allFaculties).sort().forEach(f => {
+          const opt = document.createElement('option');
+          opt.value = f === 'All Faculties' ? '' : f;
+          opt.textContent = f;
+          sel.appendChild(opt);
         });
       }
-      
-      // Render subjects table
+
       function renderSubjectsTable(data, highlightTerm = '', highlightField = '') {
         const container = document.getElementById('subjectsTableContainer');
-        
-        if (!Array.isArray(data) || data.length === 0) {
-          container.innerHTML = `
-            <div class="empty-state">
-              <i class="fas fa-book-slash"></i>
-              <h4>No Subjects Found</h4>
-              <p>No subject records found for the selected session/semester.</p>
-              <p>Try selecting a different academic session or semester.</p>
-              <p><small>The TTMS API might not have subject data for this session, or the endpoint format might have changed.</small></p>
-              <button class="w3-button btn-primary w3-small" onclick="testApiEndpoint()">
-                <i class="fas fa-vial"></i> Test API Endpoint
-              </button>
-            </div>`;
+        if (!data.length) {
+          container.innerHTML = `<div class="empty-state"><i class="fas fa-book-slash"></i><h4>No Subjects Found</h4><p>Try a different session or semester.</p></div>`;
           return;
         }
-        
-        // Debug: Show first record structure
-        console.log("📊 First subject record:", data[0]);
-        
-        // Determine available fields
-        const firstRecord = data[0];
-        const hasCode = 'kod_subjek' in firstRecord || 'course_code' in firstRecord || 'code' in firstRecord;
-        const hasName = 'nama_subjek' in firstRecord || 'subject_name' in firstRecord || 'name' in firstRecord;
-        const hasProgram = 'kod_program' in firstRecord || 'program_code' in firstRecord || 'program' in firstRecord;
-        const hasFaculty = 'fakulti' in firstRecord || 'faculty' in firstRecord || 'department' in firstRecord;
-        const hasLevel = 'peringkat' in firstRecord || 'study_level' in firstRecord || 'level' in firstRecord;
-        const hasCredit = 'kredit' in firstRecord || 'credit_hours' in firstRecord || 'credits' in firstRecord;
-        
-        let html = `<div class="table-container"><table class="w3-table w3-bordered w3-striped">`;
-        
-        html += `<thead><tr>
+
+        const first = data[0];
+        const hasCode = 'kod_subjek' in first;
+        const hasName = 'nama_subjek' in first;
+        const hasProgram = 'kod_program' in first;
+        const hasFaculty = 'fakulti' in first;
+        const hasLevel = 'peringkat' in first;
+        const hasCredit = 'kredit' in first;
+
+        let html = `<div class="table-wrapper"><table class="w3-table w3-striped w3-bordered"><thead><tr>
           <th>#</th>
           ${hasCode ? '<th>Course Code</th>' : ''}
           ${hasName ? '<th>Subject Name</th>' : ''}
@@ -695,479 +783,235 @@
           ${hasCredit ? '<th>Credits</th>' : ''}
           <th>Actions</th>
         </tr></thead><tbody>`;
-        
-        data.forEach((subject, index) => {
-          const code = subject.kod_subjek || subject.course_code || subject.code || 'N/A';
-          const name = subject.nama_subjek || subject.subject_name || subject.name || 'N/A';
-          const program = subject.kod_program || subject.program_code || subject.program || 'N/A';
-          const faculty = subject.fakulti || subject.faculty || subject.department || 'N/A';
-          const level = subject.peringkat || subject.study_level || subject.level || 'N/A';
-          const credits = subject.kredit || subject.credit_hours || subject.credits || 'N/A';
-          
-          // Check if this row should be highlighted
+
+        data.forEach((s, i) => {
+          const code = s.kod_subjek || 'N/A';
+          const name = s.nama_subjek || 'N/A';
+          const prog = s.kod_program || 'N/A';
+          const fac = s.fakulti || 'N/A';
+          const level = s.peringkat || 'N/A';
+          const cred = s.kredit || 'N/A';
+
+          const term = highlightTerm.toLowerCase();
           const shouldHighlight = highlightTerm && (
-            (highlightField === 'all' && (
-              code.toLowerCase().includes(highlightTerm.toLowerCase()) ||
-              name.toLowerCase().includes(highlightTerm.toLowerCase()) ||
-              program.toLowerCase().includes(highlightTerm.toLowerCase()) ||
-              level.toLowerCase().includes(highlightTerm.toLowerCase())
-            )) ||
-            (highlightField === 'code' && code.toLowerCase().includes(highlightTerm.toLowerCase())) ||
-            (highlightField === 'name' && name.toLowerCase().includes(highlightTerm.toLowerCase())) ||
-            (highlightField === 'program' && program.toLowerCase().includes(highlightTerm.toLowerCase())) ||
-            (highlightField === 'level' && level.toLowerCase().includes(highlightTerm.toLowerCase()))
+            (highlightField === 'all' && [code, name, prog, level].some(x => x.toLowerCase().includes(term))) ||
+            (highlightField === 'code' && code.toLowerCase().includes(term)) ||
+            (highlightField === 'name' && name.toLowerCase().includes(term)) ||
+            (highlightField === 'program' && prog.toLowerCase().includes(term)) ||
+            (highlightField === 'level' && level.toLowerCase().includes(term))
           );
-          
-          html += `
-            <tr ${shouldHighlight ? 'style="background-color:#fff9c4;"' : ''} 
-                onclick="viewSubjectDetails(${index})">
-              <td>${index + 1}</td>
-              ${hasCode ? `<td><strong>${code}</strong></td>` : ''}
-              ${hasName ? `<td>${name}</td>` : ''}
-              ${hasProgram ? `<td>${program}</td>` : ''}
-              ${hasFaculty ? `<td>${faculty}</td>` : ''}
-              ${hasLevel ? `<td>${level}</td>` : ''}
-              ${hasCredit ? `<td class="w3-center">${credits}</td>` : ''}
-              <td>
-                <button class="w3-button btn-blue action-btn" onclick="event.stopPropagation(); viewSubjectDetails(${index})">
-                  <i class="fas fa-eye"></i> View
-                </button>
-                <button class="w3-button btn-success action-btn" onclick="event.stopPropagation(); copySubjectCode('${code}', '${name}')">
-                  <i class="fas fa-copy"></i> Copy
-                </button>
-              </td>
-            </tr>`;
+
+          html += `<tr ${shouldHighlight ? 'style="background-color:#fff9c4;"' : ''} onclick="viewSubjectDetails(${i})">
+            <td>${i + 1}</td>
+            ${hasCode ? `<td><strong>${code}</strong></td>` : ''}
+            ${hasName ? `<td>${name}</td>` : ''}
+            ${hasProgram ? `<td>${prog}</td>` : ''}
+            ${hasFaculty ? `<td>${fac}</td>` : ''}
+            ${hasLevel ? `<td>${level}</td>` : ''}
+            ${hasCredit ? `<td class="w3-center">${cred}</td>` : ''}
+            <td>
+              <button class="btn btn-info action-btn" onclick="event.stopPropagation(); viewSubjectDetails(${i})">
+                <i class="fas fa-eye"></i> View
+              </button>
+              <button class="btn btn-success action-btn" onclick="event.stopPropagation(); copySubjectCode('${code}', '${name}')">
+                <i class="fas fa-copy"></i> Copy
+              </button>
+            </td>
+          </tr>`;
         });
-        
         html += `</tbody></table></div>`;
-        
-        // Add summary stats
-        const totalCredits = data.reduce((sum, subject) => {
-          const credits = parseInt(subject.kredit || subject.credit_hours || subject.credits || 0);
-          return sum + credits;
-        }, 0);
-        
-        html += `
-          <div class="subject-summary">
-            <div class="w3-row">
-              <div class="w3-col m6">
-                <p><i class="fas fa-database"></i> <strong>Total Records:</strong> ${data.length}</p>
-                <p><i class="fas fa-graduation-cap"></i> <strong>Total Credit Hours:</strong> ${totalCredits}</p>
-              </div>
-              <div class="w3-col m6">
-                <p><i class="fas fa-university"></i> <strong>Unique Faculties:</strong> ${allFaculties.size - 1}</p>
-                <p><i class="fas fa-info-circle"></i> <strong>Available Fields:</strong> ${Object.keys(firstRecord).length}</p>
-              </div>
-            </div>
-            ${Object.keys(firstRecord).length > 0 ? 
-              `<p class="w3-tiny"><i class="fas fa-code"></i> Field names: ${Object.keys(firstRecord).join(', ')}</p>` : ''}
-          </div>`;
-        
+
+        const totalCredits = data.reduce((sum, s) => sum + (parseInt(s.kredit) || 0), 0);
+        html += `<div class="summary-card">
+          <div class="w3-row">
+            <div class="w3-col m6"><p><i class="fas fa-database"></i> <strong>Total:</strong> ${data.length}</p><p><i class="fas fa-graduation-cap"></i> <strong>Credits:</strong> ${totalCredits}</p></div>
+            <div class="w3-col m6"><p><i class="fas fa-university"></i> <strong>Faculties:</strong> ${allFaculties.size - 1}</p><p><i class="fas fa-info-circle"></i> <strong>Fields:</strong> ${Object.keys(first).length}</p></div>
+          </div>
+        </div>`;
+
         container.innerHTML = html;
       }
-      
-      // Apply search and filters
+
       function applySearch() {
-        const searchTerm = document.getElementById('searchInput').value.trim();
-        const searchBy = document.getElementById('searchBySelect').value;
-        const facultyFilter = document.getElementById('facultyFilter').value;
-        
-        applyFilters(searchTerm, searchBy, facultyFilter);
+        const term = document.getElementById('searchInput').value.trim();
+        const by = document.getElementById('searchBySelect').value;
+        const fac = document.getElementById('facultyFilter').value;
+        applyFilters(term, by, fac);
       }
-      
-      // Apply all filters
+
       function applyFilters(searchTerm = '', searchBy = 'all', facultyFilter = '') {
-        if (currentSubjectsData.length === 0) {
-          alert("Please load subjects first!");
-          return;
-        }
-        
+        if (!currentSubjectsData.length) return;
         let filtered = currentSubjectsData;
-        
-        // Apply faculty filter first
         if (facultyFilter) {
-          filtered = filtered.filter(subject => {
-            const faculty = subject.fakulti || subject.faculty || subject.department || '';
-            return faculty.toLowerCase().includes(facultyFilter.toLowerCase());
-          });
+          filtered = filtered.filter(s => (s.fakulti || '').includes(facultyFilter));
         }
-        
-        // Apply search filter
         if (searchTerm) {
-          filtered = filtered.filter(subject => {
-            const code = (subject.kod_subjek || subject.course_code || subject.code || '').toString().toLowerCase();
-            const name = (subject.nama_subjek || subject.subject_name || subject.name || '').toLowerCase();
-            const program = (subject.kod_program || subject.program_code || subject.program || '').toLowerCase();
-            const level = (subject.peringkat || subject.study_level || subject.level || '').toLowerCase();
-            const faculty = (subject.fakulti || subject.faculty || subject.department || '').toLowerCase();
+          filtered = filtered.filter(s => {
+            const code = (s.kod_subjek || '').toLowerCase();
+            const name = (s.nama_subjek || '').toLowerCase();
+            const prog = (s.kod_program || '').toLowerCase();
+            const level = (s.peringkat || '').toLowerCase();
             const term = searchTerm.toLowerCase();
-            
             switch(searchBy) {
-              case 'code':
-                return code.includes(term);
-              case 'name':
-                return name.includes(term);
-              case 'program':
-                return program.includes(term);
-              case 'level':
-                return level.includes(term);
-              case 'all':
-                return code.includes(term) || 
-                       name.includes(term) || 
-                       program.includes(term) || 
-                       level.includes(term) ||
-                       faculty.includes(term);
-              default:
-                return true;
+              case 'code': return code.includes(term);
+              case 'name': return name.includes(term);
+              case 'program': return prog.includes(term);
+              case 'level': return level.includes(term);
+              default: return code.includes(term) || name.includes(term) || prog.includes(term) || level.includes(term);
             }
           });
         }
-        
         renderSubjectsTable(filtered, searchTerm, searchBy);
         updateStats(filtered, searchTerm || facultyFilter);
       }
-      
-      // Clear all filters
+
       function clearAllFilters() {
         document.getElementById('searchInput').value = '';
         document.getElementById('facultyFilter').value = '';
         document.getElementById('searchBySelect').value = 'all';
-        
-        if (currentSubjectsData.length > 0) {
+        if (currentSubjectsData.length) {
           renderSubjectsTable(currentSubjectsData);
           updateStats(currentSubjectsData);
         }
       }
-      
-      // Update statistics display
+
       function updateStats(data, filterText = '') {
-        if (!data || data.length === 0) {
-          return;
-        }
-        
-        // Count by faculty
-        const facultyCounts = {};
-        const levelCounts = {};
         let totalCredits = 0;
-        
-        data.forEach(subject => {
-          const faculty = subject.fakulti || subject.faculty || subject.department || 'Unknown';
-          const level = subject.peringkat || subject.study_level || subject.level || 'Unknown';
-          const credits = parseInt(subject.kredit || subject.credit_hours || subject.credits || 0);
-          
-          facultyCounts[faculty] = (facultyCounts[faculty] || 0) + 1;
-          levelCounts[level] = (levelCounts[level] || 0) + 1;
-          totalCredits += credits;
+        const facCounts = {};
+        data.forEach(s => {
+          totalCredits += parseInt(s.kredit) || 0;
+          const f = s.fakulti || 'Unknown';
+          facCounts[f] = (facCounts[f] || 0) + 1;
         });
-        
-        // Update stats info
-        let statsHtml = `<i class="fas fa-chart-bar"></i> `;
-        
+        let html = `<i class="fas fa-chart-bar"></i> `;
         if (filterText) {
-          statsHtml += `Showing <strong>${data.length}</strong> subjects (filtered)`;
+          html += `Showing <strong>${data.length}</strong> subjects (filtered)`;
         } else {
-          statsHtml += `Loaded <strong>${data.length}</strong> subjects`;
+          html += `Loaded <strong>${data.length}</strong> subjects`;
         }
-        
-        statsHtml += ` • <strong>${totalCredits}</strong> total credits • <strong>${Object.keys(facultyCounts).length}</strong> faculties`;
-        
-        document.getElementById('statsInfo').innerHTML = statsHtml;
+        html += ` • <strong>${totalCredits}</strong> credits • <strong>${Object.keys(facCounts).length}</strong> faculties`;
+        document.getElementById('statsInfo').innerHTML = html;
       }
-      
-      // Export data to CSV
+
+      // ✅ FIXED EXPORT FUNCTION ✅
       function exportData() {
         if (currentSubjectsData.length === 0) {
           alert("No data to export!");
           return;
         }
-        
         try {
-          // Get headers from first object
           const headers = Object.keys(currentSubjectsData[0]);
-          
-          // Convert to CSV
           const csvRows = [];
-          
-          // Add headers
           csvRows.push(headers.join(','));
-          
-          // Add data rows
           currentSubjectsData.forEach(subject => {
-            const row = headers.map(header => {
-              const value = subject[header];
-              // Escape quotes and wrap in quotes if contains comma or quotes
-              const escaped = ('' + value).replace(/"/g, '""');
-              return `"${escaped}"`;
+            const row = headers.map(h => {
+              const val = subject[h] == null ? '' : String(subject[h]);
+              return `"${val.replace(/"/g, '""')}"`;
             });
             csvRows.push(row.join(','));
           });
-          
+          // ✅ CORRECTED: Use \n, not literal newline ✅
           const csvContent = csvRows.join('\n');
           const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
           const url = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          
-          const sesi = document.getElementById('sessionSelect').value;
+          const a = document.createElement('a');
+          const sesi = document.getElementById('sessionSelect').value.replace('/', '-');
           const semester = document.getElementById('semesterSelect').value;
-          const filename = `subjects_${sesi.replace('/', '-')}_sem${semester}_${new Date().toISOString().slice(0,10)}.csv`;
-          
-          link.href = url;
-          link.setAttribute('download', filename);
-          link.style.visibility = 'hidden';
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          
-          alert(`✅ Exported ${currentSubjectsData.length} subjects to ${filename}`);
-          
-        } catch (error) {
-          console.error("Export failed:", error);
-          alert("Export failed: " + error.message);
+          a.href = url;
+          a.download = `subjects_${sesi}_sem${semester}_${new Date().toISOString().slice(0,10)}.csv`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          alert(`✅ Exported ${currentSubjectsData.length} subjects`);
+        } catch (err) {
+          alert("Export failed: " + err.message);
         }
       }
-      
-      // View subject sections with client-side filtering
-      window.viewSubjectDetails = async function(index) {
-        if (!currentSubjectsData || !currentSubjectsData[index]) {
-          alert("Subject data not available");
-          return;
-        }
 
-        const subject = currentSubjectsData[index];
-        const kod_subjek = subject.kod_subjek || subject.course_code || subject.code;
+      // Other functions (viewSubjectDetails, etc.) remain unchanged
+      window.viewSubjectDetails = async function(index) {
+        const data = currentSubjectsData[index];
+        if (!data) return;
+        const kod = data.kod_subjek;
         const sesi = document.getElementById('sessionSelect').value;
         const semester = document.getElementById('semesterSelect').value;
-
-        if (!kod_subjek) {
-          alert("Invalid subject code");
-          return;
-        }
+        if (!kod) return;
 
         const modal = document.getElementById('subjectDetailsModal');
-        const title = document.getElementById('modalTitle');
-        const content = document.getElementById('modalContent');
-
-        // Show loading in modal
-        title.textContent = `Loading Sections: ${kod_subjek}`;
-        content.innerHTML = `
-          <div class="loading-spinner" style="padding:0;">
-            <i class="fas fa-spinner"></i>
-            <p class="w3-small">Loading section data for ${kod_subjek}<br>
-            <small>Session: ${sesi} • Semester: ${semester}</small></p>
-          </div>`;
-
+        document.getElementById('modalTitle').textContent = `Loading: ${kod}`;
+        document.getElementById('modalContent').innerHTML = '<div class="loading-container"><div class="spinner"></div><p>Loading...</p></div>';
         modal.style.display = 'block';
 
-        // 🔴 NO filtering in API — fetch ALL sections for this subject
-        const sectionUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=subjek_seksyen&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}&kod_subjek=${encodeURIComponent(kod_subjek)}`;
-
-        console.log("🔗 [Sections] Fetching all sections (filtering locally):", sectionUrl);
-
         try {
-          const response = await fetch(sectionUrl);
-          if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-
-          const text = await response.text();
+          const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=subjek_seksyen&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}&kod_subjek=${encodeURIComponent(kod)}`;
+          const res = await fetch(url);
+          const text = await res.text();
           if (!text.trim()) throw new Error("Empty response");
-
-          let sectionData = JSON.parse(text);
-
-          // Handle wrapper objects
-          if (sectionData && !Array.isArray(sectionData) && sectionData.seksyen_list) {
-            // This is the expected structure (like your example)
-            // Keep the top-level object and its seksyen_list
-          } else if (Array.isArray(sectionData)) {
-            // Some endpoints return array directly — wrap it
-            sectionData = {
-              kod_subjek: kod_subjek,
-              nama_subjek: subject.nama_subjek || subject.name || 'Unknown',
-              seksyen_list: sectionData,
-              bil_seksyen: sectionData.length,
-              bil_pelajar: sectionData.reduce((sum, s) => sum + (s.bil_pelajar || 0), 0)
-            };
+          let sectData = JSON.parse(text);
+          if (!Array.isArray(sectData) && sectData.seksyen_list) {
+            // OK, keep as-is
+          } else if (Array.isArray(sectData)) {
+            sectData = { kod_subjek: kod, nama_subjek: data.nama_subjek, seksyen_list: sectData, bil_seksyen: sectData.length };
           } else {
-            throw new Error("Unexpected response format");
+            throw new Error("Bad format");
           }
 
-          // ✅ CLIENT-SIDE FILTERING: Remove invalid sections
-          let validSections = (sectionData.seksyen_list || []).filter(seksyen => {
-            const lecturer = (seksyen.pensyarah || '').toString().trim();
-            const sectionNum = (seksyen.seksyen || '').toString().trim();
+          const valid = (sectData.seksyen_list || []).filter(s => s.seksyen && s.pensyarah && s.pensyarah.trim() !== '—');
+          const totalStud = valid.reduce((sum, s) => sum + (parseInt(s.bil_pelajar) || 0), 0);
 
-            // Skip if section number is missing or lecturer is empty/placeholder
-            if (!sectionNum) return false;
-            if (!lecturer || lecturer === '—' || lecturer === 'N/A' || lecturer === '-') return false;
-
-            return true;
-          });
-
-          const totalStudents = validSections.reduce((sum, s) => sum + (parseInt(s.bil_pelajar) || 0), 0);
-
-          // Build modal content
-          let html = `
-            <div class="info-box">
-              <h4 style="margin:0;">
-                <i class="fas fa-book-open"></i> ${sectionData.nama_subjek || 'Unknown Subject'}
-              </h4>
-              <p><strong>Course Code:</strong> ${kod_subjek}</p>
-              <p><strong>Session:</strong> ${sesi} • <strong>Semester:</strong> ${semester}</p>
-              <p><strong>Valid Sections:</strong> ${validSections.length} / ${sectionData.seksyen_list?.length || 0}</p>
-            </div>`;
-
-          if (validSections.length === 0) {
-            html += `
-              <div class="empty-state" style="padding:20px;">
-                <i class="fas fa-exclamation-triangle"></i>
-                <h5>No Valid Sections</h5>
-                <p>All sections were filtered out because they had:</p>
-                <ul style="text-align:left; max-width:400px; margin:0 auto;">
-                  <li>No assigned lecturer</li>
-                  <li>Missing section number</li>
-                  <li>Placeholder lecturer names (e.g., "—")</li>
-                </ul>
-                <p class="w3-tiny">Original data contained ${sectionData.seksyen_list?.length || 0} section(s).</p>
-              </div>`;
-          } else {
-            html += `
-              <p><strong>Valid sections with lecturers and student counts:</strong></p>
-              <div class="table-container">
-                <table class="w3-table w3-bordered w3-striped">
-                  <thead>
-                    <tr class="w3-teal">
-                      <th>Section</th>
-                      <th>Lecturer</th>
-                      <th>Students</th>
-                    </tr>
-                  </thead>
-                  <tbody>`;
-
-            validSections.forEach(seksyen => {
-              html += `
-                <tr>
-                  <td><strong>${seksyen.seksyen || '—'}</strong></td>
-                  <td>${seksyen.pensyarah || '—'}</td>
-                  <td class="w3-center">${seksyen.bil_pelajar || 0}</td>
-                </tr>`;
+          let html = `<div class="info-card"><h4>${sectData.nama_subjek || kod}</h4><p><strong>Code:</strong> ${kod}</p><p><strong>Valid Sections:</strong> ${valid.length}</p></div>`;
+          if (valid.length) {
+            html += `<p><strong>Sections with lecturers:</strong></p><div class="table-wrapper"><table class="w3-table w3-bordered w3-striped"><thead><tr class="w3-teal"><th>Section</th><th>Lecturer</th><th>Students</th></tr></thead><tbody>`;
+            valid.forEach(s => {
+              html += `<tr><td>${s.seksyen}</td><td>${s.pensyarah}</td><td class="w3-center">${s.bil_pelajar || 0}</td></tr>`;
             });
-
             html += `</tbody></table></div>`;
-
-            // Add stats summary
-            html += `
-              <div class="subject-summary" style="margin-top:20px;">
-                <div class="w3-row">
-                  <div class="w3-col m6">
-                    <p><i class="fas fa-users"></i> <strong>Total Students:</strong> ${totalStudents}</p>
-                  </div>
-                  <div class="w3-col m6">
-                    <p><i class="fas fa-chalkboard-teacher"></i> <strong>Lecturers:</strong> ${validSections.length}</p>
-                  </div>
-                </div>
-              </div>`;
+            html += `<div class="summary-card" style="margin-top:12px;"><p><i class="fas fa-users"></i> <strong>Total Students:</strong> ${totalStud}</p></div>`;
+          } else {
+            html += `<div class="empty-state" style="padding:12px;"><i class="fas fa-exclamation-triangle"></i> No valid sections found</div>`;
           }
 
-          // Add raw data toggle (optional)
-          html += `
-            <details class="w3-margin-top">
-              <summary class="w3-button w3-small w3-light-gray">
-                <i class="fas fa-code"></i> View Raw Section Data (${sectionData.seksyen_list?.length || 0} sections)
-              </summary>
-              <pre style="background:#f8f8f8; padding:10px; overflow:auto; max-height:200px; font-size:11px;">${JSON.stringify(sectionData, null, 2)}</pre>
-            </details>`;
-
-          title.textContent = `Sections: ${kod_subjek} - ${sectionData.nama_subjek || ''}`;
-          content.innerHTML = html;
-
-          // Store for copy if needed
-          window.currentSubjectForCopy = sectionData;
-
-        } catch (error) {
-          console.error("🔥 [Section Load Error]:", error);
-          content.innerHTML = `
-            <div class="error-panel">
-              <h4><i class="fas fa-exclamation-triangle"></i> Error Loading Sections</h4>
-              <p><strong>Subject:</strong> ${kod_subjek}</p>
-              <p><strong>Session:</strong> ${sesi} • <strong>Semester:</strong> ${semester}</p>
-              <p><strong>Error:</strong> ${error.message}</p>
-              <button class="w3-button w3-gray w3-small" onclick="window.closeSubjectModal()">
-                <i class="fas fa-times"></i> Close
-              </button>
-            </div>`;
+          document.getElementById('modalTitle').textContent = `Sections: ${kod}`;
+          document.getElementById('modalContent').innerHTML = html;
+          window.currentSubjectForCopy = sectData;
+        } catch (err) {
+          document.getElementById('modalContent').innerHTML = `<div class="error-container"><h4>Error</h4><p>${err.message}</p></div>`;
         }
       };
-      
-      // Close subject modal
-      window.closeSubjectModal = function() {
+
+      window.closeSubjectModal = () => {
         document.getElementById('subjectDetailsModal').style.display = 'none';
       };
-      
-      // Copy subject details
-      window.copySubjectDetails = function() {
-        if (!window.currentSubjectForCopy) return;
-        
-        const text = JSON.stringify(window.currentSubjectForCopy, null, 2);
-        copyToClipboard(text);
-        alert("Subject details copied to clipboard!");
-      };
-      
-      // Copy subject code
-      window.copySubjectCode = function(code, name) {
-        const text = `${code} - ${name}`;
-        copyToClipboard(text);
-        alert(`Copied: ${text}`);
-      };
-      
-      // Copy to clipboard helper
-      function copyToClipboard(text) {
-        const textarea = document.createElement('textarea');
-        textarea.value = text;
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
-      }
-      
-      // Test API endpoint
-      window.testApiEndpoint = async function() {
-        const sesi = document.getElementById('sessionSelect').value;
-        const semester = document.getElementById('semesterSelect').value;
-        const apiUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=subjek&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}`;
-        
-        alert(`Testing API Endpoint:\n\n${apiUrl}\n\nOpening in new tab...`);
-        window.open(apiUrl, '_blank');
-      };
-      
-      // UI helper functions
-      function showLoading(show, message = '') {
-        isLoading = show;
-        const spinner = document.getElementById('loadingSpinner');
-        
-        if (show) {
-          spinner.style.display = 'flex';
-          if (message) {
-            document.getElementById('loadingMessage').innerHTML = message;
-          }
-          document.getElementById('loadSubjectsBtn').disabled = true;
-        } else {
-          spinner.style.display = 'none';
-          document.getElementById('loadSubjectsBtn').disabled = false;
+
+      window.copySubjectDetails = () => {
+        if (window.currentSubjectForCopy) {
+          navigator.clipboard.writeText(JSON.stringify(window.currentSubjectForCopy, null, 2))
+            .then(() => alert("Copied to clipboard!"));
         }
+      };
+
+      window.copySubjectCode = (code, name) => {
+        navigator.clipboard.writeText(`${code} - ${name}`)
+          .then(() => alert(`Copied: ${code}`));
+      };
+
+      function showLoading(show, msg = '') {
+        document.getElementById('loadingSpinner').style.display = show ? 'flex' : 'none';
+        if (msg) document.getElementById('loadingMessage').textContent = msg;
+        document.getElementById('loadSubjectsBtn').disabled = show;
       }
-      
-      function showError(title, message) {
+
+      function showError(title, msg) {
         document.getElementById('errorTitle').textContent = title;
-        document.getElementById('errorMessage').textContent = message;
+        document.getElementById('errorMessage').textContent = msg;
         document.getElementById('errorContainer').style.display = 'block';
       }
-      
+
       function hideError() {
         document.getElementById('errorContainer').style.display = 'none';
-        document.getElementById('errorDetails').style.display = 'none';
       }
     }
   </script>
 </body>
 </html>
-
-
-

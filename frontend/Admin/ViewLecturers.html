@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>TTMS - View Lecturers</title>
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -10,126 +10,291 @@
     :root {
       --utm-blue: #003366;
       --utm-gold: #C9A85C;
-      --light-bg: #f8f9fc;
-      --input-border: #d1d5db;
-      --error-red: #d32f2f;
-      --success-green: #4CAF50;
-      --warning-yellow: #FFC107;
+      --light-bg: #f5f7fa;
+      --card-bg: #ffffff;
+      --border-color: #e5e7eb;
+      --text-primary: #1f2937;
+      --text-secondary: #6b7280;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
     }
 
     body {
       margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background-color: var(--light-bg);
-      color: #333;
+      color: var(--text-primary);
+      line-height: 1.6;
     }
 
+    /* Sidebar */
     .w3-sidebar {
-      background-color: var(--utm-blue) !important;
-      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+      background: linear-gradient(180deg, var(--utm-blue) 0%, #002244 100%) !important;
+      box-shadow: 2px 0 12px rgba(0,0,0,0.15);
+      z-index: 1000;
+    }
+
+    .sidebar-header {
+      padding: 24px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      text-align: center;
+    }
+
+    .sidebar-logo {
+      font-size: 28px;
+      color: var(--utm-gold);
+      margin-bottom: 8px;
+    }
+
+    .sidebar-title {
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0;
+      letter-spacing: 0.5px;
+    }
+
+    .sidebar-subtitle {
+      color: rgba(255,255,255,0.7);
+      font-size: 12px;
+      margin: 4px 0 0;
     }
 
     .w3-sidebar .w3-bar-item {
-      color: white !important;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.9) !important;
+      border-bottom: none;
+      padding: 16px 20px;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      position: relative;
     }
 
-    .w3-sidebar .w3-bar-item:hover,
-    .w3-sidebar .w3-bar-item.w3-red {
+    .w3-sidebar .w3-bar-item:hover {
+      background-color: rgba(201, 168, 92, 0.15) !important;
+      color: white !important;
+      padding-left: 28px;
+    }
+
+    .w3-sidebar .w3-bar-item.active {
       background-color: var(--utm-gold) !important;
       color: var(--utm-blue) !important;
-    }
-
-    .w3-main {
-      background-color: #fff;
-      min-height: 100vh;
-    }
-
-    .w3-teal {
-      background-color: var(--utm-blue) !important;
-    }
-
-    .search-box {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      margin-bottom: 25px;
-      border: 1px solid #e0e0e0;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    }
-
-    .controls-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      margin-bottom: 16px;
-      align-items: flex-end;
-    }
-
-    .control-group {
-      flex: 1;
-      min-width: 180px;
-    }
-
-    .control-group label {
       font-weight: 600;
-      font-size: 0.95em;
-      color: #444;
-      margin-bottom: 6px;
-      display: block;
+    }
+
+    .w3-sidebar .w3-bar-item i {
+      margin-right: 12px;
+      width: 20px;
+      text-align: center;
+    }
+
+    /* Header */
+    .w3-teal {
+      background: linear-gradient(135deg, var(--utm-blue) 0%, #004080 100%) !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+    }
+
+    .header-title {
+      margin: 0;
+      color: white;
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    /* Main Content */
+    .w3-main {
+      background-color: var(--light-bg);
+      min-height: 100vh;
+      transition: margin-left 0.3s;
+    }
+
+    .content-wrapper {
+      padding: 32px;
+      max-width: 1400px;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border-color);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .card-header i {
+      font-size: 24px;
+      color: var(--utm-blue);
+    }
+
+    .card-header h3 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* Form Controls */
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      align-items: end;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    .form-group label i {
+      color: var(--utm-blue);
     }
 
     .w3-input, .w3-select {
       width: 100%;
-      border: 1px solid var(--input-border);
-      border-radius: 6px;
-      padding: 10px;
-      font-size: 1em;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 14px;
+      background: white;
+      transition: border-color 0.2s;
     }
 
     .w3-input:focus, .w3-select:focus {
-      border-color: var(--utm-blue);
       outline: none;
-      box-shadow: 0 0 0 2px rgba(0,51,102,0.2);
+      border-color: var(--utm-blue);
     }
 
-    .action-buttons {
-      display: flex;
-      gap: 12px;
-      margin-top: 12px;
-      flex-wrap: wrap;
-    }
-
-    .w3-button {
-      border-radius: 6px;
-      font-weight: 600;
-      padding: 10px 18px;
-      transition: all 0.2s ease;
-    }
-
-    .w3-teal { background-color: var(--utm-blue) !important; }
-    .w3-green { background-color: var(--success-green) !important; }
-    .w3-gray { background-color: #6c757d !important; }
-
-    .stats-box {
-      background: #e8f5e9;
-      padding: 14px;
+    .btn {
+      padding: 12px 24px;
       border-radius: 8px;
-      margin: 20px 0;
-      border-left: 4px solid var(--success-green);
-      font-size: 0.95em;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
     }
 
-    .debug-box {
+    .btn-primary {
+      background: linear-gradient(135deg, var(--utm-blue) 0%, #004080 100%);
+      color: white;
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    /* Stats & Debug */
+    .stats-card {
+      background: #e8f5e9;
+      border-left: 4px solid var(--success);
+      padding: 16px;
+      border-radius: 8px;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+
+    .debug-card {
       background: #f0f8ff;
       border-left: 4px solid var(--utm-blue);
-      padding: 14px;
-      margin: 20px 0;
+      padding: 16px;
       border-radius: 8px;
-      font-size: 0.95em;
+      margin: 16px 0;
+      font-size: 14px;
     }
 
-    .highlight { background-color: #fff9c4 !important; }
+    /* Table */
+    .table-wrapper {
+      overflow-x: auto;
+      margin: 20px 0;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    table.w3-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      margin: 0;
+      font-size: 14px;
+    }
+
+    table.w3-table thead tr {
+      background: linear-gradient(135deg, var(--utm-blue) 0%, #004080 100%);
+      color: white;
+    }
+
+    table.w3-table th {
+      padding: 14px 12px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    table.w3-table td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    table.w3-table tbody tr:hover {
+      background-color: #f8f9fa;
+    }
+
+    .highlight {
+      background-color: #fff9c4 !important;
+    }
 
     .lecturer-link {
       color: var(--utm-blue);
@@ -138,162 +303,273 @@
       font-weight: 600;
     }
 
-    table.w3-table thead tr {
-      background-color: var(--utm-blue) !important;
-      color: white;
-    }
-
-    table.w3-table tbody tr:nth-child(even) {
-      background-color: #fafafa;
-    }
-
-    .w3-panel.w3-pale-yellow,
-    .w3-panel.w3-pale-red,
-    .w3-panel.w3-light-blue {
-      border-radius: 8px;
-      margin: 15px 0;
+    /* Panels */
+    .info-panel {
+      border-radius: 12px;
       padding: 20px;
+      margin: 20px 0;
+      font-size: 14px;
     }
 
-    .w3-panel.w3-pale-red { border-left: 4px solid var(--error-red); }
-    .w3-panel.w3-pale-yellow { border-left: 4px solid var(--warning-yellow); }
-    .w3-panel.w3-light-blue { border-left: 4px solid var(--utm-blue); }
+    .panel-yellow {
+      background: #fffbeb;
+      border-left: 4px solid var(--warning);
+      color: #713f12;
+    }
 
-    .loading-spinner {
+    .panel-red {
+      background: #fef2f2;
+      border-left: 4px solid var(--error);
+      color: #991b1b;
+    }
+
+    .panel-blue {
+      background: #f0f9ff;
+      border-left: 4px solid var(--utm-blue);
+      color: var(--utm-blue);
+    }
+
+    /* Loading & Error */
+    .loading-container {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 30px;
-      color: var(--utm-blue);
+      padding: 48px;
+      gap: 16px;
     }
 
-    .loading-spinner i {
-      font-size: 24px;
-      margin-bottom: 10px;
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--border-color);
+      border-top-color: var(--utm-blue);
+      border-radius: 50%;
       animation: spin 1s linear infinite;
     }
 
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      to { transform: rotate(360deg); }
     }
 
-    .error-panel {
-      background: #ffebee;
-      border-left: 4px solid var(--error-red);
-      padding: 14px;
-      border-radius: 10px;
-      margin: 16px 0;
-      font-size: 0.95em;
+    .loading-text {
+      font-size: 16px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .error-container {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid var(--error);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .error-container h4 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 8px 0;
+      color: #991b1b;
+      font-size: 16px;
+    }
+
+    .error-container p {
+      margin: 0;
+      color: #991b1b;
+      font-size: 14px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-secondary);
+      background: #fafafa;
+      border-radius: 8px;
+      margin: 24px 0;
+    }
+
+    .refresh-info {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     @media (max-width: 768px) {
-      .controls-row { flex-direction: column; align-items: stretch; }
-      .action-buttons { flex-direction: column; }
-      .w3-sidebar { width: 250px !important; }
+      .content-wrapper {
+        padding: 20px;
+      }
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
     }
   </style>
 </head>
 <body>
   <!-- Sidebar -->
-  <div class="w3-sidebar w3-bar-block w3-collapse w3-card" style="width:240px;" id="mySidebar">
-    <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">Close &times;</button>
-    <a href="Admin.html" class="w3-bar-item w3-button">Dashboard</a>
-    <a href="ViewLecturers.html" class="w3-bar-item w3-button w3-red">View Lecturers</a>
-    <a href="ViewStudents.html" class="w3-bar-item w3-button">View Students</a>
-    <a href="ViewSubjects.html" class="w3-bar-item w3-button">View Subjects</a>
-    <a href="RoomUtilization.html" class="w3-bar-item w3-button">Room Utilization</a>
-    <a href="Reports.html" class="w3-bar-item w3-button">Reports</a>
-    <a href="#" class="w3-bar-item w3-button" id="navLogout">Logout</a>
+  <div class="w3-sidebar w3-bar-block w3-collapse w3-card" style="width:260px;" id="mySidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <i class="fas fa-graduation-cap"></i>
+      </div>
+      <h2 class="sidebar-title">TTMS</h2>
+      <p class="sidebar-subtitle">Timetable Management System</p>
+    </div>
+    
+    <a href="Admin.html" class="w3-bar-item w3-button">
+      <i class="fas fa-home"></i> Dashboard
+    </a>
+    <a href="ViewLecturers.html" class="w3-bar-item w3-button active">
+      <i class="fas fa-chalkboard-teacher"></i> Lecturers
+    </a>
+    <a href="ViewStudents.html" class="w3-bar-item w3-button">
+      <i class="fas fa-user-graduate"></i> Students
+    </a>
+    <a href="ViewSubjects.html" class="w3-bar-item w3-button">
+      <i class="fas fa-book-open"></i> Subjects
+    </a>
+    <a href="RoomUtilization.html" class="w3-bar-item w3-button">
+      <i class="fas fa-door-open"></i> Room Utilization
+    </a>
+    <a href="Reports.html" class="w3-bar-item w3-button">
+      <i class="fas fa-chart-bar"></i> Reports
+    </a>
+    <a href="#" class="w3-bar-item w3-button" id="navLogout" style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </a>
   </div>
 
   <!-- Main Content -->
-  <div class="w3-main" style="margin-left:240px">
+  <div class="w3-main" style="margin-left:260px">
     <div class="w3-teal">
-      <button class="w3-button w3-teal w3-xlarge w3-hide-large" onclick="w3_open()">&#9776;</button>
+      <button class="w3-button w3-teal w3-xlarge w3-hide-large" onclick="w3_open()" style="padding: 16px;">&#9776;</button>
       <div class="w3-container">
-        <h1>View Lecturers</h1>
+        <div class="header-content">
+          <h1 class="header-title">View Lecturers</h1>
+        </div>
       </div>
     </div>
 
-    <div class="w3-container" style="padding: 20px;">
-      <div class="search-box">
-        <h3><i class="fas fa-search"></i> Search & Filter Lecturers</h3>
-        <div class="controls-row">
-          <div class="control-group">
-            <label for="sessionSelect"><i class="fas fa-calendar-alt"></i> Academic Session</label>
-            <select class="w3-select w3-border" id="sessionSelect"></select>
+    <div class="content-wrapper">
+      <!-- Description Card -->
+      <div class="card">
+        <div class="card-header">
+          <i class="fas fa-search"></i>
+          <h3>Search & Filter Lecturers</h3>
+        </div>
+        <p>Load lecturer data by session and semester. Click on a lecturer name to view assigned subjects.</p>
+      </div>
+
+      <!-- Search Controls -->
+      <div class="card">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="sessionSelect">
+              <i class="fas fa-calendar-alt"></i> Academic Session
+            </label>
+            <select class="w3-select" id="sessionSelect"></select>
           </div>
-          <div class="control-group">
-            <label for="semesterSelect"><i class="fas fa-book"></i> Semester</label>
-            <select class="w3-select w3-border" id="semesterSelect">
+          <div class="form-group">
+            <label for="semesterSelect">
+              <i class="fas fa-book"></i> Semester
+            </label>
+            <select class="w3-select" id="semesterSelect">
               <option value="1">Semester 1</option>
-              <option value="2">Semester 2</option>
+              <option value="2" selected>Semester 2</option>
               <option value="3">Special Semester</option>
             </select>
           </div>
-          <div class="control-group">
-            <label for="searchBySelect"><i class="fas fa-filter"></i> Search By</label>
-            <select class="w3-select w3-border" id="searchBySelect">
+          <div class="form-group">
+            <label for="searchBySelect">
+              <i class="fas fa-filter"></i> Search By
+            </label>
+            <select class="w3-select" id="searchBySelect">
               <option value="name">Lecturer Name</option>
               <option value="staffId">Staff ID</option>
               <option value="both">Both Name & ID</option>
             </select>
           </div>
         </div>
-        <div class="controls-row">
-          <div class="control-group" style="flex: 2;">
-            <label for="searchInput"><i class="fas fa-search"></i> Search Term</label>
-            <input type="text" class="w3-input w3-border" id="searchInput" placeholder="Enter lecturer name or staff ID...">
+        <div class="form-row">
+          <div class="form-group" style="flex: 2;">
+            <label for="searchInput">
+              <i class="fas fa-search"></i> Search Term
+            </label>
+            <input type="text" class="w3-input" id="searchInput" placeholder="Enter lecturer name or staff ID...">
           </div>
         </div>
-        <div class="action-buttons">
-          <button class="w3-button w3-teal" id="loadLecturersBtn"><i class="fas fa-sync-alt"></i> Load Lecturers</button>
-          <button class="w3-button w3-green" id="applySearchBtn"><i class="fas fa-search"></i> Apply Search</button>
-          <button class="w3-button w3-gray" id="clearSearchBtn"><i class="fas fa-times"></i> Clear Search</button>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px;">
+          <button class="btn btn-primary" id="loadLecturersBtn">
+            <i class="fas fa-sync-alt"></i> Load Lecturers
+          </button>
+          <button class="btn btn-success" id="applySearchBtn">
+            <i class="fas fa-search"></i> Apply Search
+          </button>
+          <button class="btn btn-secondary" id="clearSearchBtn">
+            <i class="fas fa-times"></i> Clear Search
+          </button>
         </div>
-        <div class="refresh-info"><i class="fas fa-info-circle"></i> Data auto-refreshes every 25 minutes</div>
+        <div class="refresh-info">
+          <i class="fas fa-info-circle"></i> Data auto-refreshes every 25 minutes
+        </div>
       </div>
 
-      <div class="w3-card w3-padding w3-light-grey">
-        <h4>🔑 Your Login Info</h4>
+      <!-- Auth Info -->
+      <div class="card debug-card">
+        <h4><i class="fas fa-key"></i> Your Login Info</h4>
         <p><strong>Account:</strong> <span id="loginDisplay">...</span></p>
         <p><strong>Password (Session ID):</strong> <span id="sessionIdDisplay">...</span></p>
       </div>
 
-      <div class="w3-card w3-padding w3-pink w3-margin-top">
-        <h4>✅ Real Session ID Used for Data</h4>
+      <div class="card panel-blue">
+        <h4><i class="fas fa-shield-alt"></i> Real Session ID Used for Data</h4>
         <p><strong>Session ID:</strong> <span id="sessionUsedDisplay">Loading...</span></p>
       </div>
 
-      <div id="loadingSpinner" class="loading-spinner" style="display:none;">
-        <i class="fas fa-spinner"></i>
-        <p>Loading lecturers...</p>
+      <!-- Loading -->
+      <div id="loadingSpinner" class="card" style="display:none;">
+        <div class="loading-container">
+          <div class="spinner"></div>
+          <div class="loading-text">Loading lecturers...</div>
+        </div>
       </div>
 
-      <div id="errorContainer" class="error-panel" style="display:none;">
-        <h4><i class="fas fa-exclamation-triangle"></i> <span id="errorTitle">Error</span></h4>
-        <p id="errorMessage" style="margin:0;"></p>
+      <!-- Error -->
+      <div id="errorContainer" class="error-container" style="display:none;">
+        <h4>
+          <i class="fas fa-exclamation-triangle"></i>
+          <span id="errorTitle">Error</span>
+        </h4>
+        <p id="errorMessage"></p>
       </div>
 
-      <div id="lecturerTableContainer" class="w3-margin-top">
-        <p class="w3-center w3-text-grey"><i class="fas fa-spinner fa-spin"></i> Click "Load Lecturers" to begin</p>
+      <!-- Results -->
+      <div id="lecturerTableContainer" class="card">
+        <div class="empty-state">
+          <i class="fas fa-chalkboard-teacher" style="font-size: 48px; opacity: 0.6;"></i>
+          <p>Click "Load Lecturers" to begin</p>
+        </div>
       </div>
     </div>
   </div>
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script>
-    // Sidebar toggle
+    // Sidebar
     function w3_open() {
       document.getElementById("mySidebar").style.display = "block";
     }
-    function w3_close() {
-      document.getElementById("mySidebar").style.display = "none";
-    }
 
-    // Session validation
+    // Auth
     const rawSession = localStorage.getItem("TTMSFC_userSession");
     if (!rawSession) {
       alert("Please log in first.");
@@ -313,28 +589,24 @@
       window.location.replace("../index.html");
     }
 
-    // Set UI
     document.getElementById("loginDisplay").textContent = user.login || "—";
     document.getElementById("sessionIdDisplay").textContent = user.session_id || "—";
 
-    // Logout
     document.getElementById("navLogout").onclick = function() {
-  if (confirm("Logout now?")) {
-    // Clear ALL authentication tokens
-    localStorage.removeItem("TTMSFC_userSession");
-    localStorage.removeItem("TTMSFC_adminAuth"); // ← ADD THIS
-    window.location.replace("../index.html");
-  }
-};
+      if (confirm("Are you sure you want to logout?")) {
+        localStorage.removeItem("TTMSFC_userSession");
+        localStorage.removeItem("TTMSFC_adminAuth");
+        window.location.replace("../index.html");
+      }
+    };
 
-    // ===== YOUR LECTURER LOGIC =====
+    // ===== LECTURER LOGIC =====
     let autoRefreshInterval = null;
     let currentLecturerData = [];
     let currentSessionId = null;
     let currentSesi = '';
     let currentSemester = '';
 
-    // Generate academic years
     function generateAcademicYears() {
       const currentYear = new Date().getFullYear();
       const years = [];
@@ -344,7 +616,6 @@
       return years;
     }
 
-    // Filter lecturers
     function filterLecturers(data, searchTerm, searchBy) {
       if (!searchTerm.trim()) return data;
       const term = searchTerm.toLowerCase().trim();
@@ -358,7 +629,6 @@
       });
     }
 
-    // Show lecturer subjects
     function showLecturerSubjects(staffId, realSessionId, sesi, semester) {
       if (!realSessionId) {
         alert("Real session not loaded yet. Please click 'Load Lecturers' first.");
@@ -366,7 +636,12 @@
       }
 
       const container = document.getElementById("lecturerTableContainer");
-      container.innerHTML = `<p class="w3-center"><i class="fas fa-spinner fa-spin"></i> Loading subjects for staff ID: ${staffId}<br>Filtering for: Session <strong>${sesi}</strong>, Semester <strong>${semester}</strong></p>`;
+      container.innerHTML = `<div class="empty-state">
+        <div class="loading-container">
+          <div class="spinner"></div>
+          <p>Loading subjects for staff ID: ${staffId}<br>Session <strong>${sesi}</strong>, Semester <strong>${semester}</strong></p>
+        </div>
+      </div>`;
 
       const subjectUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pensyarah_subjek&session_id=${encodeURIComponent(realSessionId)}&no_pekerja=${encodeURIComponent(staffId)}`;
 
@@ -378,7 +653,7 @@
         .then(text => {
           if (!text.trim()) throw new Error("Empty response");
           let subjects = JSON.parse(text);
-          if (!Array.isArray(subjects)) throw new Error("Subjects response is not an array");
+          if (!Array.isArray(subjects)) subjects = [subjects];
 
           const filteredSubjects = subjects.filter(subj =>
             (subj.sesi || '').toString() === sesi.toString() &&
@@ -386,44 +661,54 @@
           );
 
           if (filteredSubjects.length === 0) {
-            container.innerHTML = `<div class="w3-panel w3-pale-yellow w3-border">
-              <h3>ℹ️ No Subjects Found</h3>
+            container.innerHTML = `<div class="card panel-yellow">
+              <h4><i class="fas fa-info-circle"></i> No Subjects Found</h4>
               <p>Lecturer <code>${staffId}</code> has no subjects in <strong>${sesi} Semester ${semester}</strong>.</p>
-              <button class="w3-button w3-teal" onclick="initLecturersPageWithFilters('${sesi}', '${semester}');">← Back to Lecturers</button>
+              <button class="btn btn-primary" onclick="initLecturersPageWithFilters('${sesi}', '${semester}');">← Back to Lecturers</button>
             </div>`;
             return;
           }
 
-          let html = `<div class="w3-panel w3-light-blue">
-            <h3><i class="fas fa-book"></i> Subjects for Staff ID: ${staffId}</h3>
+          let html = `<div class="card panel-blue">
+            <h4><i class="fas fa-book"></i> Subjects for Staff ID: ${staffId}</h4>
             <p><strong>Session:</strong> ${sesi} | <strong>Semester:</strong> ${semester}</p>
-            <button class="w3-button w3-teal w3-small" onclick="initLecturersPageWithFilters('${sesi}', '${semester}');">← Back to Lecturers</button>
+            <button class="btn btn-primary" onclick="initLecturersPageWithFilters('${sesi}', '${semester}');">← Back to Lecturers</button>
           </div>
-          <div style="overflow-x:auto;">
-            <table class="w3-table w3-bordered w3-striped w3-white">
-              <thead><tr><th>No.</th><th>Subject Code</th><th>Subject Name</th><th>Credits</th><th>Section</th><th>Session</th><th>Semester</th><th>Students</th></tr></thead>
+          <div class="table-wrapper">
+            <table class="w3-table w3-striped w3-bordered">
+              <thead><tr>
+                <th>No.</th><th>Subject Code</th><th>Subject Name</th><th>Credits</th>
+                <th>Section</th><th>Session</th><th>Semester</th><th>Students</th>
+              </tr></thead>
               <tbody>`;
 
           filteredSubjects.forEach((subj, i) => {
-            html += `<tr><td>${i + 1}</td><td>${subj.kod_subjek || '—'}</td><td>${subj.nama_subjek || '—'}</td><td>${subj.kredit || '—'}</td><td>${subj.seksyen || '—'}</td><td>${subj.sesi || '—'}</td><td>${subj.semester || '—'}</td><td>${subj.bil_pelajar || 0}</td></tr>`;
+            html += `<tr>
+              <td>${i + 1}</td>
+              <td>${subj.kod_subjek || '—'}</td>
+              <td>${subj.nama_subjek || '—'}</td>
+              <td>${subj.kredit || '—'}</td>
+              <td>${subj.seksyen || '—'}</td>
+              <td>${subj.sesi || '—'}</td>
+              <td>${subj.semester || '—'}</td>
+              <td>${subj.bil_pelajar || 0}</td>
+            </tr>`;
           });
 
           html += `</tbody></table></div>`;
           container.innerHTML = html;
         })
         .catch(err => {
-          console.error("🔥 [Error] Loading subjects:", err);
-          container.innerHTML = `<div class="w3-panel w3-pale-red w3-border">
-            <h3>❌ Failed to Load Subjects</h3>
+          container.innerHTML = `<div class="card panel-red">
+            <h4><i class="fas fa-exclamation-triangle"></i> Failed to Load Subjects</h4>
             <p><strong>Staff ID:</strong> ${staffId}</p>
             <p><strong>Filter:</strong> ${sesi} Semester ${semester}</p>
             <p><strong>Error:</strong> ${err.message}</p>
-            <button class="w3-button w3-teal" onclick="initLecturersPageWithFilters('${sesi}', '${semester}');">← Back to Lecturers</button>
+            <button class="btn btn-primary" onclick="initLecturersPageWithFilters('${sesi}', '${semester}');">← Back to Lecturers</button>
           </div>`;
         });
     }
 
-    // Initialize with filters
     function initLecturersPageWithFilters(sesi, semester) {
       initLecturersPage();
       setTimeout(() => {
@@ -432,33 +717,34 @@
       }, 100);
     }
 
-    // Initialize lecturers page
     function initLecturersPage() {
       clearAutoRefresh();
       const academicYears = generateAcademicYears();
       const currentYear = new Date().getFullYear();
       const defaultSession = `${currentYear}/${currentYear + 1}`;
 
-      const controlsHTML = ``; // Already in HTML
+      document.getElementById("sessionSelect").innerHTML = academicYears.map(year => 
+        `<option value="${year}" ${year === defaultSession ? 'selected' : ''}>${year}</option>`
+      ).join('');
 
       document.getElementById("loadLecturersBtn").onclick = fetchLecturerData;
       document.getElementById("applySearchBtn").onclick = applySearch;
       document.getElementById("clearSearchBtn").onclick = clearSearch;
       document.getElementById("searchInput").addEventListener('keypress', e => { if (e.key === 'Enter') applySearch(); });
 
-      // Populate session dropdown
-      document.getElementById("sessionSelect").innerHTML = academicYears.map(year => 
-        `<option value="${year}" ${year === defaultSession ? 'selected' : ''}>${year}</option>`
-      ).join('');
-
       function fetchLecturerData() {
         currentSesi = document.getElementById("sessionSelect").value;
         currentSemester = document.getElementById("semesterSelect").value;
-        document.getElementById("lecturerTableContainer").innerHTML = `<p class="w3-center"><i class="fas fa-spinner fa-spin"></i> Loading lecturers for ${currentSesi} Semester ${currentSemester}...</p>`;
+        document.getElementById("lecturerTableContainer").innerHTML = `<div class="empty-state">
+          <div class="loading-container">
+            <div class="spinner"></div>
+            <p>Loading lecturers for ${currentSesi} Semester ${currentSemester}...</p>
+          </div>
+        </div>`;
 
         const password = user.session_id || user.password || user.id;
         if (!password) {
-          showError("Invalid session", "Session ID not found in session data.");
+          document.getElementById("lecturerTableContainer").innerHTML = `<div class="card panel-red">Invalid session: Session ID not found.</div>`;
           return;
         }
 
@@ -489,45 +775,56 @@
           .then(text => {
             if (!text.trim()) throw new Error("Empty response");
             let data = JSON.parse(text);
-            if (!Array.isArray(data)) throw new Error("Expected array");
+            if (!Array.isArray(data)) data = [data];
             currentLecturerData = data;
             renderLecturerTable(data);
             clearAutoRefresh();
             autoRefreshInterval = setInterval(fetchLecturerData, 25 * 60 * 1000);
           })
           .catch(err => {
-            console.error("🔥 [Error]:", err);
-            document.getElementById("lecturerTableContainer").innerHTML = `<div class="w3-panel w3-pale-red w3-border"><h3>❌ Error Loading Lecturers</h3><p><strong>Session:</strong> ${currentSesi} | <strong>Semester:</strong> ${currentSemester}</p><p><strong>Error:</strong> ${err.message}</p></div>`;
+            document.getElementById("lecturerTableContainer").innerHTML = `<div class="card panel-red">
+              <h4><i class="fas fa-exclamation-triangle"></i> Error Loading Lecturers</h4>
+              <p><strong>Session:</strong> ${currentSesi} | <strong>Semester:</strong> ${currentSemester}</p>
+              <p><strong>Error:</strong> ${err.message}</p>
+            </div>`;
           });
       }
 
       function renderLecturerTable(data, searchTerm = '', searchBy = 'name') {
         const container = document.getElementById("lecturerTableContainer");
         if (!Array.isArray(data) || data.length === 0) {
-          container.innerHTML = `<div class="w3-panel w3-pale-yellow w3-border"><h3>ℹ️ No Lecturers Found</h3><p>No lecturers are assigned for the selected session.</p></div>`;
+          container.innerHTML = `<div class="card panel-yellow">No lecturers found for the selected session.</div>`;
           return;
         }
 
-        let html = `<div class="stats-box"><strong>📊 Statistics:</strong> ${data.length} lecturer(s) found${searchTerm ? ` • ${data.length} matching "${searchTerm}"` : ''}</div>
-        <div style="overflow-x:auto;">
-          <table class="w3-table w3-bordered w3-striped w3-white">
-            <thead><tr><th>No.</th><th>Lecturer Name</th><th>Staff ID</th><th>Subjects</th><th>Sections</th><th>Students</th></tr></thead>
-            <tbody>`;
+        const stats = `<div class="stats-card">
+          <strong>📊 ${data.length} lecturer(s) found</strong>${searchTerm ? ` • Matching: "${searchTerm}"` : ''}
+        </div>`;
+
+        let html = `<div class="table-wrapper"><table class="w3-table w3-striped w3-bordered">
+          <thead><tr>
+            <th>No.</th><th>Lecturer Name</th><th>Staff ID</th>
+            <th>Subjects</th><th>Sections</th><th>Students</th>
+          </tr></thead>
+          <tbody>`;
 
         data.forEach((lect, i) => {
           const name = lect.nama || '—';
           const staffId = lect.no_pekerja || '—';
-          const shouldHighlight = searchTerm && (
-            (searchBy === 'name' && name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            (searchBy === 'staffId' && staffId.toString().includes(searchTerm)) ||
-            (searchBy === 'both' && (name.toLowerCase().includes(searchTerm.toLowerCase()) || staffId.toString().includes(searchTerm)))
-          );
+          const shouldHighlight = searchTerm && filterLecturers([lect], searchTerm, searchBy).length > 0;
           const displayName = staffId !== '—' ? `<a class="lecturer-link" data-staff-id="${staffId}">${name}</a>` : name;
-          html += `<tr ${shouldHighlight ? 'class="highlight"' : ''}><td>${i + 1}</td><td>${displayName}</td><td>${staffId}</td><td>${lect.bil_subjek || 0}</td><td>${lect.bil_seksyen || 0}</td><td>${lect.bil_pelajar || 0}</td></tr>`;
+          html += `<tr ${shouldHighlight ? 'class="highlight"' : ''}>
+            <td>${i + 1}</td>
+            <td>${displayName}</td>
+            <td>${staffId}</td>
+            <td>${lect.bil_subjek || 0}</td>
+            <td>${lect.bil_seksyen || 0}</td>
+            <td>${lect.bil_pelajar || 0}</td>
+          </tr>`;
         });
 
         html += `</tbody></table></div>`;
-        container.innerHTML = html;
+        container.innerHTML = stats + html;
 
         document.querySelectorAll(".lecturer-link").forEach(link => {
           link.addEventListener("click", function() {
@@ -558,22 +855,7 @@
       }
     }
 
-    function showLoading(show) {
-      document.getElementById('loadingSpinner').style.display = show ? 'flex' : 'none';
-      document.getElementById('loadLecturersBtn').disabled = show;
-    }
-
-    function showError(title, message) {
-      document.getElementById('errorTitle').textContent = title;
-      document.getElementById('errorMessage').textContent = message;
-      document.getElementById('errorContainer').style.display = 'block';
-    }
-
-    function hideError() {
-      document.getElementById('errorContainer').style.display = 'none';
-    }
-
-    // Initialize page
+    // Initialize
     initLecturersPage();
   </script>
 </body>

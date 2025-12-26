@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>TTMS - Room Utilization</title>
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -10,162 +10,487 @@
     :root {
       --utm-blue: #003366;
       --utm-gold: #C9A85C;
-      --light-bg: #f8f9fc;
-      --input-border: #d1d5db;
-      --error-red: #d32f2f;
-      --success-green: #4CAF50;
-      --warning-yellow: #ffc107;
+      --light-bg: #f5f7fa;
+      --card-bg: #ffffff;
+      --border-color: #e5e7eb;
+      --text-primary: #1f2937;
+      --text-secondary: #6b7280;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
     }
 
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background-color: var(--light-bg);
-      color: #333;
+      color: var(--text-primary);
+      line-height: 1.6;
     }
 
+    /* Sidebar */
     .w3-sidebar {
-      background-color: var(--utm-blue) !important;
-      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+      background: linear-gradient(180deg, var(--utm-blue) 0%, #002244 100%) !important;
+      box-shadow: 2px 0 12px rgba(0,0,0,0.15);
+      z-index: 1000;
+    }
+
+    .sidebar-header {
+      padding: 24px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      text-align: center;
+    }
+
+    .sidebar-logo {
+      font-size: 28px;
+      color: var(--utm-gold);
+      margin-bottom: 8px;
+    }
+
+    .sidebar-title {
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0;
+      letter-spacing: 0.5px;
+    }
+
+    .sidebar-subtitle {
+      color: rgba(255,255,255,0.7);
+      font-size: 12px;
+      margin: 4px 0 0;
     }
 
     .w3-sidebar .w3-bar-item {
-      color: white !important;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.9) !important;
+      border-bottom: none;
+      padding: 16px 20px;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      position: relative;
     }
 
-    .w3-sidebar .w3-bar-item:hover,
-    .w3-sidebar .w3-bar-item.w3-red {
+    .w3-sidebar .w3-bar-item:hover {
+      background-color: rgba(201, 168, 92, 0.15) !important;
+      color: white !important;
+      padding-left: 28px;
+    }
+
+    .w3-sidebar .w3-bar-item.active {
       background-color: var(--utm-gold) !important;
       color: var(--utm-blue) !important;
+      font-weight: 600;
     }
 
-    .w3-main {
-      background-color: #fff;
-      min-height: 100vh;
-    }
-
-    .w3-teal {
-      background-color: var(--utm-blue) !important;
-    }
-
-    .search-box {
-      background: #f9f9f9;
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      border: 1px solid #ddd;
-    }
-    .controls-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      align-items: flex-end;
-      margin-bottom: 15px;
-    }
-    .control-group {
-      flex: 1;
-      min-width: 180px;
-    }
-    .control-group label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
-      color: #555;
-    }
-    .stats-box {
-      background: #e8f5e9;
-      padding: 15px;
-      border-radius: 6px;
-      margin: 20px 0;
-      border-left: 4px solid #4CAF50;
-    }
-    .no-data {
+    .w3-sidebar .w3-bar-item i {
+      margin-right: 12px;
+      width: 20px;
       text-align: center;
-      padding: 40px;
-      color: #666;
-      font-style: italic;
     }
+
+    /* Header */
+    .w3-teal {
+      background: linear-gradient(135deg, var(--utm-blue) 0%, #004080 100%) !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+    }
+
+    .header-title {
+      margin: 0;
+      color: white;
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    /* Main Content */
+    .w3-main {
+      background-color: var(--light-bg);
+      min-height: 100vh;
+      transition: margin-left 0.3s;
+    }
+
+    .content-wrapper {
+      padding: 32px;
+      max-width: 1400px;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border-color);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .card-header i {
+      font-size: 24px;
+      color: var(--utm-blue);
+    }
+
+    .card-header h3 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .card-description {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin: 0 0 20px 0;
+    }
+
+    /* Form Controls */
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      align-items: end;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    .form-group label i {
+      color: var(--utm-blue);
+    }
+
+    .w3-input, .w3-select {
+      width: 100%;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 14px;
+      background: white;
+      transition: border-color 0.2s;
+    }
+
+    .w3-input:focus, .w3-select:focus {
+      outline: none;
+      border-color: var(--utm-blue);
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border-radius: 8px;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--utm-blue) 0%, #004080 100%);
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 51, 102, 0.3);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Stats */
+    .stats-card {
+      background: #e8f5e9;
+      border-left: 4px solid var(--success);
+      padding: 16px;
+      border-radius: 8px;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+
+    .stats-card strong {
+      color: var(--utm-blue);
+    }
+
+    .filter-info {
+      background: #fffbeb;
+      border-left: 4px solid var(--warning);
+      padding: 12px;
+      border-radius: 6px;
+      margin: 12px 0;
+      font-size: 13px;
+      color: #713f12;
+    }
+
+    /* Chart */
     #chart_div {
       height: 400px;
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+      margin: 24px 0;
+    }
+
+    /* Table */
+    .table-wrapper {
+      overflow-x: auto;
       margin: 20px 0;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
     }
-    .filter-info {
-      background: #fff3cd;
-      padding: 10px;
+
+    table.w3-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      margin: 0;
+      font-size: 14px;
+    }
+
+    table.w3-table thead tr {
+      background: linear-gradient(135deg, var(--utm-blue) 0%, #004080 100%);
+      color: white;
+    }
+
+    table.w3-table th {
+      padding: 14px 12px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    table.w3-table td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    table.w3-table tbody tr:hover {
+      background-color: #f8f9fa;
+    }
+
+    /* Status Tags */
+    .status-high { color: var(--error); font-weight: 600; }
+    .status-medium { color: #f59e0b; font-weight: 600; }
+    .status-normal { color: var(--success); font-weight: 600; }
+    .status-low { color: var(--text-secondary); font-weight: 600; }
+
+    /* Utilization Bar */
+    .util-bar {
+      width: 100%;
+      height: 20px;
+      background: #e5e7eb;
       border-radius: 4px;
-      margin: 10px 0;
-      border-left: 4px solid #ffc107;
-      color: #856404;
+      overflow: hidden;
     }
-    .error-panel {
-      background: #ffebee;
-      border-left: 4px solid var(--error-red);
-      padding: 14px;
-      border-radius: 10px;
-      margin: 16px 12px;
-      font-size: 0.95em;
+
+    .util-fill {
+      height: 100%;
+      background: var(--success);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 6px;
+      color: white;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 4px;
     }
-    .loading-spinner {
+
+    /* Loading & Error */
+    .loading-container {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 30px;
-      color: var(--utm-blue);
+      padding: 48px;
+      gap: 16px;
     }
-    .loading-spinner i {
-      font-size: 24px;
-      margin-bottom: 10px;
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--border-color);
+      border-top-color: var(--utm-blue);
+      border-radius: 50%;
       animation: spin 1s linear infinite;
     }
+
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      font-size: 16px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .error-container {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid var(--error);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .error-container h4 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 8px 0;
+      color: #991b1b;
+      font-size: 16px;
+    }
+
+    .error-container p {
+      margin: 0;
+      color: #991b1b;
+      font-size: 14px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-secondary);
+      background: #fafafa;
+      border-radius: 8px;
+      margin: 24px 0;
+    }
+
+    @media (max-width: 768px) {
+      .content-wrapper {
+        padding: 20px;
+      }
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+      #chart_div {
+        height: 300px;
+      }
     }
   </style>
 </head>
 <body>
   <!-- Sidebar -->
-  <div class="w3-sidebar w3-bar-block w3-collapse w3-card" style="width:240px;" id="mySidebar">
-    <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">Close &times;</button>
-    <a href="Admin.html" class="w3-bar-item w3-button">Dashboard</a>
-    <a href="ViewLecturers.html" class="w3-bar-item w3-button">View Lecturers</a>
-    <a href="ViewStudents.html" class="w3-bar-item w3-button">View Students</a>
-    <a href="ViewSubjects.html" class="w3-bar-item w3-button">View Subjects</a>
-    <a href="RoomUtilization.html" class="w3-bar-item w3-button w3-red">Room Utilization</a>
-    <a href="Reports.html" class="w3-bar-item w3-button">Reports</a>
-    <a href="#" class="w3-bar-item w3-button" id="navLogout">Logout</a>
+  <div class="w3-sidebar w3-bar-block w3-collapse w3-card" style="width:260px;" id="mySidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <i class="fas fa-graduation-cap"></i>
+      </div>
+      <h2 class="sidebar-title">TTMS</h2>
+      <p class="sidebar-subtitle">Timetable Management System</p>
+    </div>
+    
+    <a href="Admin.html" class="w3-bar-item w3-button">
+      <i class="fas fa-home"></i> Dashboard
+    </a>
+    <a href="ViewLecturers.html" class="w3-bar-item w3-button">
+      <i class="fas fa-chalkboard-teacher"></i> Lecturers
+    </a>
+    <a href="ViewStudents.html" class="w3-bar-item w3-button">
+      <i class="fas fa-user-graduate"></i> Students
+    </a>
+    <a href="ViewSubjects.html" class="w3-bar-item w3-button">
+      <i class="fas fa-book-open"></i> Subjects
+    </a>
+    <a href="RoomUtilization.html" class="w3-bar-item w3-button active">
+      <i class="fas fa-door-open"></i> Room Utilization
+    </a>
+    <a href="Reports.html" class="w3-bar-item w3-button">
+      <i class="fas fa-chart-bar"></i> Reports
+    </a>
+    <a href="#" class="w3-bar-item w3-button" id="navLogout" style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </a>
   </div>
 
   <!-- Main Content -->
-  <div class="w3-main" style="margin-left:240px">
+  <div class="w3-main" style="margin-left:260px">
     <div class="w3-teal">
-      <button class="w3-button w3-teal w3-xlarge w3-hide-large" onclick="w3_open()">&#9776;</button>
+      <button class="w3-button w3-teal w3-xlarge w3-hide-large" onclick="w3_open()" style="padding: 16px;">&#9776;</button>
       <div class="w3-container">
-        <h1>Room Utilization Dashboard</h1>
+        <div class="header-content">
+          <h1 class="header-title">Room Utilization Dashboard</h1>
+        </div>
       </div>
     </div>
 
-    <div class="w3-container" style="padding: 20px;">
-      <h3><i class="fas fa-door-open"></i> Room Utilization Dashboard</h3>
-      <p>Analyze classroom usage by faculty, session, and semester. <small style="color:#666;">(Rooms with less than 2 scheduled slots are filtered out)</small></p>
+    <div class="content-wrapper">
+      <!-- Description Card -->
+      <div class="card">
+        <div class="card-header">
+          <i class="fas fa-door-open"></i>
+          <h3>Room Utilization Analysis</h3>
+        </div>
+        <p class="card-description">
+          Analyze classroom usage by faculty, session, and semester. 
+          <em>Rooms with fewer than 2 scheduled slots are excluded from results.</em>
+        </p>
+      </div>
 
-      <div class="search-box">
-        <div class="controls-row">
-          <div class="control-group">
-            <label for="facultySelect"><i class="fas fa-university"></i> Faculty Code</label>
-            <input type="text" class="w3-input w3-border" id="facultySelect" placeholder="e.g. FSKSM" value="FSKSM">
+      <!-- Controls Card -->
+      <div class="card">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="facultySelect">
+              <i class="fas fa-university"></i> Faculty Code
+            </label>
+            <input type="text" class="w3-input" id="facultySelect" placeholder="e.g. FSKSM" value="FSKSM">
           </div>
           
-          <div class="control-group">
-            <label for="sessionSelect"><i class="fas fa-calendar-alt"></i> Academic Session</label>
-            <select class="w3-select w3-border" id="sessionSelect"></select>
+          <div class="form-group">
+            <label for="sessionSelect">
+              <i class="fas fa-calendar-alt"></i> Academic Session
+            </label>
+            <select class="w3-select" id="sessionSelect"></select>
           </div>
           
-          <div class="control-group">
-            <label for="semesterSelect"><i class="fas fa-book"></i> Semester</label>
-            <select class="w3-select w3-border" id="semesterSelect">
+          <div class="form-group">
+            <label for="semesterSelect">
+              <i class="fas fa-book"></i> Semester
+            </label>
+            <select class="w3-select" id="semesterSelect">
               <option value="1">Semester 1</option>
               <option value="2" selected>Semester 2</option>
               <option value="3">Special Semester</option>
@@ -173,44 +498,57 @@
           </div>
         </div>
         
-        <button class="w3-button w3-teal" id="loadBtn">
+        <button class="btn btn-primary" id="loadBtn" style="margin-top: 20px;">
           <i class="fas fa-sync-alt"></i> Analyze Utilization
         </button>
       </div>
 
-      <div id="loadingSpinner" class="loading-spinner" style="display:none;">
-        <i class="fas fa-spinner"></i>
-        <p>Analyzing room utilization... This may take a few seconds.</p>
+      <!-- Loading -->
+      <div id="loadingSpinner" class="card" style="display:none;">
+        <div class="loading-container">
+          <div class="spinner"></div>
+          <div class="loading-text">Analyzing room utilization... This may take a few seconds.</div>
+        </div>
       </div>
 
-      <div id="errorContainer" class="error-panel" style="display:none;">
-        <h4><i class="fas fa-exclamation-triangle"></i> <span id="errorTitle">Error</span></h4>
-        <p id="errorMessage" style="margin:0;"></p>
+      <!-- Error -->
+      <div id="errorContainer" class="error-container" style="display:none;">
+        <h4>
+          <i class="fas fa-exclamation-triangle"></i>
+          <span id="errorTitle">Error</span>
+        </h4>
+        <p id="errorMessage"></p>
       </div>
 
-      <div id="stats" class="stats-box" style="display:none;"></div>
+      <!-- Stats -->
+      <div id="stats" class="stats-card" style="display:none;"></div>
 
+      <!-- Chart -->
       <div id="chart_div"></div>
 
-      <div id="results">
-        <p class="no-data">Configure filters and click "Analyze Utilization" to begin.</p>
+      <!-- Results -->
+      <div id="results" class="card">
+        <div class="empty-state">
+          <i class="fas fa-door-open" style="font-size: 48px; opacity: 0.6;"></i>
+          <p>Configure filters and click "Analyze Utilization" to begin.</p>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Load Google Charts -->
+  <!-- Scripts -->
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script>
-    // Sidebar toggle
+    // ✅ Load Google Charts ONCE at page load
+    google.charts.load('current', { 'packages': ['corechart'] });
+
+    // Sidebar
     function w3_open() {
       document.getElementById("mySidebar").style.display = "block";
     }
-    function w3_close() {
-      document.getElementById("mySidebar").style.display = "none";
-    }
 
-    // Session validation
+    // Auth
     const rawSession = localStorage.getItem("TTMSFC_userSession");
     if (!rawSession) {
       alert("Please log in first.");
@@ -230,18 +568,15 @@
       window.location.replace("../index.html");
     }
 
-    // Logout
     document.getElementById("navLogout").onclick = function() {
-  if (confirm("Logout now?")) {
-    // Clear ALL authentication tokens
-    localStorage.removeItem("TTMSFC_userSession");
-    localStorage.removeItem("TTMSFC_adminAuth"); // ← ADD THIS
-    window.location.replace("../index.html");
-  }
-};
+      if (confirm("Are you sure you want to logout?")) {
+        localStorage.removeItem("TTMSFC_userSession");
+        localStorage.removeItem("TTMSFC_adminAuth");
+        window.location.replace("../index.html");
+      }
+    };
 
-    // ===== YOUR ROOM UTILIZATION LOGIC (UNCHANGED) =====
-    // Generate academic years
+    // Years
     function generateAcademicYears() {
       const currentYear = new Date().getFullYear();
       const years = [];
@@ -251,9 +586,7 @@
       return years;
     }
 
-    // Initialize page
     $(document).ready(function() {
-      // Populate session dropdown
       const sessions = generateAcademicYears();
       const currentYear = new Date().getFullYear();
       const defaultSession = `${currentYear}/${currentYear + 1}`;
@@ -261,7 +594,6 @@
         `<option value="${s}" ${s === defaultSession ? 'selected' : ''}>${s}</option>`
       ).join(''));
 
-      // Load button
       $('#loadBtn').click(analyzeRoomUtilization);
     });
 
@@ -269,7 +601,8 @@
       const faculty = $('#facultySelect').val().trim().toUpperCase();
       const sesi = $('#sessionSelect').val();
       const semester = $('#semesterSelect').val();
-      const MIN_SLOTS_THRESHOLD = 2; // Minimum slots to include room in results
+      const MIN_SLOTS_THRESHOLD = 2;
+      const POSSIBLE_SLOTS_PER_ROOM = 5 * 10 * 14;
 
       if (!faculty) {
         showError("Please enter a faculty code (e.g. FSKSM)");
@@ -279,31 +612,17 @@
       showLoading(true);
       hideError();
       $('#stats').hide();
-      $('#results').html('');
+      $('#results').html('<div class="empty-state"><i class="fas fa-sync"></i><p>Processing data...</p></div>');
 
       try {
-        // Step 1: Get all rooms for faculty
         const roomsUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=ruang&kod_fakulti=${encodeURIComponent(faculty)}&kod_ruang_like=`;
-        console.log("🔗 Fetching rooms:", roomsUrl);
-        
         const roomsRes = await fetch(roomsUrl);
         if (!roomsRes.ok) throw new Error(`Failed to fetch rooms: ${roomsRes.status}`);
         
         const roomsText = await roomsRes.text();
-        let rooms = [];
-        try {
-          rooms = JSON.parse(roomsText);
-        } catch (e) {
-          throw new Error("Invalid room data (not JSON). Faculty code may be invalid.");
-        }
+        let rooms = JSON.parse(roomsText);
+        if (!Array.isArray(rooms)) throw new Error("Invalid room data format");
 
-        if (!Array.isArray(rooms) || rooms.length === 0) {
-          throw new Error(`No rooms found for faculty: ${faculty}`);
-        }
-
-        console.log(`✅ Found ${rooms.length} rooms`);
-
-        // Step 2: Fetch timetable for each room
         const allRoomsData = [];
         let filteredRoomsData = [];
         let roomsWithNoData = 0;
@@ -311,10 +630,6 @@
         let totalUsedSlotsAll = 0;
         let totalUsedSlotsFiltered = 0;
         let totalPossibleSlots = 0;
-
-        // Assume: 5 days/week, 10 slots/day = 50 slots per week
-        // Semester duration: ~14 weeks → 700 possible slots per room
-        const POSSIBLE_SLOTS_PER_ROOM = 5 * 10 * 14; // Adjust as needed
 
         for (const room of rooms) {
           const kod_ruang = room.kod_ruang || room.room_code;
@@ -328,31 +643,18 @@
             let schedule = [];
             if (scheduleText.trim()) {
               schedule = JSON.parse(scheduleText);
-              if (!Array.isArray(schedule)) {
-                schedule = [schedule]; // normalize
-              }
+              if (!Array.isArray(schedule)) schedule = [schedule];
             }
 
             const usedSlots = schedule.length;
             const utilizationPct = Math.min(100, (usedSlots / POSSIBLE_SLOTS_PER_ROOM) * 100);
-
-            const roomData = {
-              room: kod_ruang,
-              used: usedSlots,
-              total: POSSIBLE_SLOTS_PER_ROOM,
-              pct: parseFloat(utilizationPct.toFixed(1))
-            };
+            const roomData = { room: kod_ruang, used: usedSlots, total: POSSIBLE_SLOTS_PER_ROOM, pct: parseFloat(utilizationPct.toFixed(1)) };
 
             allRoomsData.push(roomData);
-            totalUsedSlotsAll += usedSlots;
             totalPossibleSlots += POSSIBLE_SLOTS_PER_ROOM;
+            totalUsedSlotsAll += usedSlots;
 
-            // Track rooms with no data
-            if (usedSlots === 0) {
-              roomsWithNoData++;
-            }
-
-            // Apply filter: only include rooms with 2 or more scheduled slots
+            if (usedSlots === 0) roomsWithNoData++;
             if (usedSlots >= MIN_SLOTS_THRESHOLD) {
               filteredRoomsData.push(roomData);
               totalUsedSlotsFiltered += usedSlots;
@@ -361,172 +663,127 @@
             }
 
           } catch (err) {
-            console.warn(`⚠️ Failed to fetch schedule for ${kod_ruang}:`, err.message);
-            // Still include room with 0 utilization
-            const roomData = {
-              room: kod_ruang,
-              used: 0,
-              total: POSSIBLE_SLOTS_PER_ROOM,
-              pct: 0
-            };
+            const roomData = { room: kod_ruang, used: 0, total: POSSIBLE_SLOTS_PER_ROOM, pct: 0 };
             allRoomsData.push(roomData);
             totalPossibleSlots += POSSIBLE_SLOTS_PER_ROOM;
             roomsWithNoData++;
           }
         }
 
-        // Sort filtered data by utilization % (descending)
         filteredRoomsData.sort((a, b) => b.pct - a.pct);
-
-        // Render results
         renderResults(
-          filteredRoomsData, 
-          faculty, 
-          sesi, 
-          semester, 
-          totalUsedSlotsFiltered, 
-          totalPossibleSlots,
-          allRoomsData.length,
-          roomsWithMinimalUsage,
-          roomsWithNoData
+          filteredRoomsData, faculty, sesi, semester,
+          totalUsedSlotsFiltered, totalPossibleSlots,
+          allRoomsData.length, roomsWithMinimalUsage, roomsWithNoData
         );
 
       } catch (error) {
-        console.error("🔥 Error:", error);
-        showError(error.message);
+        console.error("Error:", error);
+        showError(error.message || "An unknown error occurred.");
       } finally {
         showLoading(false);
       }
     }
 
-    function renderResults(
-      data, 
-      faculty, 
-      sesi, 
-      semester, 
-      totalUsed, 
-      totalPossible, 
-      totalRooms,
-      filteredOutCount,
-      zeroSlotRooms
-    ) {
+    function renderResults(data, faculty, sesi, semester, totalUsed, totalPossible, totalRooms, filteredOutCount, zeroSlotRooms) {
       const avgUtil = totalPossible > 0 ? ((totalUsed / totalPossible) * 100).toFixed(1) : "0.0";
-
-      // Stats
+      
       $('#stats').html(`
         <strong>📊 Summary for ${faculty} • ${sesi} • Semester ${semester}</strong><br>
         • ${totalRooms} total rooms analyzed<br>
         • <strong>${data.length} rooms with ≥2 scheduled slots</strong><br>
         • Average utilization (filtered): <strong>${avgUtil}%</strong><br>
         • Total scheduled slots (filtered): ${totalUsed}<br>
-        <small class="filter-info">
-          <i class="fas fa-filter"></i> Filtered out: ${filteredOutCount} rooms with less than 2 slots (${zeroSlotRooms} with 0 slots)
-        </small>
+        <div class="filter-info">
+          <i class="fas fa-filter"></i> Filtered out: ${filteredOutCount} rooms with &lt;2 slots (${zeroSlotRooms} with 0 slots)
+        </div>
       `).show();
 
-      // Chart
       if (data.length > 0) {
         drawChart(data);
+        renderTable(data);
       } else {
-        $('#chart_div').html('<div class="no-data" style="height:400px; display:flex; align-items:center; justify-content:center;">No rooms meet the minimum 2-slot threshold for visualization</div>');
-      }
-
-      // Table
-      if (data.length === 0) {
+        $('#chart_div').html('<div class="empty-state" style="height:400px; display:flex; align-items:center; justify-content:center;">No rooms meet the minimum 2-slot threshold</div>');
         $('#results').html(`
-          <div class="w3-panel w3-yellow">
-            <h4><i class="fas fa-exclamation-triangle"></i> No rooms meet the criteria</h4>
-            <p>None of the ${totalRooms} rooms have 2 or more scheduled slots for the selected semester.</p>
-            <p>Try selecting a different semester, academic session, or faculty.</p>
+          <div class="empty-state">
+            <i class="fas fa-exclamation-circle" style="color:var(--warning);"></i>
+            <p>No rooms meet the minimum 2-slot threshold.<br>Try a different semester or faculty.</p>
           </div>
         `);
-        return;
       }
+    }
 
-      let html = `
-        <div class="filter-info">
-          <i class="fas fa-info-circle"></i> Showing ${data.length} rooms with 2 or more scheduled slots (${filteredOutCount} rooms filtered out)
-        </div>
-        <div style="overflow-x:auto;">
-          <table class="w3-table w3-bordered w3-striped">
-            <thead>
-              <tr class="w3-teal">
-                <th>Room Code</th>
-                <th>Scheduled Slots</th>
-                <th>Possible Slots</th>
-                <th>Utilization</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>`;
+    function renderTable(data) {
+      let html = `<div class="table-wrapper"><table class="w3-table w3-striped w3-bordered">`;
+      html += `<thead><tr>
+        <th>Room Code</th>
+        <th>Scheduled Slots</th>
+        <th>Possible Slots</th>
+        <th>Utilization</th>
+        <th>Status</th>
+      </tr></thead><tbody>`;
 
       data.forEach(item => {
-        const barWidth = Math.min(100, item.pct);
-        let status = '';
-        let statusClass = '';
-        
-        if (item.pct >= 80) {
-          status = 'High';
-          statusClass = 'w3-text-red';
-        } else if (item.pct >= 50) {
-          status = 'Medium';
-          statusClass = 'w3-text-orange';
-        } else if (item.pct >= 20) {
-          status = 'Normal';
-          statusClass = 'w3-text-green';
-        } else {
-          status = 'Low';
-          statusClass = 'w3-text-blue';
-        }
-        
+        let statusClass = 'status-low', statusText = 'Low';
+        if (item.pct >= 80) { statusClass = 'status-high'; statusText = 'High'; }
+        else if (item.pct >= 50) { statusClass = 'status-medium'; statusText = 'Medium'; }
+        else if (item.pct >= 20) { statusClass = 'status-normal'; statusText = 'Normal'; }
+
+        const fillWidth = Math.min(100, item.pct);
         html += `
           <tr>
             <td><code>${item.room}</code></td>
-            <td><strong>${item.used}</strong> slots</td>
+            <td><strong>${item.used}</strong></td>
             <td>${item.total}</td>
             <td>
-              <div style="width:100%; background:#e0e0e0; border-radius:4px;">
-                <div style="width:${barWidth}%; background:#4CAF50; height:20px; border-radius:4px; text-align:right; color:white; font-size:12px; padding-right:5px;">${item.pct}%</div>
+              <div class="util-bar">
+                <div class="util-fill" style="width:${fillWidth}%">${item.pct}%</div>
               </div>
             </td>
-            <td><span class="${statusClass}">${status}</span></td>
+            <td><span class="${statusClass}">${statusText}</span></td>
           </tr>`;
       });
-
       html += `</tbody></table></div>`;
       $('#results').html(html);
     }
 
     function drawChart(data) {
-      google.charts.load('current', {'packages':['corechart']});
-      google.charts.setOnLoadCallback(() => {
-        const dataTable = new google.visualization.DataTable();
-        dataTable.addColumn('string', 'Room');
-        dataTable.addColumn('number', 'Utilization %');
+      const dataTable = new google.visualization.DataTable();
+      dataTable.addColumn('string', 'Room');
+      dataTable.addColumn('number', 'Utilization %');
 
-        // Show top 15 rooms to avoid clutter
-        const topRooms = data.slice(0, 15);
-        topRooms.forEach(item => {
-          dataTable.addRow([item.room, item.pct]);
-        });
-
-        const options = {
-          title: `Top Room Utilization (%) - Minimum 2 Slots`,
-          titleTextStyle: { fontSize: 16 },
-          hAxis: { title: 'Room Code', textStyle: { fontSize: 10 } },
-          vAxis: { title: 'Utilization %', minValue: 0, maxValue: 100 },
-          backgroundColor: '#f9f9f9',
-          chartArea: { width: '80%', height: '70%' },
-          legend: { position: 'none' }
-        };
-
-        const chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
-        chart.draw(dataTable, options);
+      const topRooms = data.slice(0, 15);
+      topRooms.forEach(item => {
+        dataTable.addRow([item.room, item.pct]);
       });
+
+      const options = {
+        title: 'Top Room Utilization (%) – Minimum 2 Slots',
+        titleTextStyle: { fontSize: 16, color: '#1f2937' },
+        hAxis: {
+          title: 'Room Code',
+          textStyle: { fontSize: 11, color: '#6b7280' },
+          titleTextStyle: { fontSize: 12 }
+        },
+        vAxis: {
+          title: 'Utilization %',
+          minValue: 0,
+          maxValue: 100,
+          textStyle: { fontSize: 11, color: '#6b7280' },
+          titleTextStyle: { fontSize: 12 }
+        },
+        backgroundColor: '#ffffff',
+        chartArea: { left: 60, top: 40, width: '80%', height: '70%' },
+        legend: { position: 'none' },
+        series: { 0: { color: '#10b981' } }
+      };
+
+      const chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+      chart.draw(dataTable, options);
     }
 
     function showLoading(show) {
-      document.getElementById('loadingSpinner').style.display = show ? 'flex' : 'none';
+      document.getElementById('loadingSpinner').style.display = show ? 'block' : 'none';
       document.getElementById('loadBtn').disabled = show;
     }
 
