@@ -35,7 +35,6 @@
       line-height: 1.6;
     }
 
-    /* Sidebar Styles */
     .w3-sidebar {
       background: linear-gradient(180deg, var(--utm-blue) 0%, #002244 100%) !important;
       box-shadow: 2px 0 12px rgba(0,0,0,0.15);
@@ -95,7 +94,6 @@
       text-align: center;
     }
 
-    /* Header Styles */
     .w3-teal {
       background: linear-gradient(135deg, var(--utm-blue) 0%, #004080 100%) !important;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -134,7 +132,6 @@
       color: var(--utm-blue);
     }
 
-    /* Main Content */
     .w3-main {
       background-color: var(--light-bg);
       min-height: 100vh;
@@ -146,7 +143,6 @@
       max-width: 1400px;
     }
 
-    /* Welcome Section */
     .welcome-section {
       background: linear-gradient(135deg, var(--utm-blue) 0%, #004080 100%);
       border-radius: 16px;
@@ -168,7 +164,6 @@
       margin: 0;
     }
 
-    /* Stats Grid */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -226,7 +221,15 @@
       line-height: 1;
     }
 
-    /* Feature Cards */
+    .stat-loading {
+      width: 24px;
+      height: 24px;
+      border: 3px solid var(--border-color);
+      border-top-color: var(--utm-blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
     .section-title {
       font-size: 24px;
       font-weight: 700;
@@ -310,7 +313,6 @@
       opacity: 1;
     }
 
-    /* Session Info Card */
     .session-card {
       background: var(--card-bg);
       border-radius: 12px;
@@ -382,7 +384,6 @@
       font-weight: 600;
     }
 
-    /* Loading State */
     .loading-container {
       display: flex;
       flex-direction: column;
@@ -411,7 +412,6 @@
       font-weight: 500;
     }
 
-    /* Error State */
     .error-container {
       background: #fef2f2;
       border: 1px solid #fecaca;
@@ -434,7 +434,6 @@
       margin: 0;
     }
 
-    /* Responsive */
     @media (max-width: 992px) {
       .w3-sidebar { 
         width: 240px !important; 
@@ -480,7 +479,6 @@
   </style>
 </head>
 <body>
-  <!-- Sidebar -->
   <div class="w3-sidebar w3-bar-block w3-collapse w3-card" style="width:260px;" id="mySidebar">
     <div class="sidebar-header">
       <div class="sidebar-logo">
@@ -513,7 +511,6 @@
     </a>
   </div>
 
-  <!-- Main Content -->
   <div class="w3-main" style="margin-left:260px">
     <div class="w3-teal">
       <button class="w3-button w3-teal w3-xlarge w3-hide-large" onclick="w3_open()" style="padding: 16px;">&#9776;</button>
@@ -532,27 +529,32 @@
     </div>
 
     <div class="content-wrapper">
-      <!-- Loading State -->
       <div id="loading" class="loading-container">
         <div class="spinner"></div>
-        <div class="loading-text">Authenticating with TTMS...</div>
+        <div class="loading-text">Loading Dashboard Data...</div>
       </div>
 
-      <!-- Dashboard Content -->
       <div id="dashboard" style="display:none;">
-        <!-- Welcome Section -->
         <div class="welcome-section">
           <h2 class="welcome-title">Welcome back, Admin!</h2>
           <p class="welcome-subtitle">Here's what's happening with your timetable system today</p>
+          <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.3);">
+            <p style="margin: 0; font-size: 14px; opacity: 0.9;">
+              <i class="fas fa-calendar-alt"></i> 
+              <strong>Current Session:</strong> <span id="currentSessionDisplay">Loading...</span> | 
+              <strong>Semester:</strong> <span id="currentSemesterDisplay">Loading...</span>
+            </p>
+          </div>
         </div>
 
-        <!-- Stats Grid -->
         <div class="stats-grid">
           <div class="stat-card">
             <div class="stat-header">
               <div>
                 <p class="stat-label">Total Lecturers</p>
-                <h3 class="stat-value">—</h3>
+                <h3 class="stat-value" id="totalLecturers">
+                  <div class="stat-loading"></div>
+                </h3>
               </div>
               <div class="stat-icon">
                 <i class="fas fa-chalkboard-teacher"></i>
@@ -564,7 +566,9 @@
             <div class="stat-header">
               <div>
                 <p class="stat-label">Total Students</p>
-                <h3 class="stat-value">—</h3>
+                <h3 class="stat-value" id="totalStudents">
+                  <div class="stat-loading"></div>
+                </h3>
               </div>
               <div class="stat-icon">
                 <i class="fas fa-user-graduate"></i>
@@ -576,7 +580,9 @@
             <div class="stat-header">
               <div>
                 <p class="stat-label">Active Subjects</p>
-                <h3 class="stat-value">—</h3>
+                <h3 class="stat-value" id="totalSubjects">
+                  <div class="stat-loading"></div>
+                </h3>
               </div>
               <div class="stat-icon">
                 <i class="fas fa-book-open"></i>
@@ -588,16 +594,31 @@
             <div class="stat-header">
               <div>
                 <p class="stat-label">Total Rooms</p>
-                <h3 class="stat-value">—</h3>
+                <h3 class="stat-value" id="totalRooms">
+                  <div class="stat-loading"></div>
+                </h3>
               </div>
               <div class="stat-icon">
                 <i class="fas fa-door-open"></i>
               </div>
             </div>
           </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <div>
+                <p class="stat-label">Rooms with Classes</p>
+                <h3 class="stat-value" id="roomsWithClasses">
+                  <div class="stat-loading"></div>
+                </h3>
+              </div>
+              <div class="stat-icon">
+                <i class="fas fa-chalkboard"></i>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <!-- Quick Actions -->
         <h3 class="section-title">
           <i class="fas fa-bolt"></i>
           Quick Actions
@@ -649,31 +670,6 @@
             <span class="arrow">View Details <i class="fas fa-arrow-right"></i></span>
           </a>
         </div>
-
-        <!-- Session Info -->
-        <!--<div class="session-card">
-          <div class="session-header">
-            <i class="fas fa-shield-alt"></i>
-            <h3>Session Information</h3>
-          </div>
-          <div class="session-info">
-            <div class="info-row">
-              <span class="info-label">Account ID</span>
-              <span class="info-value" id="loginDisplay">—</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Access Level</span>
-              <span class="role-badge">
-                <i class="fas fa-user-shield"></i>
-                Administrator
-              </span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Session ID</span>
-              <span class="info-value" id="sessionIdDisplay">—</span>
-            </div>
-          </div> -->
-        </div>
       </div>
     </div>
   </div>
@@ -686,18 +682,150 @@
       document.getElementById("mySidebar").style.display = "none";
     }
 
-    // Check if user is authorized
     const hasAdminAuth = localStorage.getItem("TTMSFC_adminAuth") === "true";
     if (!hasAdminAuth) {
       alert("Admin access required.");
       window.location.replace("../index.html");
     }
 
-    // TTMS Credentials
     const TTMS_ADMIN_LOGIN = "12085";
     const TTMS_ADMIN_PASSWORD = "S808323";
 
-    // Fetch session from TTMS
+    function getAcademicSessionAndSemester() {
+      const now = new Date();
+      const month = now.getMonth() + 1;
+      const year = now.getFullYear();
+      
+      let sesi, semester;
+      
+      if (month >= 10 || month <= 2) {
+        semester = '1';
+        if (month >= 10) {
+          sesi = `${year}/${year + 1}`;
+        } else {
+          sesi = `${year - 1}/${year}`;
+        }
+      } else if (month >= 3 && month <= 7) {
+        semester = '2';
+        sesi = `${year - 1}/${year}`;
+      } else {
+        semester = '1';
+        sesi = `${year}/${year + 1}`;
+      }
+      
+      return { sesi, semester };
+    }
+
+    function safeJsonParse(text) {
+      if (!text) return null;
+      const trimmed = text.trim();
+      if (!trimmed.startsWith('{') && !trimmed.startsWith('[')) return null;
+      try {
+        return JSON.parse(trimmed);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    async function fetchDashboardStats(sessionId) {
+      try {
+        const authUrl = `http://web.fc.utm.my/ttms/auth-admin.php?session_id=${encodeURIComponent(sessionId)}`;
+        const authRes = await fetch(authUrl);
+        if (!authRes.ok) throw new Error(`Auth failed: HTTP ${authRes.status}`);
+        const authText = await authRes.text();
+        
+        const patterns = [
+          /name\s*=\s*["']session_id["']\s+value\s*=\s*["']([^"']+)/i,
+          /value\s*=\s*["']([^"']+)["']\s+name\s*=\s*["']session_id["']/i,
+          /"session_id"\s*:\s*"([^"]+)"/
+        ];
+        let realSessionId = null;
+        for (const pattern of patterns) {
+          const match = authText.match(pattern);
+          if (match && match[1]) {
+            realSessionId = match[1].trim();
+            break;
+          }
+        }
+        if (!realSessionId) throw new Error("Could not extract real session ID");
+
+        console.log("Real Session ID:", realSessionId);
+        const { sesi, semester } = getAcademicSessionAndSemester();
+        document.getElementById('currentSessionDisplay').textContent = sesi;
+        document.getElementById('currentSemesterDisplay').textContent = semester;
+
+        // --- Lecturers ---
+        const lecturersUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pensyarah&session_id=${encodeURIComponent(realSessionId)}&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}`;
+        const lecturersRes = await fetch(lecturersUrl);
+        const lecturersData = safeJsonParse(await lecturersRes.text());
+        document.getElementById('totalLecturers').textContent = lecturersData ? (Array.isArray(lecturersData) ? lecturersData.length : 1) : '0';
+
+        // --- Subjects ---
+        const subjectsUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=subjek&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}`;
+        const subjectsRes = await fetch(subjectsUrl);
+        const subjectsData = safeJsonParse(await subjectsRes.text()) || [];
+        const subjectsList = Array.isArray(subjectsData) ? subjectsData : [subjectsData];
+        document.getElementById('totalSubjects').textContent = subjectsList.length;
+
+        // --- Students (direct) ---
+        const studentsUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar&session_id=${encodeURIComponent(realSessionId)}&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}`;
+        const studentsRes = await fetch(studentsUrl);
+        const studentsText = await studentsRes.text();
+        if (studentsText.trim().startsWith("The most simple ever")) {
+          document.getElementById('totalStudents').textContent = '0';
+        } else {
+          const studentsData = safeJsonParse(studentsText);
+          document.getElementById('totalStudents').textContent = studentsData ? (Array.isArray(studentsData) ? studentsData.length : 1) : '—';
+        }
+
+        // --- ROOMS: Total + With Classes ---
+        console.log("Fetching rooms and checking for classes...");
+
+        // 1. Get all rooms in FSKSM
+        const roomsUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=ruang&kod_fakulti=FSKSM&kod_ruang_like=`;
+        const roomsRes = await fetch(roomsUrl);
+        const roomsText = await roomsRes.text();
+        let roomsData = safeJsonParse(roomsText) || [];
+        roomsData = Array.isArray(roomsData) ? roomsData : [roomsData];
+        const totalRooms = roomsData.length;
+        document.getElementById('totalRooms').textContent = totalRooms;
+
+        // 2. For each room, check if it has at least one class with kod_subjek
+        let roomsWithClasses = 0;
+        const roomCheckPromises = roomsData.map(async (room) => {
+          if (!room.kod_ruang) return false;
+          try {
+            const scheduleUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=jadual_ruang&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}&kod_ruang=${encodeURIComponent(room.kod_ruang)}`;
+            const schedRes = await fetch(scheduleUrl);
+            const schedText = await schedRes.text();
+            if (schedText.trim().startsWith("The most simple ever")) return false;
+            const schedData = safeJsonParse(schedText);
+            if (!schedData) return false;
+            const list = Array.isArray(schedData) ? schedData : [schedData];
+            // Check if ANY entry has subjek.kod_subjek
+            return list.some(entry => entry.subjek && entry.subjek.kod_subjek);
+          } catch (e) {
+            return false;
+          }
+        });
+
+        // Wait for all checks to complete (with concurrency)
+        const results = await Promise.all(roomCheckPromises);
+        roomsWithClasses = results.filter(Boolean).length;
+
+        document.getElementById('roomsWithClasses').textContent = roomsWithClasses;
+        console.log(`Total rooms: ${totalRooms}, Rooms with classes: ${roomsWithClasses}`);
+
+      } catch (err) {
+        console.error('Error fetching dashboard stats:', err);
+        document.getElementById('totalLecturers').textContent = '—';
+        document.getElementById('totalStudents').textContent = '—';
+        document.getElementById('totalSubjects').textContent = '—';
+        document.getElementById('totalRooms').textContent = '—';
+        document.getElementById('roomsWithClasses').textContent = '—';
+      }
+    }
+
     const authUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=authentication&login=${encodeURIComponent(TTMS_ADMIN_LOGIN)}&password=${encodeURIComponent(TTMS_ADMIN_PASSWORD)}`;
 
     fetch(authUrl)
@@ -718,16 +846,10 @@
           session_id: apiUser.session_id,
           inferredRole: "admin"
         };
-
         localStorage.setItem("TTMSFC_userSession", JSON.stringify(sessionData));
-
-        // Show dashboard
         document.getElementById("loading").style.display = "none";
         document.getElementById("dashboard").style.display = "block";
-
-        // Just use generic admin display, not lecturer name
-        document.getElementById("loginDisplay").innerText = sessionData.login;
-        document.getElementById("sessionIdDisplay").innerText = sessionData.session_id || "—";
+        fetchDashboardStats(sessionData.session_id);
       })
       .catch(err => {
         console.error("TTMS Session Fetch Error:", err);
@@ -739,7 +861,6 @@
         `;
       });
 
-    // Logout
     document.getElementById("navLogout").onclick = function(e) {
       e.preventDefault();
       if (confirm("Are you sure you want to logout?")) {

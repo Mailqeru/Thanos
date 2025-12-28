@@ -6,7 +6,8 @@
   <title>TTMS - System Reports</title>
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Google Charts -->
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
   <style>
     :root {
       --utm-blue: #003366;
@@ -314,7 +315,7 @@
 
     /* Charts */
     .chart-container {
-      height: 280px;
+      height: 320px;
       margin: 20px 0;
       position: relative;
       background: white;
@@ -371,18 +372,12 @@
 
     .missing-lecturer { 
       background-color: #fff3e0 !important; 
+      color: #e65100 !important;
     }
 
     .zero-enroll { 
       background-color: #ffebee !important; 
-    }
-
-    .low-enroll { 
-      background-color: #ffebee !important; 
-    }
-
-    .high-enroll { 
-      background-color: #e8f5e9 !important; 
+      color: #991b1b !important;
     }
 
     /* Empty State */
@@ -521,7 +516,7 @@
       }
 
       .chart-container {
-        height: 220px;
+        height: 280px;
       }
 
       .card {
@@ -582,7 +577,7 @@
           <i class="fas fa-chart-line"></i>
           <h3>TTMS Analytics & Reports</h3>
         </div>
-        <p class="card-description">Generate comprehensive reports on enrollment anomalies and incomplete course sections</p>
+        <p class="card-description">Generate reports on top-enrolled subjects (excluding practical/professional training) and incomplete sections</p>
       </div>
 
       <!-- Filter Controls -->
@@ -602,7 +597,7 @@
             </label>
             <select class="w3-select" id="reportSemester">
               <option value="1">Semester 1</option>
-              <option value="2" selected>Semester 2</option>
+              <option value="2">Semester 2</option>
               <option value="3">Special Semester</option>
             </select>
           </div>
@@ -647,20 +642,20 @@
       <!-- Summary Stats -->
       <div id="summaryStats" class="stats-grid" style="display:none;"></div>
 
-      <!-- Report 1: Unusual Enrollments -->
+      <!-- Report 1: Top 10 Subjects with Highest Enrollment -->
       <div class="card report-section">
         <h4>
-          <i class="fas fa-exclamation-triangle" style="color: var(--error);"></i>
-          Unusual Enrollments
+          <i class="fas fa-chart-bar" style="color: var(--utm-blue);"></i>
+          Top 10 Subjects with Highest Enrollment
         </h4>
-        <p>Sections with ≤5 students (low enrollment) or ≥80 students (high enrollment)</p>
+        <p>Highest enrolled subjects (excluding practical/professional training)</p>
         
         <div class="chart-container">
-          <canvas id="unusualEnrollChart"></canvas>
+          <div id="topEnrollChart" style="width:100%; height:100%;"></div>
         </div>
         
         <div class="table-wrapper">
-          <div id="unusualEnrollTable">
+          <div id="topEnrollTable">
             <div class="empty-state">
               <i class="fas fa-users"></i>
               <p>Click "Generate Report" to load data</p>
@@ -669,20 +664,20 @@
         </div>
       </div>
 
-      <!-- Report 2: Incomplete Sections -->
+      <!-- Report 2: Incomplete SEC Sections -->
       <div class="card report-section">
         <h4>
           <i class="fas fa-exclamation-circle" style="color: var(--warning);"></i>
           Incomplete Sections
         </h4>
-        <p>Sections missing lecturer assignment or with zero enrolled students</p>
+        <p>Sections missing lecturer or with zero students</p>
         
         <div class="chart-container">
-          <canvas id="incompleteSectionsChart"></canvas>
+          <div id="incompleteSecChart" style="width:100%; height:100%;"></div>
         </div>
         
         <div class="table-wrapper">
-          <div id="incompleteSectionsTable">
+          <div id="incompleteSecTable">
             <div class="empty-state">
               <i class="fas fa-list"></i>
               <p>Click "Generate Report" to load data</p>
@@ -740,8 +735,6 @@
     // ===== REPORTS LOGIC =====
     let allLecturers = [], assignments = [], allSections = [];
     let currentSesi = '', currentSemester = '';
-    let unusualChart = null;
-    let incompleteChart = null;
 
     function log(msg) {
       const logDiv = document.getElementById('debugLog');
@@ -847,72 +840,55 @@
       container.innerHTML = html;
     }
 
-    function renderUnusualChart(data) {
-      const ctx = document.getElementById('unusualEnrollChart').getContext('2d');
-      if (unusualChart) unusualChart.destroy();
+    // Google Charts initialization
+    google.charts.load('current', {'packages':['corechart']});
+    google.charts.setOnLoadCallback(() => { window.googleChartsLoaded = true; });
 
-      const labels = data.map(d => `${d.kod_subjek}-${d.seksyen}`);
-      const values = data.map(d => d.bil_pelajar);
-
-      unusualChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'Student Enrollment',
-            data: values,
-            backgroundColor: values.map(v => v <= 5 ? '#ef4444' : '#10b981'),
-            borderColor: '#fff',
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: (ctx) => `${ctx.parsed.y} students`
-              }
-            }
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: { stepSize: 10 }
-            }
-          }
-        }
-      });
+    function drawTopEnrollChart(data) {
+      if (!window.googleChartsLoaded) return;
+      const container = document.getElementById('topEnrollChart');
+      const chart = new google.visualization.BarChart(container);
+      const dataTable = new google.visualization.DataTable();
+      dataTable.addColumn('string', 'Subject');
+      dataTable.addColumn('number', 'Students');
+      const rows = data.map(d => [`${d.kod_subjek}-${d.seksyen}`, d.bil_pelajar]);
+      dataTable.addRows(rows);
+      const options = {
+        title: 'Top 10 Subjects by Enrollment',
+        titleTextStyle: { fontSize: 16, bold: true },
+        hAxis: { title: 'Students', minValue: 0 },
+        vAxis: { title: 'Subject' },
+        colors: ['#003366'],
+        backgroundColor: 'transparent',
+        animation: { duration: 1000, easing: 'out' }
+      };
+      chart.draw(dataTable, options);
     }
 
-    function renderIncompleteChart(data) {
-      const ctx = document.getElementById('incompleteSectionsChart').getContext('2d');
-      if (incompleteChart) incompleteChart.destroy();
-
+    function drawIncompleteSecChart(data) {
+      if (!window.googleChartsLoaded) return;
+      const container = document.getElementById('incompleteSecChart');
+      const chart = new google.visualization.PieChart(container);
+      const dataTable = new google.visualization.DataTable();
+      dataTable.addColumn('string', 'Issue');
+      dataTable.addColumn('number', 'Count');
+      
       const tbaCount = data.filter(d => d.pensyarah === 'TBA').length;
       const zeroCount = data.filter(d => d.bil_pelajar === 0).length;
+      
+      dataTable.addRows([
+        ['Missing Lecturer (TBA)', tbaCount],
+        ['Zero Enrollment', zeroCount]
+      ]);
 
-      incompleteChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: ['Missing Lecturer (TBA)', 'Zero Enrollment'],
-          datasets: [{
-            data: [tbaCount, zeroCount],
-            backgroundColor: ['#f59e0b', '#ef4444'],
-            borderWidth: 2,
-            borderColor: '#fff'
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { position: 'bottom' }
-          }
-        }
-      });
+      const options = {
+        title: 'Incomplete Sections Distribution',
+        titleTextStyle: { fontSize: 16, bold: true },
+        pieHole: 0.4,
+        colors: ['#f59e0b', '#ef4444'],
+        backgroundColor: 'transparent'
+      };
+      chart.draw(dataTable, options);
     }
 
     function showJsonUrls() {
@@ -933,10 +909,8 @@
       logDiv.scrollTop = logDiv.scrollHeight;
     }
 
-    // Placeholder for export (you can enhance later)
     function exportReports() {
       alert("Export functionality is ready to be implemented.");
-      // TODO: Implement CSV export
     }
 
     async function authenticateUser(sessionId) {
@@ -1025,34 +999,45 @@
 
         const processedSections = processSectionDetails(allSections);
 
-        const unusualEnrollments = processedSections.filter(sec =>
-          sec.bil_pelajar <= 5 || sec.bil_pelajar >= 80
-        );
+        // ✅✅✅ TOP 10 SEC SUBJECTS — EXCLUDE PRACTICAL & PROFESSIONAL SUBJECTS
+        const excludedPhrases = [
+          'practical training',
+          'initial industry',
+          'professional development',
+          'professional practice'
+        ];
 
-        const incompleteSections = processedSections.filter(sec =>
-          sec.pensyarah === 'TBA' || sec.bil_pelajar === 0
+        const topEnrollments = processedSections
+          .filter(sec => {
+            if (!sec.kod_subjek?.startsWith('SEC') || !sec.nama_subjek) return false;
+            const nameLower = sec.nama_subjek.toLowerCase();
+            return !excludedPhrases.some(phrase => nameLower.includes(phrase));
+          })
+          .sort((a, b) => b.bil_pelajar - a.bil_pelajar)
+          .slice(0, 10);
+
+        // ✅✅✅ INCOMPLETE SEC SECTIONS ONLY
+        const incompleteSec = processedSections.filter(sec =>
+          sec.kod_subjek?.startsWith('SEC') &&
+          (sec.pensyarah === 'TBA' || sec.bil_pelajar === 0)
         );
 
         // Render stats
         const summaryStats = document.getElementById('summaryStats');
         summaryStats.innerHTML = `
           <div class="stat-card">
-            <h4>${processedSections.length}</h4>
-            <p>Total Sections</p>
+            <h4>${topEnrollments.length}</h4>
+            <p>Top Subject Enrolled</p>
           </div>
           <div class="stat-card warning">
-            <h4>${unusualEnrollments.length}</h4>
-            <p>Unusual Enrollments</p>
-          </div>
-          <div class="stat-card">
-            <h4>${incompleteSections.length}</h4>
+            <h4>${incompleteSec.length}</h4>
             <p>Incomplete Sections</p>
           </div>
         `;
         summaryStats.style.display = 'grid';
 
         // Render tables
-        renderTable('unusualEnrollTable', unusualEnrollments, [
+        renderTable('topEnrollTable', topEnrollments, [
           { key: 'kod_subjek', label: 'Subject Code' },
           { key: 'nama_subjek', label: 'Subject Name' },
           { key: 'seksyen', label: 'Section' },
@@ -1061,15 +1046,12 @@
             key: 'bil_pelajar', 
             label: 'Students',
             render: (val) => {
-              let cls = '';
-              if (val <= 5) cls = 'low-enroll';
-              else if (val >= 80) cls = 'high-enroll';
-              return `<span class="w3-tag ${cls}">${val}</span>`;
+              return `<span class="w3-tag">${val}</span>`;
             }
           }
         ]);
 
-        renderTable('incompleteSectionsTable', incompleteSections, [
+        renderTable('incompleteSecTable', incompleteSec, [
           { key: 'kod_subjek', label: 'Subject Code' },
           { key: 'nama_subjek', label: 'Subject Name' },
           { key: 'seksyen', label: 'Section' },
@@ -1086,8 +1068,8 @@
         ]);
 
         // Render charts
-        renderUnusualChart(unusualEnrollments);
-        renderIncompleteChart(incompleteSections);
+        drawTopEnrollChart(topEnrollments);
+        drawIncompleteSecChart(incompleteSec);
 
         // Show tools
         document.getElementById('exportBtn').style.display = 'inline-block';
@@ -1104,16 +1086,44 @@
 
     // Initialize
     $(document).ready(() => {
-      const currentYear = new Date().getFullYear();
-      const academicYears = [];
-      for (let i = currentYear - 5; i <= currentYear + 1; i++) {
-        academicYears.push(`${i}/${i + 1}`);
+      const now = new Date();
+      const currentMonth = now.getMonth(); // 0 = Jan, 11 = Dec
+      const currentCalendarYear = now.getFullYear();
+
+      // Determine current academic year (starts in October)
+      let academicStartYear;
+      if (currentMonth >= 9) { // Oct–Dec → current year is start
+        academicStartYear = currentCalendarYear;
+      } else { // Jan–Sep → previous year is start
+        academicStartYear = currentCalendarYear - 1;
       }
-      const defaultSession = `${currentYear}/${currentYear + 1}`;
-      document.getElementById('reportSession').innerHTML = academicYears.map(year =>
-        `<option value="${year}" ${year === defaultSession ? 'selected' : ''}>${year}</option>`
+      const currentSession = `${academicStartYear}/${academicStartYear + 1}`;
+
+      // Build session list: current FIRST, then past sessions (most recent first)
+      const sessions = [currentSession]; // current at top
+      for (let i = 1; i <= 5; i++) {
+        const year = academicStartYear - i;
+        sessions.push(`${year}/${year + 1}`);
+      }
+
+      const sessionOptions = sessions.map(sess =>
+        `<option value="${sess}" ${sess === currentSession ? 'selected' : ''}>${sess}</option>`
       ).join('');
 
+      document.getElementById('reportSession').innerHTML = sessionOptions;
+
+      // Semester logic
+      let currentSem;
+      if (currentMonth >= 9 || currentMonth <= 1) { // Oct–Feb
+        currentSem = "1";
+      } else if (currentMonth >= 2 && currentMonth <= 6) { // Mar–Jul
+        currentSem = "2";
+      } else { // Aug–Sep
+        currentSem = "3";
+      }
+      document.getElementById('reportSemester').value = currentSem;
+
+      // Event listeners
       document.getElementById('loadReportBtn').addEventListener('click', generateReports);
       document.getElementById('exportBtn').addEventListener('click', exportReports);
       document.getElementById('showJsonUrls').addEventListener('click', showJsonUrls);
