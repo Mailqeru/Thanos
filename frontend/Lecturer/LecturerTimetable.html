@@ -3,34 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="refresh" content="900" />
+  <meta name="refresh" content="900">
   <title>TTMS - My Teaching Schedule</title>
   <style>
     :root {
       --utm-blue: #003366;
       --utm-blue-dark: #002244;
       --utm-gold: #C9A85C;
+      --utm-gold-light: #e6c98a;
       --light-bg: #f8f9fc;
       --input-border: #d1d5db;
       --error-red: #d32f2f;
-      --success-green: #2e7d32;
-      --warning-orange: #ed6c02;
-      --info-blue: #1565c0;
-      --dark: #1f2937;
-      --light: #f3f4f6;
-      --white: #ffffff;
-      --sidebar-width: 280px;
+      --sidebar-width: 240px;
       --header-height: 70px;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: var(--light-bg);
       color: #333;
       overflow-x: hidden;
@@ -39,8 +30,7 @@
     /* Sidebar */
     .sidebar {
       position: fixed;
-      top: 0;
-      left: 0;
+      top: 0; left: 0;
       width: var(--sidebar-width);
       height: 100vh;
       background: linear-gradient(180deg, var(--utm-blue) 0%, var(--utm-blue-dark) 100%);
@@ -49,481 +39,241 @@
       transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       overflow-y: auto;
     }
-
     .sidebar-header {
-      padding: 30px 25px;
+      padding: 25px 20px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-      background: rgba(0, 0, 0, 0.15);
     }
-
-    .sidebar-title {
-      color: white;
-      font-size: 24px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .sidebar-subtitle {
-      color: rgba(255, 255, 255, 0.85);
-      font-size: 14px;
-      font-weight: 400;
-    }
-
+    .sidebar-title { color: white; font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+    .sidebar-subtitle { color: rgba(255, 255, 255, 0.85); font-size: 13px; }
     .sidebar-user {
-      padding: 20px 25px;
-      background: rgba(255, 255, 255, 0.15);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 20px 20px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.15);
     }
-
     .user-avatar {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
+      width: 48px; height: 48px; border-radius: 50%;
       background: linear-gradient(135deg, var(--utm-gold) 0%, #8B6F3E 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      font-weight: 700;
-      color: white;
-      margin-bottom: 12px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; color: white; margin-bottom: 10px; font-size: 18px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
-
-    .user-name {
-      color: white;
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    .user-role {
-      color: rgba(255, 255, 255, 0.8);
-      font-size: 13px;
-    }
-
-    .sidebar-nav {
-      padding: 20px 0;
-    }
-
+    .user-name { color: white; font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+    .user-role { color: rgba(255, 255, 255, 0.85); font-size: 12px; }
     .nav-item {
-      display: flex;
-      align-items: center;
-      padding: 14px 25px;
+      display: flex; align-items: center;
+      padding: 14px 20px;
       color: rgba(255, 255, 255, 0.9);
       text-decoration: none;
       transition: all 0.3s ease;
       border-left: 4px solid transparent;
-      font-size: 15px;
-      font-weight: 500;
+      font-size: 15px; font-weight: 500;
     }
-
-    .nav-item:hover {
-      background: rgba(255, 255, 255, 0.2);
-      border-left-color: var(--utm-gold);
-      color: white;
-    }
-
-    .nav-item.active {
-      background: rgba(255, 255, 255, 0.25);
-      border-left-color: var(--utm-gold);
-      color: white;
-      font-weight: 600;
-    }
-
-    .nav-icon {
-      margin-right: 12px;
-      font-size: 20px;
-      width: 24px;
-      text-align: center;
-      color: rgba(255, 255, 255, 0.9);
-    }
-
-    .nav-logout {
-      margin-top: 20px;
-      border-top: 1px solid rgba(255, 255, 255, 0.15);
-      padding-top: 20px;
-    }
+    .nav-item:hover { background: rgba(255, 255, 255, 0.15); border-left-color: var(--utm-gold); color: white; }
+    .nav-item.active { background: rgba(255, 255, 255, 0.25); border-left-color: var(--utm-gold); color: white; font-weight: 600; }
+    .nav-icon { margin-right: 12px; font-size: 18px; width: 24px; text-align: center; }
+    .nav-logout { margin-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.15); padding-top: 20px; }
 
     /* Main Content */
-    .main-wrapper {
-      margin-left: var(--sidebar-width);
-      min-height: 100vh;
-      transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
+    .main-wrapper { margin-left: var(--sidebar-width); min-height: 100vh; transition: margin-left 0.3s ease; }
     .top-header {
-      position: sticky;
-      top: 0;
-      height: var(--header-height);
-      background: white;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      display: flex;
-      align-items: center;
-      padding: 0 30px;
-      z-index: 100;
-      border-bottom: 1px solid #e5e7eb;
+      position: sticky; top: 0; height: var(--header-height);
+      background: white; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      display: flex; align-items: center; padding: 0 25px; z-index: 100;
     }
-
     .menu-toggle {
-      display: none;
-      background: none;
-      border: none;
-      font-size: 24px;
-      color: var(--utm-blue);
-      cursor: pointer;
-      padding: 8px;
-      margin-right: 15px;
-      border-radius: 8px;
-      transition: background 0.2s;
+      display: none; background: none; border: none; font-size: 24px; color: var(--utm-blue);
+      cursor: pointer; padding: 8px; margin-right: 15px; border-radius: 8px; transition: background 0.2s;
     }
-
-    .menu-toggle:hover {
-      background: #f0f4ff;
-    }
-
-    .header-title {
-      font-size: 24px;
-      font-weight: 600;
-      color: var(--utm-blue);
-    }
-
-    .header-actions {
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
+    .menu-toggle:hover { background: #f0f4ff; }
+    .header-title { font-size: 22px; font-weight: 600; color: var(--utm-blue); }
+    .header-actions { margin-left: auto; display: flex; align-items: center; gap: 15px; }
     .header-time {
-      font-size: 14px;
-      color: #555;
-      padding: 8px 16px;
-      background: #f0f4ff;
-      border-radius: 8px;
-      border: 1px solid #dde4f0;
+      font-size: 14px; color: #555; padding: 8px 16px; background: #f0f4ff;
+      border-radius: 8px; border: 1px solid #dde4f0;
     }
 
-    .main-content {
-      padding: 30px;
-      max-width: 1400px;
-    }
+    .main-content { padding: 30px; max-width: 1400px; }
 
-    /* ===== TIMETABLE-SPECIFIC STYLES (YOUR CSS) ===== */
-    .timetable-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 16px;
+    /* Timetable layout (StudentTimetable style) */
+    .timetable-container { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+    .timetable-container h3 { color: #003366; margin-bottom: 24px; font-weight: 600; font-size: 24px; text-align: center; }
+    .filters { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+    .filter-group { flex: 1; min-width: 200px; }
+    .filter-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #444; font-size: 14px; }
+    .filter-group select, .filter-group button {
+      width: 100%; padding: 12px 16px; border: 1px solid #d1d5db; border-radius: 8px;
+      font-size: 16px; background: white; color: #333; transition: all 0.3s ease;
     }
-
-    .header {
-      background: white;
-      border-radius: 20px;
-      padding: 30px;
-      margin-bottom: 20px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.12);
-    }
-
-    .header h1 {
-      font-size: 28px;
-      color: #003366; /* UTM blue */
-      margin-bottom: 8px;
-    }
-
-    .header p {
-      color: #666;
-      font-size: 14px;
-    }
-
-    .controls-card {
-      background: white;
-      border-radius: 20px;
-      padding: 25px;
-      margin-bottom: 20px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.12);
-    }
-
-    .controls-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-      margin-bottom: 20px;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .form-group label {
-      font-size: 13px;
-      font-weight: 600;
-      color: #555;
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .form-group select {
-      padding: 12px 15px;
-      border: 2px solid #e0e0e0;
-      border-radius: 12px;
-      font-size: 15px;
-      background: white;
-      cursor: pointer;
-      transition: all 0.3s ease;
+    .filter-group select {
       appearance: none;
-      background-image: url("image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23003366' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 15px center;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23003366' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 16px center;
       padding-right: 40px;
     }
-
-    .form-group select:focus {
-      outline: none;
-      border-color: #003366; /* UTM blue */
-      box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.15);
+    .filter-group button {
+      background: linear-gradient(135deg, #003366 0%, #002244 100%);
+      color: white; border: none; cursor: pointer; font-weight: 600;
+      transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 2px 6px rgba(0, 51, 102, 0.3);
     }
+    .filter-group button:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0, 51, 102, 0.4); }
 
-    .load-btn {
-      background: linear-gradient(135deg, #003366 0%, #002244 100%); /* UTM blue gradient */
-      color: white;
-      border: none;
-      padding: 15px 30px;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      width: 100%;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      box-shadow: 0 4px 15px rgba(0, 51, 102, 0.3);
+    /* Desktop timetable grid */
+    .desktop-timetable { display: block; }
+    .desktop-grid {
+      background: white; border-radius: 12px; overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      border: 1px solid #eaeef5;
+      margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: 100px repeat(9, 1fr);
     }
-
-    .load-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0, 51, 102, 0.4);
+    .day-label {
+      background: linear-gradient(135deg, #003366 0%, #002244 100%);
+      color: white; font-weight: 700; font-size: 13px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      display: flex; align-items: center; justify-content: center;
+      padding: 12px 8px;
+      border-right: 1px solid rgba(255,255,255,0.2);
+      border-bottom: 1px solid rgba(255,255,255,0.2);
     }
-
-    .load-btn:active {
-      transform: translateY(0);
+    .time-label {
+      background: linear-gradient(135deg, #003366 0%, #002244 100%);
+      color: white; font-weight: 700; font-size: 13px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      text-align: center; padding: 12px 8px;
+      border-right: 1px solid rgba(255,255,255,0.2);
+      border-bottom: 1px solid rgba(255,255,255,0.2);
     }
-
-    .download-btn {
-      margin-top: 12px;
+    .corner-cell {
+      background: linear-gradient(135deg, #003366 0%, #002244 100%);
+      border-right: 1px solid rgba(255,255,255,0.2);
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+    .grid-cell {
+      grid-column: span var(--span, 1);
+      padding: 0 !important;
+      min-height: 100px;
+      border-right: 1px solid #eef2f7;
+      border-bottom: 1px solid #eef2f7;
+      background: #fafbff;
+    }
+    .grid-cell:last-child { border-right: none; }
+    .class-item {
       background: #eef5ff;
-      color: #003366;
-      border: 1px solid #dbeafe;
-      padding: 12px 16px;
-      border-radius: 10px;
-      font-weight: 600;
-      cursor: pointer;
+      border-left: 5px solid #003366;
+      padding: 8px;
+      font-size: 12px;
+      height: 100%;
       width: 100%;
-      transition: background 0.2s ease, transform 0.2s ease;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      text-align: center;
     }
-    .download-btn:hover {
-      background: #dbeafe;
-      transform: translateY(-1px);
+    .class-code { font-weight: 700; color: #003366; margin-bottom: 4px; }
+    .class-name { color: #333; font-size: 12px; margin-bottom: 2px; }
+    .class-room { color: #555; font-size: 12px; }
+
+    /* Mobile timetable list */
+    .mobile-timetable { display: none; }
+    .day-card {
+      background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin-bottom: 16px; overflow: hidden; border: 1px solid #eaeef5;
+    }
+    .day-header {
+      background: linear-gradient(135deg, #003366 0%, #002244 100%);
+      color: white; padding: 14px 16px; font-weight: 700; font-size: 16px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .time-slot-mobile {
+      padding: 16px; border-bottom: 1px solid #eee;
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
+    }
+    .time-slot-mobile:last-child { border-bottom: none; }
+    .time-info { min-width: 80px; flex-shrink: 0; }
+    .time-period { font-weight: 700; color: #003366; font-size: 14px; margin-bottom: 2px; }
+    .time-duration { font-size: 12px; color: #666; }
+    .class-item-mobile {
+      background: #eef5ff; border-left: 4px solid #003366;
+      padding: 12px; border-radius: 8px; margin-bottom: 8px;
+    }
+    .class-code-mobile { font-weight: 700; color: #003366; font-size: 14px; margin-bottom: 4px; }
+    .class-room-mobile, .class-lecturer-mobile {
+      color: #555; font-size: 12px; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;
+    }
+    .empty-slot-mobile { text-align: center; padding: 16px; color: #999; font-style: italic; font-size: 14px; }
+
+    .summary {
+      margin-top: 20px; padding: 14px 20px;
+      background-color: #f0f5ff; border-left: 4px solid #003366;
+      font-weight: 600; color: #003366; border-radius: 0 8px 8px 0; font-size: 14px;
     }
 
-    .content-card {
-      background: white;
-      border-radius: 20px;
-      padding: 25px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.12);
-      min-height: 200px;
-    }
-
-    .alert {
-      padding: 20px;
+    /* Day summary panel */
+    .day-summary {
+      margin-top: 16px;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
       border-radius: 12px;
-      margin: 20px 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      padding: 16px;
+    }
+    .day-summary h4 {
+      margin: 0 0 10px 0;
+      color: #003366;
+      font-size: 16px;
       display: flex;
       align-items: center;
-      gap: 12px;
-      font-size: 14px;
-      line-height: 1.6;
+      gap: 8px;
     }
-
-    .alert-error {
-      background: #ffebee;
-      color: #c62828;
-      border-left: 4px solid #c62828;
-    }
-
-    .alert-warning {
-      background: #fff8e1;
-      color: #ed6c02;
-      border-left: 4px solid #ed6c02;
-    }
-
-    .alert-success {
-      background: #e8f5e9;
-      color: #2e7d32;
-      border-left: 4px solid #2e7d32;
-    }
-
-    .alert-info {
-      background: #e3f2fd;
-      color: #003366; /* UTM blue */
-      border-left: 4px solid #1565c0;
-    }
-
-    .loading {
-      text-align: center;
-      padding: 40px;
-      color: #666;
-    }
-
-    .spinner {
-      border: 3px solid #f3f3f3;
-      border-top: 3px solid #003366; /* UTM blue */
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 15px;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .timetable-header {
-      margin-bottom: 25px;
-      padding-bottom: 15px;
-      border-bottom: 2px solid #f0f0f0;
-    }
-
-    .timetable-header h2 {
-      color: #003366; /* UTM blue */
-      font-size: 22px;
-      margin-bottom: 5px;
-    }
-
-    .timetable-header p {
-      color: #666;
-      font-size: 14px;
-    }
-
-    .table-container {
-      overflow-x: auto;
-      margin-bottom: 20px;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-    }
-
-    thead th {
-      background: linear-gradient(135deg, #003366 0%, #002244 100%); /* UTM blue */
-      color: white;
-      padding: 15px 12px;
-      text-align: left;
-      font-weight: 600;
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      white-space: nowrap;
-    }
-
-    tbody tr {
-      border-bottom: 1px solid #f0f0f0;
-      transition: background 0.2s ease;
-    }
-
-    tbody tr:hover {
-      background: #f8fbff;
-    }
-
-    tbody td {
-      padding: 15px 12px;
-      font-size: 14px;
-      color: #555;
-    }
-
-    .subject-code {
-      font-weight: 600;
-      color: #003366; /* UTM blue */
-    }
-
-    .section-badge {
-      display: inline-block;
-      padding: 4px 10px;
-      background: #e3f2fd;
-      color: #1565c0;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    .day-badge {
-      display: inline-block;
-      padding: 4px 10px;
-      background: #f0f4ff;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 500;
-      color: #003366;
-    }
-
-    .stats {
+    .day-summary-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-      margin-top: 25px;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
     }
-
-    .stat-card {
-      background: linear-gradient(135deg, #003366 0%, #002244 100%); /* UTM blue */
-      color: white;
-      padding: 20px;
-      border-radius: 12px;
-      text-align: center;
-    }
-
-    .stat-card h3 {
-      font-size: 32px;
-      margin-bottom: 5px;
-    }
-
-    .stat-card p {
+    .day-summary-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 10px;
+      background: #f8fbff;
+      display: grid;
+      gap: 4px;
       font-size: 13px;
-      opacity: 0.9;
+      color: #333;
+    }
+    .day-summary-card .title { font-weight: 700; color: #003366; }
+    .day-summary-card .badge {
+      display: inline-block;
+      background: #e0f2fe;
+      color: #0369a1;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 700;
     }
 
-    /* Print styles */
-    @media print {
-      body {
-        background: white;
-      }
-      .sidebar, .top-header, .controls-card, .download-btn {
-        display: none !important;
-      }
-      .main-wrapper {
-        margin: 0 !important;
-      }
-      .main-content {
-        padding: 0 !important;
-      }
-      .timetable-container {
-        max-width: 100%;
-        padding: 0;
-      }
-      .content-card {
-        box-shadow: none;
-        border: none;
-      }
-      .table-container {
-        box-shadow: none;
-      }
+    .empty-message, .loading {
+      text-align: center; padding: 30px; background: white;
+      border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      color: #666; border: 1px solid #eee;
+    }
+    .loading { color: #003366; font-style: italic; }
+
+    /* Overlay for mobile */
+    .overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); z-index: 999; }
+    .overlay.active { display: block; }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .main-wrapper { margin-left: 0; }
+      .menu-toggle { display: block; }
+      .main-content { padding: 20px; }
+      .top-header { padding: 0 16px; }
+      .header-time { display: none; }
+      .desktop-timetable { display: none; }
+      .mobile-timetable { display: block; }
+      .timetable-container, .filters { flex-direction: column; }
+      .filter-group { min-width: 100%; }
     }
   </style>
 </head>
@@ -535,10 +285,7 @@
   <!-- Sidebar -->
   <nav class="sidebar" id="sidebar">
     <div class="sidebar-header">
-      <div class="sidebar-title">
-        <span>🎓</span>
-        <span>TTMS</span>
-      </div>
+      <div class="sidebar-title">TTMS</div>
       <div class="sidebar-subtitle">Lecturer Portal</div>
     </div>
 
@@ -548,30 +295,24 @@
       <div class="user-role">Lecturer</div>
     </div>
 
-    <div class="sidebar-nav">
-      <a class="nav-item" href="Lecturer.html">
-        <span class="nav-icon">📊</span>
-        <span>Dashboard</span>
+    <a class="nav-item" href="Lecturer.html">
+      <span class="nav-icon">📊</span><span>Dashboard</span>
+    </a>
+    <a class="nav-item active" href="LecturerTimetable.html">
+      <span class="nav-icon">📅</span><span>My Timetable</span>
+    </a>
+    <a class="nav-item" href="LecturerEnrollment.html">
+      <span class="nav-icon">👥</span><span>Course Enrollment</span>
+    </a>
+
+    <div class="nav-logout">
+      <a class="nav-item" id="navLogout">
+        <span class="nav-icon">🚪</span><span>Logout</span>
       </a>
-      <a class="nav-item active" href="LecturerTimetable.html">
-        <span class="nav-icon">📅</span>
-        <span>My Timetable</span>
-      </a>
-      <a class="nav-item" href="LecturerEnrollment.html">
-        <span class="nav-icon">👥</span>
-        <span>Course Enrollment</span>
-      </a>
-      
-      <div class="nav-logout">
-        <a class="nav-item" id="navLogout">
-          <span class="nav-icon">🚪</span>
-          <span>Logout</span>
-        </a>
-      </div>
     </div>
   </nav>
 
-  <!-- Main Content -->
+  <!-- Main -->
   <div class="main-wrapper">
     <header class="top-header">
       <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
@@ -583,95 +324,72 @@
 
     <main class="main-content">
       <div class="timetable-container">
-        <div class="header">
-          <h1>📚 My Teaching Schedule</h1>
-          <p>View and manage your teaching timetable</p>
+        <h3>My Timetable</h3>
+
+        <div class="filters">
+          <div class="filter-group">
+            <label for="sessionSelect">Academic Session</label>
+            <select id="sessionSelect">
+              <option value="2025/2026" selected>2025/2026</option>
+              <option value="2024/2025">2024/2025</option>
+              <option value="2023/2024">2023/2024</option>
+              <option value="2022/2023">2022/2023</option>
+              <option value="2021/2022">2021/2022</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="semesterSelect">Semester</label>
+            <select id="semesterSelect">
+              <option value="1" selected>Semester 1</option>
+              <option value="2">Semester 2</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>&nbsp;</label>
+            <button id="loadBtn">Load Timetable</button>
+          </div>
         </div>
 
-        <div class="controls-card">
-          <div class="controls-grid">
-            <div class="form-group">
-              <label>Academic Session</label>
-              <select id="sessionSelect">
-                <option value="2021/2022">2021/2022</option>
-                <option value="2022/2023">2022/2023</option>
-                <option value="2023/2024">2023/2024</option>
-                <option value="2024/2025" selected>2024/2025</option>
-                <option value="2025/2026">2025/2026</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label>Semester</label>
-              <select id="semesterSelect">
-                <option value="1" selected>Semester 1</option>
-                <option value="2">Semester 2</option>
-              </select>
-            </div>
-          </div>
-
-          <button class="load-btn" id="loadTimetableBtn">
-            🔍 Load Timetable
-          </button>
-          <button class="download-btn" id="printTimetableBtn">
-            🖨️ Print Timetable
-          </button>
-        </div>
-
-        <div class="content-card">
-          <div id="timetableContent">
-            <div class="alert alert-info">
-              <span>ℹ️</span>
-              <div>
-                <strong>Welcome!</strong> Select an academic session and semester above, then click "Load Timetable" to view your teaching schedule.
-              </div>
-            </div>
-          </div>
+        <div id="timetableContent">
+          <div class="empty-message">Select a session and semester, then click “Load Timetable”.</div>
         </div>
       </div>
     </main>
   </div>
 
   <script>
-    // Sidebar Toggle
+    // Time updater
+    function updateTime() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+      document.getElementById('currentTime').textContent = timeStr;
+    }
+    updateTime();
+    setInterval(updateTime, 60000);
+
+    // Sidebar
     function toggleSidebar() {
       const sidebar = document.getElementById('sidebar');
       const overlay = document.getElementById('overlay');
       sidebar.classList.toggle('open');
       overlay.classList.toggle('active');
     }
-
     function closeSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      const overlay = document.getElementById('overlay');
-      sidebar.classList.remove('open');
-      overlay.classList.remove('active');
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('overlay').classList.remove('active');
     }
 
-    // Update Time
-    function updateTime() {
-      const now = new Date();
-      const timeStr = now.toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        hour12: true 
-      });
-      document.getElementById('currentTime').textContent = timeStr;
-    }
-    updateTime();
-    setInterval(updateTime, 60000);
-
-    // Session Check
-    const session = localStorage.getItem("TTMSFC_userSession");
-    if (!session) {
+    // Auth
+    const sessionStr = localStorage.getItem("TTMSFC_userSession");
+    if (!sessionStr) {
       alert("Please log in first.");
       window.location.replace("../index.html");
     }
 
-    let user;
+    let currentUser;
     try {
-      user = JSON.parse(session);
-      const role = user.inferredRole || "unknown";
+      currentUser = JSON.parse(sessionStr);
+      const role = (currentUser.inferredRole || "").toLowerCase();
       if (role !== "lecturer") {
         alert("Access denied: Lecturer access only.");
         localStorage.removeItem("TTMSFC_userSession");
@@ -683,11 +401,10 @@
       window.location.replace("../index.html");
     }
 
-    // Set UI
-    const userName = user.full_name || user.login || "Lecturer";
-    const initials = userName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-    
-    document.getElementById("userName").textContent = userName;
+    // UI user info
+    const fullName = currentUser.full_name || currentUser.login || "Lecturer";
+    const initials = fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || "L";
+    document.getElementById("userName").textContent = fullName;
     document.getElementById("userAvatar").textContent = initials;
 
     // Logout
@@ -698,266 +415,212 @@
       }
     };
 
-    // ===== TIMETABLE LOGIC =====
-    let lastTimetableEntries = [];
-    let lastSesi = '';
-    let lastSemester = '';
+    // API base
+    const API_BASE = "http://web.fc.utm.my/ttms/web_man_webservice_json.cgi";
 
-    (function() {
-      console.log("📅 Lecturer Timetable (UTM Branded) loaded");
+    const days = [
+      { id: 1, name: "Monday" },
+      { id: 2, name: "Tuesday" },
+      { id: 3, name: "Wednesday" },
+      { id: 4, name: "Thursday" },
+      { id: 5, name: "Friday" }
+    ];
+    const slots = [
+      { slot: 2, label: "08:00 - 09:00" },
+      { slot: 3, label: "09:00 - 10:00" },
+      { slot: 4, label: "10:00 - 11:00" },
+      { slot: 5, label: "11:00 - 12:00" },
+      { slot: 6, label: "12:00 - 13:00" },
+      { slot: 7, label: "13:00 - 14:00" },
+      { slot: 8, label: "14:00 - 15:00" },
+      { slot: 9, label: "15:00 - 16:00" },
+      { slot: 10, label: "16:00 - 17:00" }
+    ];
 
-      document.getElementById('loadTimetableBtn').addEventListener('click', loadTimetable);
-      document.getElementById('printTimetableBtn').addEventListener('click', () => {
-        if (!lastTimetableEntries.length) {
-          alert("Load your timetable first, then try printing.");
-          return;
-        }
-        window.print();
-      });
+    document.getElementById("loadBtn").addEventListener("click", loadTimetable);
 
-      async function loadTimetable() {
-        const sessionStr = localStorage.getItem("TTMSFC_userSession");
-        if (!sessionStr) {
-          document.getElementById("timetableContent").innerHTML = `
-            <div class="alert alert-error">
-              <span>❌</span>
-              <div>
-                <strong>Session Expired</strong><br>
-                Please log in again.
-              </div>
-            </div>
-          `;
-          return;
-        }
+    async function loadTimetable() {
+      const sesi = document.getElementById("sessionSelect").value;
+      const semester = document.getElementById("semesterSelect").value;
+      const no_pekerja = currentUser.no_pekerja;
 
-        let user;
-        try {
-          user = JSON.parse(sessionStr);
-        } catch (e) {
-          document.getElementById("timetableContent").innerHTML = `
-            <div class="alert alert-error">
-              <span>❌</span>
-              <div>
-                <strong>Invalid Session</strong><br>
-                Please log in again.
-              </div>
-            </div>
-          `;
-          return;
-        }
-
-        const noPekerja = user.no_pekerja;
-        if (!noPekerja || noPekerja === "NOT SET") {
-          document.getElementById("timetableContent").innerHTML = `
-            <div class="alert alert-error">
-              <span>❌</span>
-              <div>
-                <strong>Profile Incomplete</strong><br>
-                Staff ID (no_pekerja) is missing.
-              </div>
-            </div>
-          `;
-          return;
-        }
-
-        const sesi = document.getElementById("sessionSelect").value;
-        const semester = document.getElementById("semesterSelect").value;
-
+      if (!no_pekerja || no_pekerja === "NOT SET") {
         document.getElementById("timetableContent").innerHTML = `
-          <div class="loading">
-            <div class="spinner"></div>
-            <p>Loading your teaching timetable...</p>
-          </div>
+          <div class="empty-message">Staff ID (no_pekerja) is missing.</div>
         `;
+        return;
+      }
 
-        try {
-          const urlPensyarah = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pensyarah_subjek&no_pekerja=${noPekerja}`;
-          const resPensyarah = await fetch(urlPensyarah);
-          const dataPensyarah = await resPensyarah.json();
+      document.getElementById("timetableContent").innerHTML = `<div class="loading">Loading timetable...</div>`;
 
-          if (!Array.isArray(dataPensyarah) || dataPensyarah.length === 0) {
-            document.getElementById("timetableContent").innerHTML = `
-              <div class="alert alert-warning">
-                <span>⚠️</span>
-                <div>
-                  <strong>No Assignments Found</strong><br>
-                  You are not teaching any subjects.
-                </div>
-              </div>
-            `;
-            return;
-          }
+      try {
+        // Get lecturer subjects
+        const subsRes = await fetch(`${API_BASE}?entity=pensyarah_subjek&no_pekerja=${encodeURIComponent(no_pekerja)}`);
+        const subs = await subsRes.json();
+        if (!Array.isArray(subs) || subs.length === 0) {
+          document.getElementById("timetableContent").innerHTML = `<div class="empty-message">No teaching assignments found.</div>`;
+          return;
+        }
 
-          const currentSubjects = dataPensyarah.filter(subj =>
-            subj.sesi === sesi && subj.semester == semester
-          );
+        const currentSubs = subs.filter(s => s.sesi === sesi && String(s.semester) === String(semester));
+        if (currentSubs.length === 0) {
+          document.getElementById("timetableContent").innerHTML = `<div class="empty-message">No classes for ${sesi} Semester ${semester}.</div>`;
+          return;
+        }
 
-          if (currentSubjects.length === 0) {
-            document.getElementById("timetableContent").innerHTML = `
-              <div class="alert alert-warning">
-                <span>⚠️</span>
-                <div>
-                  <strong>No Teaching Assignments</strong><br>
-                  No classes found for <strong>${sesi} Semester ${semester}</strong>.
-                </div>
-              </div>
-            `;
-            return;
-          }
-
-          const timetablePromises = currentSubjects.map(async (subj) => {
-            const urlJadual = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=jadual_subjek&sesi=${sesi}&semester=${semester}&kod_subjek=${subj.kod_subjek}&seksyen=${subj.seksyen}`;
-            const res = await fetch(urlJadual);
-            const data = await res.json();
-
-            const validEntries = (Array.isArray(data) ? data : [])
-              .filter(entry => 
-                entry.hari && parseInt(entry.hari) >= 1 && parseInt(entry.hari) <= 5 &&
-                entry.masa && !isNaN(entry.masa)
-              );
-
-            return validEntries.map(entry => ({
-              ...entry,
+        // Fetch timetable entries for each subject/section
+        const timetablePromises = currentSubs.map(async subj => {
+          const jadRes = await fetch(`${API_BASE}?entity=jadual_subjek&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}&kod_subjek=${encodeURIComponent(subj.kod_subjek)}&seksyen=${encodeURIComponent(subj.seksyen)}`);
+          const jad = await jadRes.json();
+          const list = Array.isArray(jad) ? jad : [];
+          return list
+            .filter(e => e.hari && e.masa)
+            .map(e => ({
+              hari: parseInt(e.hari),
+              masa: parseInt(e.masa),
               kod_subjek: subj.kod_subjek,
               nama_subjek: subj.nama_subjek,
               seksyen: subj.seksyen,
-              bil_pelajar: subj.bil_pelajar
+              bil_pelajar: subj.bil_pelajar,
+              room: (e.ruang && (e.ruang.nama_ruang_singkatan || e.ruang.kod_ruang)) || '—'
             }));
-          });
+        });
 
-          const timetableArrays = await Promise.all(timetablePromises);
-          const allEntries = timetableArrays.flat();
+        const timetableEntries = (await Promise.all(timetablePromises)).flat();
+        renderTimetable(timetableEntries, sesi, semester);
+      } catch (err) {
+        console.error(err);
+        document.getElementById("timetableContent").innerHTML = `<div class="empty-message">Failed to load timetable.</div>`;
+      }
+    }
 
-          if (allEntries.length === 0) {
-            document.getElementById("timetableContent").innerHTML = `
-              <div class="alert alert-warning">
-                <span>⚠️</span>
-                <div>
-                  <strong>No Scheduled Classes</strong><br>
-                  No timetable entries found for ${sesi} Semester ${semester}.
+    function renderTimetable(entries, sesi, semester) {
+      if (!entries.length) {
+        document.getElementById("timetableContent").innerHTML = `<div class="empty-message">No timetable data.</div>`;
+        return;
+      }
+
+      // Map day->slot->array of classes
+      const daySlotMap = {};
+      days.forEach(d => {
+        daySlotMap[d.id] = {};
+        slots.forEach(s => { daySlotMap[d.id][s.slot] = []; });
+      });
+      entries.forEach(e => {
+        if (daySlotMap[e.hari] && daySlotMap[e.hari][e.masa]) {
+          daySlotMap[e.hari][e.masa].push(e);
+        }
+      });
+
+      // Unique section map to avoid multiplying student counts
+      const sectionMap = new Map();
+      entries.forEach(e => {
+        const key = `${e.kod_subjek || ''}__${e.seksyen || ''}`;
+        if (!sectionMap.has(key)) sectionMap.set(key, parseInt(e.bil_pelajar) || 0);
+      });
+      const totalStudents = Array.from(sectionMap.values()).reduce((a,b)=>a+b,0);
+      const uniqueSubjects = new Set(entries.map(e => e.kod_subjek)).size;
+
+      // Per-day summary (slots + students)
+      const daySummary = days.map(d => {
+        const dayEntries = entries.filter(e => e.hari === d.id);
+        const slotsCount = dayEntries.length;
+        // unique sections per day for students
+        const secMap = new Map();
+        dayEntries.forEach(e => {
+          const key = `${e.kod_subjek || ''}__${e.seksyen || ''}`;
+          if (!secMap.has(key)) secMap.set(key, parseInt(e.bil_pelajar) || 0);
+        });
+        const dayStudents = Array.from(secMap.values()).reduce((a,b)=>a+b,0);
+        return { day: d.name, slots: slotsCount, students: dayStudents };
+      });
+      const busiestByStudents = daySummary.reduce((acc, cur) => cur.students > acc.students ? cur : acc, { students: -1 });
+      const busiestBySlots = daySummary.reduce((acc, cur) => cur.slots > acc.slots ? cur : acc, { slots: -1 });
+
+      // Desktop grid
+      let desktopHtml = `<div class="desktop-timetable"><div class="desktop-grid">`;
+      desktopHtml += `<div class="corner-cell"></div>`;
+      slots.forEach(s => desktopHtml += `<div class="time-label">${s.label}</div>`);
+      days.forEach(d => {
+        desktopHtml += `<div class="day-label">${d.name}</div>`;
+        slots.forEach(s => {
+          const cell = daySlotMap[d.id][s.slot];
+          if (cell.length) {
+            const items = cell.map(c => `
+              <div class="class-item">
+                <div class="class-code">${c.kod_subjek || '—'} (Sec ${c.seksyen || '-'})</div>
+                <div class="class-name">${c.nama_subjek || '—'}</div>
+                <div class="class-room">Room: ${c.room || '—'}</div>
+              </div>
+            `).join('');
+            desktopHtml += `<div class="grid-cell">${items}</div>`;
+          } else {
+            desktopHtml += `<div class="grid-cell"></div>`;
+          }
+        });
+      });
+      desktopHtml += `</div></div>`;
+
+      // Mobile list
+      let mobileHtml = `<div class="mobile-timetable">`;
+      days.forEach(d => {
+        const dayHas = slots.some(s => daySlotMap[d.id][s.slot].length);
+        mobileHtml += `<div class="day-card">
+          <div class="day-header">${d.name}</div>
+          <div>`;
+        slots.forEach(s => {
+          const cell = daySlotMap[d.id][s.slot];
+          if (cell.length) {
+            const items = cell.map(c => `
+              <div class="class-item-mobile">
+                <div class="class-code-mobile">${c.kod_subjek || '—'} (Sec ${c.seksyen || '-'})</div>
+                <div class="class-lecturer-mobile">📚 ${c.nama_subjek || '—'}</div>
+                <div class="class-room-mobile">🏫 Room: ${c.room || '—'}</div>
+              </div>
+            `).join('');
+            mobileHtml += `
+              <div class="time-slot-mobile">
+                <div class="time-info">
+                  <div class="time-period">${s.label.split(' - ')[0]}</div>
+                  <div class="time-duration">${s.label}</div>
                 </div>
+                <div style="flex:1">${items}</div>
               </div>
             `;
-            return;
           }
-
-          lastTimetableEntries = allEntries;
-          lastSesi = sesi;
-          lastSemester = semester;
-
-          displayTimetable(allEntries, sesi, semester);
-
-        } catch (err) {
-          console.error("Timetable error:", err);
-          document.getElementById("timetableContent").innerHTML = `
-            <div class="alert alert-error">
-              <span>❌</span>
-              <div>
-                <strong>Failed to Load Timetable</strong><br>
-                ${err.message || 'Network or server error.'}
-                <small style="opacity: 0.8; margin-top: 8px; display: block;">💡 Tip: This works best on UTM network</small>
-              </div>
-            </div>
-          `;
+        });
+        if (!dayHas) {
+          mobileHtml += `<div class="time-slot-mobile"><div class="empty-slot-mobile">No classes</div></div>`;
         }
-      }
+        mobileHtml += `</div></div>`;
+      });
+      mobileHtml += `</div>`;
 
-      function displayTimetable(data, sesi, semester) {
-        const hariMap = {
-          1: "Monday",
-          2: "Tuesday",
-          3: "Wednesday",
-          4: "Thursday",
-          5: "Friday"
-        };
+      const summary = `
+        <div class="summary">
+          ${entries.length} slot(s) · ${uniqueSubjects} subject(s) · ${totalStudents} student(s) · ${sesi} Semester ${semester}
+        </div>
+      `;
 
-        const masaMap = {
-          2: "08:00 - 09:00",
-          3: "09:00 - 10:00",
-          4: "10:00 - 11:00",
-          5: "11:00 - 12:00",
-          6: "12:00 - 13:00",
-          7: "13:00 - 14:00",
-          8: "14:00 - 15:00",
-          9: "15:00 - 16:00",
-          10: "16:00 - 17:00"
-        };
-
-        data.sort((a, b) => {
-          const dayDiff = parseInt(a.hari) - parseInt(b.hari);
-          if (dayDiff !== 0) return dayDiff;
-          return parseInt(a.masa) - parseInt(b.masa);
-        });
-
-        const uniqueSubjects = new Set(data.map(d => d.kod_subjek)).size;
-        const totalStudents = data.reduce((sum, d) => sum + (parseInt(d.bil_pelajar) || 0), 0);
-
-        let html = `
-          <div class="timetable-header">
-            <h2>📅 ${sesi} - Semester ${semester}</h2>
-            <p>Your complete teaching schedule</p>
+      const daySummaryHtml = `
+        <div class="day-summary">
+          <h4>📊 Load by Day</h4>
+          <div class="day-summary-grid">
+            ${daySummary.map(ds => `
+              <div class="day-summary-card">
+                <div class="title">${ds.day}</div>
+                <div>Slots: <strong>${ds.slots}</strong></div>
+                <div>Students: <strong>${ds.students}</strong></div>
+                ${ (ds.day === busiestByStudents.day || ds.day === busiestBySlots.day)
+                    ? `<div class="badge">Busiest</div>` : '' }
+              </div>
+            `).join('')}
           </div>
+        </div>
+      `;
 
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Subject Code</th>
-                  <th>Subject Name</th>
-                  <th>Section</th>
-                  <th>Day</th>
-                  <th>Time</th>
-                  <th>Room</th>
-                  <th>Students</th>
-                </tr>
-              </thead>
-              <tbody>
-        `;
-
-        data.forEach(item => {
-          const day = hariMap[parseInt(item.hari)] || `Day ${item.hari}`;
-          const time = masaMap[parseInt(item.masa)] || `Slot ${item.masa}`;
-          const room = item.ruang?.nama_ruang_singkatan || item.ruang?.kod_ruang || '—';
-          const students = item.bil_pelajar || '—';
-
-          html += `
-            <tr>
-              <td><span class="subject-code">${item.kod_subjek || '—'}</span></td>
-              <td>${item.nama_subjek || '—'}</td>
-              <td><span class="section-badge">${item.seksyen || '—'}</span></td>
-              <td><span class="day-badge">${day}</span></td>
-              <td>${time}</td>
-              <td>${room}</td>
-              <td>${students}</td>
-            </tr>
-          `;
-        });
-
-        html += `
-              </tbody>
-            </table>
-          </div>
-
-          <div class="stats">
-            <div class="stat-card">
-              <h3>${data.length}</h3>
-              <p>Teaching Slots</p>
-            </div>
-            <div class="stat-card">
-              <h3>${uniqueSubjects}</h3>
-              <p>Unique Subjects</p>
-            </div>
-            <div class="stat-card">
-              <h3>${totalStudents}</h3>
-              <p>Total Students</p>
-            </div>
-          </div>
-        `;
-
-        document.getElementById("timetableContent").innerHTML = html;
-      }
-
-    })();
+      document.getElementById("timetableContent").innerHTML = desktopHtml + mobileHtml + summary + daySummaryHtml;
+    }
   </script>
 </body>
 </html>
