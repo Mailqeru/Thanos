@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<! DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -16,7 +16,7 @@
       --success-green: #2e7d32;
       --warning-orange: #ed6c02;
       --info-blue: #1565c0;
-      --dark: #1f2937;
+      --dark:  #1f2937;
       --light: #f3f4f6;
       --white: #ffffff;
       --sidebar-width: 280px;
@@ -26,12 +26,12 @@
     * {
       margin: 0;
       padding: 0;
-      box-sizing: border-box;
+      box-sizing:  border-box;
     }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      background: var(--light-bg);
+      background:  var(--light-bg);
       color: #333;
       overflow-x: hidden;
     }
@@ -63,7 +63,7 @@
       margin-bottom: 8px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap:  10px;
     }
 
     .sidebar-subtitle {
@@ -94,7 +94,7 @@
     }
 
     .user-name {
-      color: white;
+      color:  white;
       font-size: 16px;
       font-weight: 600;
       margin-bottom: 4px;
@@ -157,7 +157,7 @@
 
     .top-header {
       position: sticky;
-      top: 0;
+      top:  0;
       height: var(--header-height);
       background: white;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -193,7 +193,7 @@
 
     .header-actions {
       margin-left: auto;
-      display: flex;
+      display:  flex;
       align-items: center;
       gap: 15px;
     }
@@ -201,10 +201,10 @@
     .header-time {
       font-size: 14px;
       color: #555;
-      padding: 8px 16px;
+      padding:  8px 16px;
       background: #f0f4ff;
-      border-radius: 8px;
-      border: 1px solid #dde4f0;
+      border-radius:  8px;
+      border:  1px solid #dde4f0;
     }
 
     .main-content {
@@ -212,7 +212,7 @@
       max-width: 1400px;
     }
 
-    /* ===== TIMETABLE-SPECIFIC STYLES (YOUR CSS) ===== */
+    /* ===== TIMETABLE-SPECIFIC STYLES ===== */
     .timetable-container {
       max-width: 1200px;
       margin: 0 auto;
@@ -229,17 +229,20 @@
 
     .header h1 {
       font-size: 28px;
-      color: #003366; /* UTM blue */
+      color: #003366;
       margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap:  10px;
     }
 
     .header p {
-      color: #666;
+      color:  #666;
       font-size: 14px;
     }
 
     .controls-card {
-      background: white;
+      background:  white;
       border-radius: 20px;
       padding: 25px;
       margin-bottom: 20px;
@@ -247,9 +250,9 @@
     }
 
     .controls-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
+      display:  grid;
+      grid-template-columns:  1fr 1fr;
+      gap:  15px;
       margin-bottom: 20px;
     }
 
@@ -259,9 +262,9 @@
     }
 
     .form-group label {
-      font-size: 13px;
+      font-size:  13px;
       font-weight: 600;
-      color: #555;
+      color:  #555;
       margin-bottom: 8px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -276,30 +279,49 @@
       cursor: pointer;
       transition: all 0.3s ease;
       appearance: none;
-      background-image: url("image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23003366' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23003366' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 15px center;
       padding-right: 40px;
     }
 
     .form-group select:focus {
-      outline: none;
-      border-color: #003366; /* UTM blue */
+      outline:  none;
+      border-color: #003366;
       box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.15);
     }
 
+    .button-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 12px 25px;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap:  8px;
+    }
+
     .load-btn {
-      background: linear-gradient(135deg, #003366 0%, #002244 100%); /* UTM blue gradient */
+      background:  linear-gradient(135deg, #003366 0%, #002244 100%);
       color: white;
       border: none;
       padding: 15px 30px;
       border-radius: 12px;
       font-size: 16px;
       font-weight: 600;
-      cursor: pointer;
-      width: 100%;
+      cursor:  pointer;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
       box-shadow: 0 4px 15px rgba(0, 51, 102, 0.3);
+      flex:  1;
     }
 
     .load-btn:hover {
@@ -308,11 +330,156 @@
     }
 
     .load-btn:active {
-      transform: translateY(0);
+      transform:  translateY(0);
+    }
+
+    /* NEW:  Calendar Export Button Styles */
+    .export-calendar-btn {
+      background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 4px 15px rgba(46, 125, 50, 0.3);
+      display: inline-flex;
+      align-items: center;
+      gap:  8px;
+    }
+
+    .export-calendar-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(46, 125, 50, 0.4);
+    }
+
+    .export-calendar-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    /* NEW: Export Options Panel */
+    .export-options-panel {
+      background: #f0f9ff;
+      border:  2px solid #e0f2fe;
+      border-radius: 12px;
+      padding:  20px;
+      margin-top:  15px;
+      display: none;
+    }
+
+    .export-options-panel.visible {
+      display:  block;
+    }
+
+    .export-options-panel h4 {
+      color: #003366;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap:  8px;
+      font-size: 16px;
+    }
+
+    .export-options-grid {
+      display:  grid;
+      grid-template-columns:  repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .export-option {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .export-option label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 6px;
+    }
+
+    .export-option input,
+    .export-option select {
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .export-buttons {
+      display:  flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-ics {
+      background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor:  pointer;
+      display: inline-flex;
+      align-items: center;
+      gap:  8px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-ics:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+    }
+
+    .btn-google {
+      background:  linear-gradient(135deg, #ea4335 0%, #c5221f 100%);
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius:  10px;
+      font-size:  14px;
+      font-weight:  600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-google:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(234, 67, 53, 0.4);
+    }
+
+    .btn-outlook {
+      background:  linear-gradient(135deg, #0078d4 0%, #005a9e 100%);
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius:  10px;
+      font-size:  14px;
+      font-weight:  600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-outlook:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0, 120, 212, 0.4);
     }
 
     .content-card {
-      background: white;
+      background:  white;
       border-radius: 20px;
       padding: 25px;
       box-shadow: 0 10px 40px rgba(0,0,0,0.12);
@@ -322,7 +489,7 @@
     .alert {
       padding: 20px;
       border-radius: 12px;
-      margin: 20px 0;
+      margin:  20px 0;
       display: flex;
       align-items: center;
       gap: 12px;
@@ -331,26 +498,26 @@
     }
 
     .alert-error {
-      background: #ffebee;
+      background:  #ffebee;
       color: #c62828;
       border-left: 4px solid #c62828;
     }
 
     .alert-warning {
-      background: #fff8e1;
+      background:  #fff8e1;
       color: #ed6c02;
       border-left: 4px solid #ed6c02;
     }
 
     .alert-success {
-      background: #e8f5e9;
-      color: #2e7d32;
+      background:  #e8f5e9;
+      color:  #2e7d32;
       border-left: 4px solid #2e7d32;
     }
 
     .alert-info {
       background: #e3f2fd;
-      color: #003366; /* UTM blue */
+      color: #003366;
       border-left: 4px solid #1565c0;
     }
 
@@ -362,9 +529,9 @@
 
     .spinner {
       border: 3px solid #f3f3f3;
-      border-top: 3px solid #003366; /* UTM blue */
+      border-top: 3px solid #003366;
       border-radius: 50%;
-      width: 40px;
+      width:  40px;
       height: 40px;
       animation: spin 1s linear infinite;
       margin: 0 auto 15px;
@@ -379,10 +546,15 @@
       margin-bottom: 25px;
       padding-bottom: 15px;
       border-bottom: 2px solid #f0f0f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
     }
 
     .timetable-header h2 {
-      color: #003366; /* UTM blue */
+      color: #003366;
       font-size: 22px;
       margin-bottom: 5px;
     }
@@ -400,13 +572,13 @@
     }
 
     table {
-      width: 100%;
+      width:  100%;
       border-collapse: collapse;
       background: white;
     }
 
     thead th {
-      background: linear-gradient(135deg, #003366 0%, #002244 100%); /* UTM blue */
+      background:  linear-gradient(135deg, #003366 0%, #002244 100%);
       color: white;
       padding: 15px 12px;
       text-align: left;
@@ -423,26 +595,26 @@
     }
 
     tbody tr:hover {
-      background: #f8fbff;
+      background:  #f8fbff;
     }
 
     tbody td {
-      padding: 15px 12px;
+      padding:  15px 12px;
       font-size: 14px;
       color: #555;
     }
 
     .subject-code {
       font-weight: 600;
-      color: #003366; /* UTM blue */
+      color: #003366;
     }
 
     .section-badge {
-      display: inline-block;
+      display:  inline-block;
       padding: 4px 10px;
       background: #e3f2fd;
       color: #1565c0;
-      border-radius: 20px;
+      border-radius:  20px;
       font-size: 12px;
       font-weight: 600;
     }
@@ -450,7 +622,7 @@
     .day-badge {
       display: inline-block;
       padding: 4px 10px;
-      background: #f0f4ff;
+      background:  #f0f4ff;
       border-radius: 6px;
       font-size: 13px;
       font-weight: 500;
@@ -465,7 +637,7 @@
     }
 
     .stat-card {
-      background: linear-gradient(135deg, #003366 0%, #002244 100%); /* UTM blue */
+      background: linear-gradient(135deg, #003366 0%, #002244 100%);
       color: white;
       padding: 20px;
       border-radius: 12px;
@@ -482,14 +654,96 @@
       opacity: 0.9;
     }
 
+    /* Timetable Grid View */
+    .timetable-grid {
+      display: grid;
+      grid-template-columns: 80px repeat(5, 1fr);
+      gap: 2px;
+      background: #e5e7eb;
+      border-radius:  12px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .grid-header {
+      background:  linear-gradient(135deg, #003366 0%, #002244 100%);
+      color: white;
+      padding:  15px 10px;
+      text-align: center;
+      font-weight: 600;
+      font-size:  13px;
+    }
+
+    .grid-time {
+      background:  #f8f9fc;
+      padding:  10px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+      color:  #003366;
+      display: flex;
+      align-items: center;
+      justify-content:  center;
+    }
+
+    .grid-cell {
+      background: white;
+      padding: 8px;
+      min-height: 60px;
+      position: relative;
+    }
+
+    .grid-cell.has-class {
+      background:  #e8f5e9;
+    }
+
+    .grid-class {
+      background: linear-gradient(135deg, #003366 0%, #002244 100%);
+      color: white;
+      padding: 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      height: 100%;
+      display:  flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .grid-class.code {
+      font-weight: 700;
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+
+    .grid-class .room {
+      opacity: 0.9;
+      font-size: 10px;
+    }
+
+    /* Overlay for mobile */
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left:  0;
+      right: 0;
+      bottom: 0;
+      background:  rgba(0, 0, 0, 0.6);
+      z-index: 999;
+    }
+
+    .overlay.active {
+      display:  block;
+    }
+
     /* Mobile Responsive */
-    @media (max-width: 768px) {
+    @media (max-width:  968px) {
       .sidebar {
         transform: translateX(-100%);
       }
 
       .sidebar.open {
-        transform: translateX(0);
+        transform:  translateX(0);
       }
 
       .main-wrapper {
@@ -512,64 +766,64 @@
         display: none;
       }
 
-      .timetable-container {
-        padding: 0 12px;
+      .controls-grid {
+        grid-template-columns: 1fr;
       }
 
-      .header {
-        padding: 20px;
+      .button-group {
+        flex-direction: column;
+      }
+
+      .load-btn,
+      .export-calendar-btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .timetable-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .timetable-grid {
+        display: none;
+      }
+
+      .export-options-grid {
+        grid-template-columns:  1fr;
+      }
+
+      .export-buttons {
+        flex-direction: column;
+      }
+
+      .btn-ics,
+      .btn-google,
+      .btn-outlook {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header-title {
+        font-size: 18px;
+      }
+
+      .sidebar-header {
+        padding:  20px;
+      }
+
+      .sidebar-title {
+        font-size:  20px;
       }
 
       .header h1 {
         font-size: 22px;
       }
 
-      .controls-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .controls-card, .content-card {
-        padding: 20px;
-      }
-
-      table {
-        font-size: 13px;
-      }
-
-      thead th, tbody td {
-        padding: 10px 8px;
-      }
-
-      .timetable-header h2 {
-        font-size: 18px;
-      }
-
-      .table-container {
-        -webkit-overflow-scrolling: touch;
-      }
-
-      thead th {
-        font-size: 11px;
-        padding: 12px 8px;
-      }
-
       .stats {
         grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .header h1 {
-        font-size: 20px;
-      }
-
-      tbody td {
-        font-size: 12px;
-      }
-
-      .load-btn {
-        padding: 14px 25px;
-        font-size: 15px;
       }
     }
   </style>
@@ -596,15 +850,15 @@
     </div>
 
     <div class="sidebar-nav">
-      <a class="nav-item" href="Lecturer.html">
+      <a class="nav-item" href="Lecturer_Enhanced. html">
         <span class="nav-icon">📊</span>
         <span>Dashboard</span>
       </a>
-      <a class="nav-item active" href="LecturerTimetable.html">
+      <a class="nav-item active" href="LecturerTimetable_Enhanced.html">
         <span class="nav-icon">📅</span>
         <span>My Timetable</span>
       </a>
-      <a class="nav-item" href="LecturerEnrollment.html">
+      <a class="nav-item" href="LecturerEnrollment_Enhanced.html">
         <span class="nav-icon">👥</span>
         <span>Course Enrollment</span>
       </a>
@@ -631,8 +885,8 @@
     <main class="main-content">
       <div class="timetable-container">
         <div class="header">
-          <h1>📚 My Teaching Schedule</h1>
-          <p>View and manage your teaching timetable</p>
+          <h1>📅 My Teaching Schedule</h1>
+          <p>View and export your teaching timetable.  Select session and semester to load your schedule.</p>
         </div>
 
         <div class="controls-card">
@@ -640,36 +894,79 @@
             <div class="form-group">
               <label>Academic Session</label>
               <select id="sessionSelect">
-                <option value="2021/2022">2021/2022</option>
-                <option value="2022/2023">2022/2023</option>
-                <option value="2023/2024">2023/2024</option>
-                <option value="2024/2025" selected>2024/2025</option>
-                <option value="2025/2026">2025/2026</option>
+                <option value="">Loading...</option>
               </select>
             </div>
-
             <div class="form-group">
               <label>Semester</label>
               <select id="semesterSelect">
-                <option value="1" selected>Semester 1</option>
-                <option value="2">Semester 2</option>
+                <option value="1">Semester 1</option>
+                <option value="2" selected>Semester 2</option>
+                <option value="3">Short Semester</option>
               </select>
             </div>
           </div>
+          
+          <div class="button-group">
+            <button class="load-btn" id="loadBtn">
+              <span>🔄</span> Load Timetable
+            </button>
+            <button class="export-calendar-btn" id="exportCalendarBtn" disabled>
+              <span>📆</span> Add to Calendar
+            </button>
+          </div>
 
-          <button class="load-btn" id="loadTimetableBtn">
-            🔍 Load Timetable
-          </button>
-        </div>
-
-        <div class="content-card">
-          <div id="timetableContent">
-            <div class="alert alert-info">
-              <span>ℹ️</span>
-              <div>
-                <strong>Welcome!</strong> Select an academic session and semester above, then click "Load Timetable" to view your teaching schedule.
+          <!-- NEW: Export Options Panel -->
+          <div class="export-options-panel" id="exportOptionsPanel">
+            <h4>📆 Calendar Export Options</h4>
+            <div class="export-options-grid">
+              <div class="export-option">
+                <label>Start Date</label>
+                <input type="date" id="exportStartDate">
+              </div>
+              <div class="export-option">
+                <label>Number of Weeks</label>
+                <select id="exportWeeks">
+                  <option value="7">7 weeks</option>
+                  <option value="14" selected>14 weeks (Full Semester)</option>
+                  <option value="16">16 weeks</option>
+                </select>
+              </div>
+              <div class="export-option">
+                <label>Reminder Before Class</label>
+                <select id="exportReminder">
+                  <option value="0">No reminder</option>
+                  <option value="15" selected>15 minutes</option>
+                  <option value="30">30 minutes</option>
+                  <option value="60">1 hour</option>
+                </select>
               </div>
             </div>
+            <div class="export-buttons">
+              <button class="btn-ics" id="downloadIcsBtn">
+                <span>📥</span> Download . ICS File
+              </button>
+              <button class="btn-google" id="addGoogleBtn">
+                <span>📅</span> Add to Google Calendar
+              </button>
+              <button class="btn-outlook" id="addOutlookBtn">
+                <span>📧</span> Add to Outlook
+              </button>
+            </div>
+            <div class="alert alert-info" style="margin-top: 15px; margin-bottom: 0;">
+              <span>💡</span>
+              <div>
+                <strong>Tip:</strong> The . ICS file works with Apple Calendar, Google Calendar, Outlook, and most other calendar apps.  
+                Simply download and open the file to import all your classes.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-card" id="timetableContent">
+          <div class="alert alert-info">
+            <span>ℹ️</span>
+            <div>Select an academic session and semester, then click <strong>"Load Timetable"</strong> to view your teaching schedule.</div>
           </div>
         </div>
       </div>
@@ -677,9 +974,9 @@
   </div>
 
   <script>
-    // Sidebar Toggle
+    // ===== SIDEBAR FUNCTIONS =====
     function toggleSidebar() {
-      const sidebar = document.getElementById('sidebar');
+      const sidebar = document. getElementById('sidebar');
       const overlay = document.getElementById('overlay');
       sidebar.classList.toggle('open');
       overlay.classList.toggle('active');
@@ -692,7 +989,7 @@
       overlay.classList.remove('active');
     }
 
-    // Update Time
+    // ===== TIME UPDATE =====
     function updateTime() {
       const now = new Date();
       const timeStr = now.toLocaleTimeString('en-US', { 
@@ -705,9 +1002,9 @@
     updateTime();
     setInterval(updateTime, 60000);
 
-    // Session Check
+    // ===== SESSION CHECK =====
     const session = localStorage.getItem("TTMSFC_userSession");
-    if (!session) {
+    if (! session) {
       alert("Please log in first.");
       window.location.replace("../index.html");
     }
@@ -717,24 +1014,24 @@
       user = JSON.parse(session);
       const role = user.inferredRole || "unknown";
       if (role !== "lecturer") {
-        alert("Access denied: Lecturer access only.");
+        alert("Access denied:  Lecturer access only.");
         localStorage.removeItem("TTMSFC_userSession");
         window.location.replace("../index.html");
       }
     } catch (e) {
-      alert("Invalid session. Please log in again.");
-      localStorage.removeItem("TTMSFC_userSession");
+      alert("Invalid session.  Please log in again.");
+      localStorage. removeItem("TTMSFC_userSession");
       window.location.replace("../index.html");
     }
 
-    // Set UI
+    // ===== SET UI =====
     const userName = user.full_name || user.login || "Lecturer";
     const initials = userName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
     
     document.getElementById("userName").textContent = userName;
     document.getElementById("userAvatar").textContent = initials;
 
-    // Logout
+    // ===== LOGOUT =====
     document.getElementById("navLogout").onclick = function() {
       if (confirm("Are you sure you want to logout?")) {
         localStorage.removeItem("TTMSFC_userSession");
@@ -742,250 +1039,494 @@
       }
     };
 
-    // ===== YOUR TIMETABLE LOGIC =====
-    (function() {
-      console.log("📅 Lecturer Timetable (UTM Branded) loaded");
+    // ===== CONSTANTS =====
+    const dayNames = { 2: 'Monday', 3: 'Tuesday', 4: 'Wednesday', 5: 'Thursday', 6: 'Friday' };
+    const dayNamesShort = { 2: 'Mon', 3: 'Tue', 4: 'Wed', 5: 'Thu', 6: 'Fri' };
+    const timeSlots = {
+      2: { start: '08:00', end:  '09:00' },
+      3: { start: '09:00', end:  '10:00' },
+      4: { start: '10:00', end:  '11:00' },
+      5: { start: '11:00', end:  '12:00' },
+      6: { start: '12:00', end:  '13:00' },
+      7: { start: '13:00', end: '14:00' },
+      8: { start: '14:00', end: '15:00' },
+      9: { start: '15:00', end: '16:00' },
+      10: { start: '16:00', end: '17:00' }
+    };
 
-      document.getElementById('loadTimetableBtn').addEventListener('click', loadTimetable);
+    // ICS day mapping (SU=0, MO=1, TU=2, WE=3, TH=4, FR=5, SA=6)
+    // TTMS uses:  2=Monday, 3=Tuesday, 4=Wednesday, 5=Thursday, 6=Friday
+    const icsDayMap = { 2: 'MO', 3: 'TU', 4: 'WE', 5: 'TH', 6: 'FR' };
 
-      async function loadTimetable() {
-        const sessionStr = localStorage.getItem("TTMSFC_userSession");
-        if (!sessionStr) {
-          document.getElementById("timetableContent").innerHTML = `
-            <div class="alert alert-error">
-              <span>❌</span>
-              <div>
-                <strong>Session Expired</strong><br>
-                Please log in again.
-              </div>
+    // Store loaded timetable data for export
+    let currentTimetableData = [];
+    let currentSesi = '';
+    let currentSemester = '';
+
+    // ===== INITIALIZE SESSION DROPDOWN =====
+    function initializeSessionDropdown() {
+      const sessionSelect = document.getElementById('sessionSelect');
+      const currentYear = new Date().getFullYear();
+      let options = '';
+      
+      for (let year = currentYear + 1; year >= currentYear - 5; year--) {
+        const sessionStr = `${year}/${year + 1}`;
+        const selected = year === currentYear ? 'selected' : '';
+        options += `<option value="${sessionStr}" ${selected}>${sessionStr}</option>`;
+      }
+      
+      sessionSelect. innerHTML = options;
+
+      // Set default start date for export
+      const startDateInput = document.getElementById('exportStartDate');
+      const today = new Date();
+      startDateInput.value = today.toISOString().split('T')[0];
+    }
+
+    initializeSessionDropdown();
+
+    // ===== LOAD TIMETABLE =====
+    document.getElementById('loadBtn').addEventListener('click', loadTimetable);
+
+    async function loadTimetable() {
+      const sesi = document.getElementById('sessionSelect').value;
+      const semester = document.getElementById('semesterSelect').value;
+      const staffId = user.no_pekerja;
+      const contentEl = document.getElementById('timetableContent');
+      const exportBtn = document.getElementById('exportCalendarBtn');
+      const exportPanel = document.getElementById('exportOptionsPanel');
+
+      if (!staffId || staffId === "NOT SET") {
+        contentEl.innerHTML = `
+          <div class="alert alert-error">
+            <span>❌</span>
+            <div>
+              <strong>Staff ID Missing</strong><br>
+              Your staff ID (no_pekerja) is not set in your profile.  Please contact the administrator.
             </div>
-          `;
-          return;
-        }
-
-        let user;
-        try {
-          user = JSON.parse(sessionStr);
-        } catch (e) {
-          document.getElementById("timetableContent").innerHTML = `
-            <div class="alert alert-error">
-              <span>❌</span>
-              <div>
-                <strong>Invalid Session</strong><br>
-                Please log in again.
-              </div>
-            </div>
-          `;
-          return;
-        }
-
-        const noPekerja = user.no_pekerja;
-        if (!noPekerja || noPekerja === "NOT SET") {
-          document.getElementById("timetableContent").innerHTML = `
-            <div class="alert alert-error">
-              <span>❌</span>
-              <div>
-                <strong>Profile Incomplete</strong><br>
-                Staff ID (no_pekerja) is missing.
-              </div>
-            </div>
-          `;
-          return;
-        }
-
-        const sesi = document.getElementById("sessionSelect").value;
-        const semester = document.getElementById("semesterSelect").value;
-
-        document.getElementById("timetableContent").innerHTML = `
-          <div class="loading">
-            <div class="spinner"></div>
-            <p>Loading your teaching timetable...</p>
           </div>
         `;
+        exportBtn. disabled = true;
+        exportPanel.classList.remove('visible');
+        return;
+      }
 
-        try {
-          const urlPensyarah = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pensyarah_subjek&no_pekerja=${noPekerja}`;
-          const resPensyarah = await fetch(urlPensyarah);
-          const dataPensyarah = await resPensyarah.json();
+      contentEl.innerHTML = `
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Loading your timetable for ${sesi} Semester ${semester}... </p>
+        </div>
+      `;
 
-          if (!Array.isArray(dataPensyarah) || dataPensyarah.length === 0) {
-            document.getElementById("timetableContent").innerHTML = `
-              <div class="alert alert-warning">
-                <span>⚠️</span>
-                <div>
-                  <strong>No Assignments Found</strong><br>
-                  You are not teaching any subjects.
-                </div>
+      exportBtn.disabled = true;
+      exportPanel.classList.remove('visible');
+
+      try {
+        const url = `http://web.fc. utm.my/ttms/web_man_webservice_json. cgi?entity=jadual_pensyarah&sesi=${encodeURIComponent(sesi)}&semester=${semester}&no_pekerja=${encodeURIComponent(staffId)}`;
+        const response = await fetch(url);
+        const data = await response. json();
+
+        if (! Array.isArray(data) || data.length === 0) {
+          contentEl.innerHTML = `
+            <div class="alert alert-warning">
+              <span>⚠️</span>
+              <div>
+                <strong>No Classes Found</strong><br>
+                No teaching schedule found for ${sesi} Semester ${semester}. You may not have any assigned classes for this period.
               </div>
-            `;
-            return;
-          }
+            </div>
+          `;
+          currentTimetableData = [];
+          return;
+        }
 
-          const currentSubjects = dataPensyarah.filter(subj =>
-            subj.sesi === sesi && subj.semester == semester
+        // Store data for export
+        currentTimetableData = data;
+        currentSesi = sesi;
+        currentSemester = semester;
+
+        // Enable export button
+        exportBtn. disabled = false;
+
+        // Render timetable
+        renderTimetable(data, sesi, semester);
+
+      } catch (error) {
+        console.error('Error loading timetable:', error);
+        contentEl.innerHTML = `
+          <div class="alert alert-error">
+            <span>❌</span>
+            <div>
+              <strong>Error Loading Timetable</strong><br>
+              ${error.message || 'Failed to connect to the server.  Please try again.'}
+            </div>
+          </div>
+        `;
+        currentTimetableData = [];
+      }
+    }
+
+    // ===== RENDER TIMETABLE =====
+    function renderTimetable(data, sesi, semester) {
+      const contentEl = document. getElementById('timetableContent');
+
+      // Calculate statistics
+      const uniqueSubjects = new Set(data.map(d => d.kod_subjek)).size;
+      const uniqueSections = new Set(data.map(d => `${d.kod_subjek}-${d.seksyen}`)).size;
+      const totalClasses = data.length;
+
+      // Group by subject
+      const subjects = {};
+      data.forEach(entry => {
+        const key = `${entry.kod_subjek} - Section ${entry.seksyen}`;
+        if (!subjects[key]) {
+          subjects[key] = {
+            code: entry.kod_subjek,
+            name: entry.nama_subjek || '',
+            section: entry.seksyen,
+            sessions: []
+          };
+        }
+        subjects[key].sessions.push(entry);
+      });
+
+      // Build grid view data
+      const gridData = {};
+      for (let day = 2; day <= 6; day++) {
+        gridData[day] = {};
+        for (let time = 2; time <= 10; time++) {
+          gridData[day][time] = null;
+        }
+      }
+      data.forEach(entry => {
+        if (gridData[entry. hari] && timeSlots[entry. masa]) {
+          gridData[entry. hari][entry.masa] = entry;
+        }
+      });
+
+      let html = `
+        <div class="timetable-header">
+          <div>
+            <h2>Teaching Schedule</h2>
+            <p>Academic Session: ${sesi} | Semester ${semester}</p>
+          </div>
+        </div>
+
+        <!-- Grid View -->
+        <h3 style="color: #003366; margin-bottom: 15px; font-size: 18px;">📊 Weekly Overview</h3>
+        <div class="timetable-grid">
+          <div class="grid-header">Time</div>
+          ${[2,3,4,5,6]. map(d => `<div class="grid-header">${dayNamesShort[d]}</div>`).join('')}
+          
+          ${[2,3,4,5,6,7,8,9,10].map(time => `
+            <div class="grid-time">${timeSlots[time]. start}</div>
+            ${[2,3,4,5,6]. map(day => {
+              const cls = gridData[day][time];
+              if (cls) {
+                const room = cls.ruang?. nama_ruang_singkatan || cls.kod_ruang || 'TBA';
+                return `
+                  <div class="grid-cell has-class">
+                    <div class="grid-class">
+                      <div class="code">${cls.kod_subjek}</div>
+                      <div class="room">📍 ${room}</div>
+                    </div>
+                  </div>
+                `;
+              }
+              return `<div class="grid-cell"></div>`;
+            }).join('')}
+          `).join('')}
+        </div>
+
+        <!-- List View -->
+        <h3 style="color: #003366; margin:  25px 0 15px; font-size: 18px;">📋 Detailed Schedule</h3>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Subject</th>
+                <th>Section</th>
+                <th>Day</th>
+                <th>Time</th>
+                <th>Room</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${data.map(entry => {
+                const room = entry.ruang?.nama_ruang_singkatan || entry. kod_ruang || 'TBA';
+                const timeSlot = timeSlots[entry.masa] || { start: '? ', end: '?' };
+                return `
+                  <tr>
+                    <td>
+                      <span class="subject-code">${entry.kod_subjek}</span>
+                      ${entry.nama_subjek ? `<br><small style="color: #666;">${entry.nama_subjek}</small>` : ''}
+                    </td>
+                    <td><span class="section-badge">${entry. seksyen}</span></td>
+                    <td><span class="day-badge">${dayNames[entry.hari] || 'N/A'}</span></td>
+                    <td>${timeSlot.start} - ${timeSlot.end}</td>
+                    <td>📍 ${room}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats">
+          <div class="stat-card">
+            <h3>${uniqueSubjects}</h3>
+            <p>Subjects</p>
+          </div>
+          <div class="stat-card">
+            <h3>${uniqueSections}</h3>
+            <p>Sections</p>
+          </div>
+          <div class="stat-card">
+            <h3>${totalClasses}</h3>
+            <p>Weekly Classes</p>
+          </div>
+          <div class="stat-card">
+            <h3>${totalClasses}</h3>
+            <p>Hours/Week</p>
+          </div>
+        </div>
+
+        <div class="alert alert-success" style="margin-top: 20px;">
+          <span>✅</span>
+          <div>
+            <strong>Timetable Loaded Successfully!</strong><br>
+            Click "Add to Calendar" to export this schedule to your calendar app.
+          </div>
+        </div>
+      `;
+
+      contentEl. innerHTML = html;
+    }
+
+    // ===== EXPORT CALENDAR TOGGLE =====
+    document.getElementById('exportCalendarBtn').addEventListener('click', function() {
+      const panel = document.getElementById('exportOptionsPanel');
+      panel.classList.toggle('visible');
+    });
+
+    // ===== GENERATE ICS FILE =====
+    function generateUID() {
+      return 'ttms-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9) + '@utm.my';
+    }
+
+    function formatICSDate(date, time) {
+      const [hours, minutes] = time.split(':').map(Number);
+      const d = new Date(date);
+      d.setHours(hours, minutes, 0, 0);
+      
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d. getDate()).padStart(2, '0');
+      const hour = String(d.getHours()).padStart(2, '0');
+      const minute = String(d.getMinutes()).padStart(2, '0');
+      
+      return `${year}${month}${day}T${hour}${minute}00`;
+    }
+
+    function getNextDayDate(startDate, targetDay) {
+      // targetDay: 2=Mon, 3=Tue, 4=Wed, 5=Thu, 6=Fri
+      // JavaScript:  0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
+      const jsDay = targetDay - 1; // Convert TTMS day to JS day
+      const date = new Date(startDate);
+      const currentDay = date.getDay();
+      
+      let daysToAdd = jsDay - currentDay;
+      if (daysToAdd <= 0) daysToAdd += 7;
+      
+      date.setDate(date.getDate() + daysToAdd);
+      return date;
+    }
+
+    function generateICSContent() {
+      if (currentTimetableData.length === 0) {
+        alert('No timetable data to export.  Please load a timetable first.');
+        return null;
+      }
+
+      const startDateInput = document.getElementById('exportStartDate').value;
+      const weeks = parseInt(document.getElementById('exportWeeks').value);
+      const reminderMinutes = parseInt(document.getElementById('exportReminder').value);
+
+      if (!startDateInput) {
+        alert('Please select a start date for the calendar export.');
+        return null;
+      }
+
+      const startDate = new Date(startDateInput);
+      const lecturerName = user.full_name || user.login || 'Lecturer';
+
+      let icsContent = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//TTMS UTM//Lecturer Timetable//EN',
+        'CALSCALE: GREGORIAN',
+        'METHOD:PUBLISH',
+        `X-WR-CALNAME: Teaching Schedule ${currentSesi} Sem ${currentSemester}`,
+        'X-WR-TIMEZONE:Asia/Kuala_Lumpur'
+      ];
+
+      // Add timezone definition
+      icsContent.push(
+        'BEGIN:VTIMEZONE',
+        'TZID:Asia/Kuala_Lumpur',
+        'BEGIN:STANDARD',
+        'DTSTART:19700101T000000',
+        'TZOFFSETFROM:+0800',
+        'TZOFFSETTO:+0800',
+        'TZNAME:MYT',
+        'END:STANDARD',
+        'END: VTIMEZONE'
+      );
+
+      // Generate events for each class
+      currentTimetableData. forEach(entry => {
+        const timeSlot = timeSlots[entry.masa];
+        if (!timeSlot) return;
+
+        const dayAbbr = icsDayMap[entry.hari];
+        if (!dayAbbr) return;
+
+        const eventDate = getNextDayDate(startDate, entry.hari);
+        const room = entry.ruang?.nama_ruang_singkatan || entry.ruang?.nama_ruang || entry.kod_ruang || 'TBA';
+        const subjectName = entry.nama_subjek || entry. kod_subjek;
+
+        const dtStart = formatICSDate(eventDate, timeSlot.start);
+        const dtEnd = formatICSDate(eventDate, timeSlot.end);
+        const now = new Date();
+        const dtstamp = formatICSDate(now, `${now.getHours()}:${now.getMinutes()}`);
+
+        icsContent.push(
+          'BEGIN:VEVENT',
+          `UID:${generateUID()}`,
+          `DTSTAMP:${dtstamp}`,
+          `DTSTART;TZID=Asia/Kuala_Lumpur:${dtStart}`,
+          `DTEND;TZID=Asia/Kuala_Lumpur: ${dtEnd}`,
+          `RRULE:FREQ=WEEKLY;BYDAY=${dayAbbr};COUNT=${weeks}`,
+          `SUMMARY:${entry.kod_subjek} (Section ${entry.seksyen})`,
+          `DESCRIPTION:Subject: ${subjectName}\\nSection: ${entry.seksyen}\\nLecturer: ${lecturerName}\\nSession: ${currentSesi} Semester ${currentSemester}`,
+          `LOCATION:${room}`,
+          'STATUS:CONFIRMED',
+          'TRANSP:OPAQUE'
+        );
+
+        // Add reminder/alarm if set
+        if (reminderMinutes > 0) {
+          icsContent.push(
+            'BEGIN: VALARM',
+            'ACTION:DISPLAY',
+            `DESCRIPTION:Class starting in ${reminderMinutes} minutes:  ${entry.kod_subjek}`,
+            `TRIGGER:-PT${reminderMinutes}M`,
+            'END:VALARM'
           );
-
-          if (currentSubjects.length === 0) {
-            document.getElementById("timetableContent").innerHTML = `
-              <div class="alert alert-warning">
-                <span>⚠️</span>
-                <div>
-                  <strong>No Teaching Assignments</strong><br>
-                  No classes found for <strong>${sesi} Semester ${semester}</strong>.
-                </div>
-              </div>
-            `;
-            return;
-          }
-
-          const timetablePromises = currentSubjects.map(async (subj) => {
-            const urlJadual = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=jadual_subjek&sesi=${sesi}&semester=${semester}&kod_subjek=${subj.kod_subjek}&seksyen=${subj.seksyen}`;
-            const res = await fetch(urlJadual);
-            const data = await res.json();
-
-            const validEntries = (Array.isArray(data) ? data : [])
-              .filter(entry => 
-                entry.hari && parseInt(entry.hari) >= 1 && parseInt(entry.hari) <= 5 &&
-                entry.masa && !isNaN(entry.masa)
-              );
-
-            return validEntries.map(entry => ({
-              ...entry,
-              kod_subjek: subj.kod_subjek,
-              nama_subjek: subj.nama_subjek,
-              seksyen: subj.seksyen,
-              bil_pelajar: subj.bil_pelajar
-            }));
-          });
-
-          const timetableArrays = await Promise.all(timetablePromises);
-          const allEntries = timetableArrays.flat();
-
-          if (allEntries.length === 0) {
-            document.getElementById("timetableContent").innerHTML = `
-              <div class="alert alert-warning">
-                <span>⚠️</span>
-                <div>
-                  <strong>No Scheduled Classes</strong><br>
-                  No timetable entries found for ${sesi} Semester ${semester}.
-                </div>
-              </div>
-            `;
-            return;
-          }
-
-          displayTimetable(allEntries, sesi, semester);
-
-        } catch (err) {
-          console.error("Timetable error:", err);
-          document.getElementById("timetableContent").innerHTML = `
-            <div class="alert alert-error">
-              <span>❌</span>
-              <div>
-                <strong>Failed to Load Timetable</strong><br>
-                ${err.message || 'Network or server error.'}
-                <small style="opacity: 0.8; margin-top: 8px; display: block;">💡 Tip: This works best on UTM network</small>
-              </div>
-            </div>
-          `;
         }
+
+        icsContent.push('END:VEVENT');
+      });
+
+      icsContent.push('END: VCALENDAR');
+
+      return icsContent.join('\r\n');
+    }
+
+    // ===== DOWNLOAD ICS FILE =====
+    document.getElementById('downloadIcsBtn').addEventListener('click', function() {
+      const icsContent = generateICSContent();
+      if (! icsContent) return;
+
+      const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Teaching_Schedule_${currentSesi. replace('/', '-')}_Sem${currentSemester}.ics`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      // Show success message
+      showExportSuccess('ICS file downloaded successfully!  Open it to import into your calendar app.');
+    });
+
+    // ===== ADD TO GOOGLE CALENDAR =====
+    document.getElementById('addGoogleBtn').addEventListener('click', function() {
+      if (currentTimetableData.length === 0) {
+        alert('No timetable data to export. Please load a timetable first.');
+        return;
       }
 
-      function displayTimetable(data, sesi, semester) {
-        const hariMap = {
-          1: "Monday",
-          2: "Tuesday",
-          3: "Wednesday",
-          4: "Thursday",
-          5: "Friday"
-        };
-
-        const masaMap = {
-          2: "08:00 - 09:00",
-          3: "09:00 - 10:00",
-          4: "10:00 - 11:00",
-          5: "11:00 - 12:00",
-          6: "12:00 - 13:00",
-          7: "13:00 - 14:00",
-          8: "14:00 - 15:00",
-          9: "15:00 - 16:00",
-          10: "16:00 - 17:00"
-        };
-
-        data.sort((a, b) => {
-          const dayDiff = parseInt(a.hari) - parseInt(b.hari);
-          if (dayDiff !== 0) return dayDiff;
-          return parseInt(a.masa) - parseInt(b.masa);
-        });
-
-        const uniqueSubjects = new Set(data.map(d => d.kod_subjek)).size;
-        const totalStudents = data.reduce((sum, d) => sum + (parseInt(d.bil_pelajar) || 0), 0);
-
-        let html = `
-          <div class="timetable-header">
-            <h2>📅 ${sesi} - Semester ${semester}</h2>
-            <p>Your complete teaching schedule</p>
-          </div>
-
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Subject Code</th>
-                  <th>Subject Name</th>
-                  <th>Section</th>
-                  <th>Day</th>
-                  <th>Time</th>
-                  <th>Room</th>
-                  <th>Students</th>
-                </tr>
-              </thead>
-              <tbody>
-        `;
-
-        data.forEach(item => {
-          const day = hariMap[parseInt(item.hari)] || `Day ${item.hari}`;
-          const time = masaMap[parseInt(item.masa)] || `Slot ${item.masa}`;
-          const room = item.ruang?.nama_ruang_singkatan || item.ruang?.kod_ruang || '—';
-          const students = item.bil_pelajar || '—';
-
-          html += `
-            <tr>
-              <td><span class="subject-code">${item.kod_subjek || '—'}</span></td>
-              <td>${item.nama_subjek || '—'}</td>
-              <td><span class="section-badge">${item.seksyen || '—'}</span></td>
-              <td><span class="day-badge">${day}</span></td>
-              <td>${time}</td>
-              <td>${room}</td>
-              <td>${students}</td>
-            </tr>
-          `;
-        });
-
-        html += `
-              </tbody>
-            </table>
-          </div>
-
-          <div class="stats">
-            <div class="stat-card">
-              <h3>${data.length}</h3>
-              <p>Teaching Slots</p>
-            </div>
-            <div class="stat-card">
-              <h3>${uniqueSubjects}</h3>
-              <p>Unique Subjects</p>
-            </div>
-            <div class="stat-card">
-              <h3>${totalStudents}</h3>
-              <p>Total Students</p>
-            </div>
-          </div>
-        `;
-
-        document.getElementById("timetableContent").innerHTML = html;
+      // For Google Calendar, we'll generate a link for the first event as an example
+      // Users should use the ICS file for bulk import
+      const firstEvent = currentTimetableData[0];
+      const timeSlot = timeSlots[firstEvent. masa];
+      const startDateInput = document.getElementById('exportStartDate').value;
+      
+      if (!startDateInput || ! timeSlot) {
+        alert('Please select a valid start date.');
+        return;
       }
-    })();
+
+      const eventDate = getNextDayDate(new Date(startDateInput), firstEvent.hari);
+      const room = firstEvent. ruang?.nama_ruang_singkatan || firstEvent. kod_ruang || 'TBA';
+
+      // Format dates for Google Calendar URL
+      const formatGoogleDate = (date, time) => {
+        const [hours, minutes] = time. split(':').map(Number);
+        const d = new Date(date);
+        d.setHours(hours, minutes, 0, 0);
+        return d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+      };
+
+      const startDT = formatGoogleDate(eventDate, timeSlot.start);
+      const endDT = formatGoogleDate(eventDate, timeSlot. end);
+
+      const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(firstEvent.kod_subjek + ' (Section ' + firstEvent.seksyen + ')')}&dates=${startDT}/${endDT}&details=${encodeURIComponent('Subject: ' + (firstEvent.nama_subjek || firstEvent.kod_subjek) + '\nSection:  ' + firstEvent. seksyen)}&location=${encodeURIComponent(room)}&recur=RRULE: FREQ=WEEKLY;COUNT=14`;
+
+      // Show info about bulk import
+      if (confirm('This will open Google Calendar for ONE event. For all classes, download the . ICS file and import it to Google Calendar.\n\nClick OK to continue, or Cancel to download the ICS file instead.')) {
+        window.open(googleUrl, '_blank');
+      } else {
+        document.getElementById('downloadIcsBtn').click();
+      }
+    });
+
+    // ===== ADD TO OUTLOOK =====
+    document.getElementById('addOutlookBtn').addEventListener('click', function() {
+      if (currentTimetableData.length === 0) {
+        alert('No timetable data to export. Please load a timetable first.');
+        return;
+      }
+
+      // Download ICS file - Outlook opens ICS files directly
+      alert('The . ICS file will be downloaded.  Open it with Outlook to import all your classes.');
+      document.getElementById('downloadIcsBtn').click();
+    });
+
+    // ===== SHOW EXPORT SUCCESS =====
+    function showExportSuccess(message) {
+      const panel = document.getElementById('exportOptionsPanel');
+      const existingSuccess = panel. querySelector('.export-success-msg');
+      if (existingSuccess) existingSuccess.remove();
+
+      const successDiv = document.createElement('div');
+      successDiv.className = 'alert alert-success export-success-msg';
+      successDiv. style.marginTop = '15px';
+      successDiv.style.marginBottom = '0';
+      successDiv.innerHTML = `
+        <span>✅</span>
+        <div><strong>Success!</strong><br>${message}</div>
+      `;
+      panel.appendChild(successDiv);
+
+      setTimeout(() => {
+        successDiv.remove();
+      }, 5000);
+    }
   </script>
 </body>
 </html>
