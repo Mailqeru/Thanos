@@ -39,16 +39,10 @@
       transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       overflow-y: auto;
     }
-    .sidebar-header {
-      padding: 25px 20px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-    }
+    .sidebar-header { padding: 25px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.15); }
     .sidebar-title { color: white; font-size: 20px; font-weight: 600; margin-bottom: 8px; }
     .sidebar-subtitle { color: rgba(255, 255, 255, 0.85); font-size: 13px; }
-    .sidebar-user {
-      padding: 20px 20px 10px;
-      border-bottom: 1px solid rgba(255,255,255,0.15);
-    }
+    .sidebar-user { padding: 20px 20px 10px; border-bottom: 1px solid rgba(255,255,255,0.15); }
     .user-avatar {
       width: 48px; height: 48px; border-radius: 50%;
       background: linear-gradient(135deg, var(--utm-gold) 0%, #8B6F3E 100%);
@@ -86,10 +80,7 @@
     .menu-toggle:hover { background: #f0f4ff; }
     .header-title { font-size: 22px; font-weight: 600; color: var(--utm-blue); }
     .header-actions { margin-left: auto; display: flex; align-items: center; gap: 15px; }
-    .header-time {
-      font-size: 14px; color: #555; padding: 8px 16px; background: #f0f4ff;
-      border-radius: 8px; border: 1px solid #dde4f0;
-    }
+    .header-time { font-size: 14px; color: #555; padding: 8px 16px; background: #f0f4ff; border-radius: 8px; border: 1px solid #dde4f0; }
 
     .main-content { padding: 30px; max-width: 1400px; }
 
@@ -454,7 +445,6 @@
       document.getElementById("timetableContent").innerHTML = `<div class="loading">Loading timetable...</div>`;
 
       try {
-        // Get lecturer subjects
         const subsRes = await fetch(`${API_BASE}?entity=pensyarah_subjek&no_pekerja=${encodeURIComponent(no_pekerja)}`);
         const subs = await subsRes.json();
         if (!Array.isArray(subs) || subs.length === 0) {
@@ -468,7 +458,6 @@
           return;
         }
 
-        // Fetch timetable entries for each subject/section
         const timetablePromises = currentSubs.map(async subj => {
           const jadRes = await fetch(`${API_BASE}?entity=jadual_subjek&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}&kod_subjek=${encodeURIComponent(subj.kod_subjek)}&seksyen=${encodeURIComponent(subj.seksyen)}`);
           const jad = await jadRes.json();
@@ -525,7 +514,6 @@
       const daySummary = days.map(d => {
         const dayEntries = entries.filter(e => e.hari === d.id);
         const slotsCount = dayEntries.length;
-        // unique sections per day for students
         const secMap = new Map();
         dayEntries.forEach(e => {
           const key = `${e.kod_subjek || ''}__${e.seksyen || ''}`;
@@ -537,31 +525,74 @@
       const busiestByStudents = daySummary.reduce((acc, cur) => cur.students > acc.students ? cur : acc, { students: -1 });
       const busiestBySlots = daySummary.reduce((acc, cur) => cur.slots > acc.slots ? cur : acc, { slots: -1 });
 
-      // Desktop grid
-      let desktopHtml = `<div class="desktop-timetable"><div class="desktop-grid">`;
-      desktopHtml += `<div class="corner-cell"></div>`;
-      slots.forEach(s => desktopHtml += `<div class="time-label">${s.label}</div>`);
-      days.forEach(d => {
-        desktopHtml += `<div class="day-label">${d.name}</div>`;
-        slots.forEach(s => {
-          const cell = daySlotMap[d.id][s.slot];
-          if (cell.length) {
-            const items = cell.map(c => `
+      // Build merged cells per day (merge consecutive slots for the same subject+section)
+      const dayCellsHtml = (dayId) => {
+        let html = "";
+        const slotValues = slots.map(s => s.slot);
+        for (let i = 0; i < slotValues.length; i++) {
+          const slotNum = slotValues[i];
+          const cellEntries = daySlotMap[dayId][slotNum] || [];
+          // If multiple different entries in same slot, stack them (no merge across)
+          if (cellEntries.length > 1) {
+            const items = cellEntries.map(c => `
               <div class="class-item">
                 <div class="class-code">${c.kod_subjek || '—'} (Sec ${c.seksyen || '-'})</div>
                 <div class="class-name">${c.nama_subjek || '—'}</div>
                 <div class="class-room">Room: ${c.room || '—'}</div>
               </div>
             `).join('');
-            desktopHtml += `<div class="grid-cell">${items}</div>`;
-          } else {
-            desktopHtml += `<div class="grid-cell"></div>`;
+            html += `<div class="grid-cell" style="--span:1">${items}</div>`;
+            continue;
           }
-        });
+
+          if (cellEntries.length === 1) {
+            const c = cellEntries[0];
+            let spanLen = 1;
+            // Try to merge forward while next slots have exactly one entry with same subject+section
+            for (let j = i + 1; j < slotValues.length; j++) {
+              const nextSlot = slotValues[j];
+              const nextEntries = daySlotMap[dayId][nextSlot] || [];
+              if (nextEntries.length === 1) {
+                const n = nextEntries[0];
+                const sameClass = (n.kod_subjek === c.kod_subjek) && (n.seksyen === c.seksyen);
+                if (sameClass) {
+                  spanLen += 1;
+                  i = j; // advance outer loop
+                } else {
+                  break;
+                }
+              } else {
+                break;
+              }
+            }
+            const itemHtml = `
+              <div class="class-item">
+                <div class="class-code">${c.kod_subjek || '—'} (Sec ${c.seksyen || '-'})</div>
+                <div class="class-name">${c.nama_subjek || '—'}</div>
+                <div class="class-room">Room: ${c.room || '—'}</div>
+              </div>
+            `;
+            html += `<div class="grid-cell" style="--span:${spanLen}">${itemHtml}</div>`;
+            continue;
+          }
+
+          // No entries: empty
+          html += `<div class="grid-cell" style="--span:1"></div>`;
+        }
+        return html;
+      };
+
+      // Desktop grid
+      let desktopHtml = `<div class="desktop-timetable"><div class="desktop-grid">`;
+      desktopHtml += `<div class="corner-cell"></div>`;
+      slots.forEach(s => desktopHtml += `<div class="time-label">${s.label}</div>`);
+      days.forEach(d => {
+        desktopHtml += `<div class="day-label">${d.name}</div>`;
+        desktopHtml += dayCellsHtml(d.id);
       });
       desktopHtml += `</div></div>`;
 
-      // Mobile list
+      // Mobile list (no merge, stacked)
       let mobileHtml = `<div class="mobile-timetable">`;
       days.forEach(d => {
         const dayHas = slots.some(s => daySlotMap[d.id][s.slot].length);
@@ -611,8 +642,7 @@
                 <div class="title">${ds.day}</div>
                 <div>Slots: <strong>${ds.slots}</strong></div>
                 <div>Students: <strong>${ds.students}</strong></div>
-                ${ (ds.day === busiestByStudents.day || ds.day === busiestBySlots.day)
-                    ? `<div class="badge">Busiest</div>` : '' }
+                ${(ds.day === busiestByStudents.day || ds.day === busiestBySlots.day) ? `<div class="badge">Busiest</div>` : ''}
               </div>
             `).join('')}
           </div>
