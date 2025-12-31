@@ -18,7 +18,7 @@
       --success-green: #2e7d32;
       --warning-orange: #ed6c02;
       --info-blue: #1565c0;
-      --dark: #1f2937;
+      --dark:  #1f2937;
       --light: #f3f4f6;
       --white: #ffffff;
       --sidebar-width: 280px;
@@ -27,7 +27,7 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      background: var(--light-bg);
+      background:  var(--light-bg);
       color: #333;
       overflow-x: hidden;
     }
@@ -37,7 +37,7 @@
       position: fixed;
       top: 0;
       left: 0;
-      width: var(--sidebar-width);
+      width:  var(--sidebar-width);
       height: 100vh;
       background: linear-gradient(180deg, var(--utm-blue) 0%, var(--utm-blue-dark) 100%);
       box-shadow: 4px 0 15px rgba(0, 0, 0, 0.15);
@@ -59,11 +59,11 @@
       margin-bottom: 8px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap:  10px;
     }
 
     .sidebar-subtitle {
-      color: rgba(255, 255, 255, 0.85);
+      color:  rgba(255, 255, 255, 0.85);
       font-size: 14px;
       font-weight: 400;
     }
@@ -84,7 +84,7 @@
       justify-content: center;
       font-size: 22px;
       font-weight: 700;
-      color: white;
+      color:  white;
       margin-bottom: 12px;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     }
@@ -97,7 +97,7 @@
     }
 
     .user-role {
-      color: rgba(255, 255, 255, 0.8);
+      color:  rgba(255, 255, 255, 0.8);
       font-size: 13px;
     }
 
@@ -153,7 +153,7 @@
 
     .top-header {
       position: sticky;
-      top: 0;
+      top:  0;
       height: var(--header-height);
       background: white;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -197,10 +197,10 @@
     .header-time {
       font-size: 14px;
       color: #555;
-      padding: 8px 16px;
+      padding:  8px 16px;
       background: #f0f4ff;
-      border-radius: 8px;
-      border: 1px solid #dde4f0;
+      border-radius:  8px;
+      border:  1px solid #dde4f0;
     }
 
     .main-content {
@@ -210,8 +210,8 @@
 
     /* Dashboard Cards */
     .dashboard-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      display:  grid;
+      grid-template-columns:  repeat(auto-fit, minmax(280px, 1fr));
       gap: 25px;
       margin-bottom: 30px;
     }
@@ -231,16 +231,16 @@
     }
 
     .stat-card-header {
-      display: flex;
+      display:  flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 15px;
     }
 
     .stat-card-title {
-      font-size: 14px;
+      font-size:  14px;
       font-weight: 600;
-      color: #6b7280;
+      color:  #6b7280;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
@@ -252,14 +252,14 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
+      font-size:  24px;
       color: white;
     }
 
     .stat-card-value {
       font-size: 36px;
       font-weight: 700;
-      color: var(--utm-blue);
+      color:  var(--utm-blue);
       margin-bottom: 8px;
     }
 
@@ -277,7 +277,7 @@
     .info-panel {
       background: white;
       border-radius: 16px;
-      padding: 30px;
+      padding:  30px;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
       margin-bottom: 30px;
       border-left: 5px solid var(--utm-blue);
@@ -289,12 +289,12 @@
       margin-bottom: 20px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap:  10px;
     }
 
     .info-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      display:  grid;
+      grid-template-columns:  repeat(auto-fit, minmax(250px, 1fr));
       gap: 20px;
     }
 
@@ -307,7 +307,7 @@
     .info-label {
       font-size: 13px;
       font-weight: 600;
-      color: #6b7280;
+      color:  #6b7280;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
@@ -319,7 +319,7 @@
     }
 
     .info-value.missing {
-      color: var(--error-red);
+      color:  var(--error-red);
       font-weight: 600;
     }
 
@@ -327,8 +327,9 @@
     .quick-actions {
       background: white;
       border-radius: 16px;
-      padding: 30px;
+      padding:  30px;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      margin-bottom: 30px;
     }
 
     .quick-actions h2 {
@@ -336,21 +337,21 @@
       color: var(--utm-blue);
       margin-bottom: 20px;
       display: flex;
-      align-items: center;
-      gap: 0;
+      align-items:  center;
+      gap: 10px;
     }
 
     .action-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      display:  grid;
+      grid-template-columns:  repeat(auto-fit, minmax(200px, 1fr));
       gap: 15px;
     }
 
     .action-btn {
-      padding: 20px;
+      padding:  20px;
       border-radius: 12px;
       border: 2px solid #e5e7eb;
-      background: white;
+      background:  white;
       cursor: pointer;
       transition: all 0.3s ease;
       text-align: center;
@@ -389,15 +390,171 @@
     }
 
     .alert-info {
-      background: #eef5ff;
+      background:  #eef5ff;
       color: var(--utm-blue);
       border-left: 4px solid var(--info-blue);
     }
 
     .alert-warning {
-      background: #fff8e1;
+      background:  #fff8e1;
       color: var(--warning-orange);
-      border-left: 4px solid var(--warning-orange);
+      border-left:  4px solid var(--warning-orange);
+    }
+
+    /* ===== NEW:  Today's Schedule Panel ===== */
+    .today-schedule-panel {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      margin-bottom: 30px;
+      border-left: 5px solid var(--success-green);
+    }
+
+    .today-schedule-panel h2 {
+      font-size: 22px;
+      color: var(--utm-blue);
+      margin-bottom:  20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .schedule-list {
+      display:  flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .schedule-item {
+      display: flex;
+      align-items: center;
+      gap:  20px;
+      padding: 20px;
+      background: #f8f9fc;
+      border-radius: 12px;
+      border-left: 4px solid var(--utm-blue);
+      transition: all 0.3s ease;
+    }
+
+    .schedule-item:hover {
+      background: #eef5ff;
+      transform: translateX(5px);
+    }
+
+    .schedule-item.next-class {
+      background:  linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+      border-left-color:  var(--success-green);
+    }
+
+    .schedule-item.past {
+      opacity: 0.6;
+      border-left-color:  #9ca3af;
+    }
+
+    .schedule-time {
+      min-width: 100px;
+      text-align: center;
+    }
+
+    .schedule-time.time {
+      font-size: 20px;
+      font-weight: 700;
+      color:  var(--utm-blue);
+    }
+
+    .schedule-time .duration {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .schedule-details {
+      flex: 1;
+    }
+
+    .schedule-details.subject-code {
+      font-size: 18px;
+      font-weight: 700;
+      color:  var(--utm-blue);
+      margin-bottom: 4px;
+    }
+
+    .schedule-details .subject-name {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 8px;
+    }
+
+    .schedule-details .room-info {
+      display: flex;
+      align-items: center;
+      gap:  15px;
+      font-size: 13px;
+      color: #6b7280;
+    }
+
+    .schedule-details .room-info span {
+      display: flex;
+      align-items: center;
+      gap:  5px;
+    }
+
+    .schedule-countdown {
+      text-align: center;
+      min-width: 120px;
+    }
+
+    .countdown-value {
+      font-size: 24px;
+      font-weight: 700;
+      color:  var(--success-green);
+    }
+
+    .countdown-label {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .schedule-status {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .status-upcoming {
+      background:  #e3f2fd;
+      color: var(--info-blue);
+    }
+
+    .status-next {
+      background:  #e8f5e9;
+      color:  var(--success-green);
+    }
+
+    .status-ongoing {
+      background:  #fff3e0;
+      color:  var(--warning-orange);
+    }
+
+    .status-completed {
+      background:  #f5f5f5;
+      color: #9ca3af;
+    }
+
+    .no-classes-today {
+      text-align: center;
+      padding: 40px;
+      color: #6b7280;
+    }
+
+    .no-classes-today.icon {
+      font-size: 48px;
+      margin-bottom: 15px;
+    }
+
+    .no-classes-today p {
+      font-size: 16px;
     }
 
     /* Overlay for mobile */
@@ -405,10 +562,10 @@
       display: none;
       position: fixed;
       top: 0;
-      left: 0;
+      left:  0;
       right: 0;
       bottom: 0;
-      background: rgba(0, 0, 0, 0.6);
+      background:  rgba(0, 0, 0, 0.6);
       z-index: 999;
     }
 
@@ -418,7 +575,7 @@
 
     /* Scrollbar */
     .sidebar::-webkit-scrollbar {
-      width: 6px;
+      width:  6px;
     }
 
     .sidebar::-webkit-scrollbar-track {
@@ -431,13 +588,13 @@
     }
 
     /* Mobile Responsive */
-    @media (max-width: 968px) {
+    @media (max-width:  968px) {
       .sidebar {
         transform: translateX(-100%);
       }
 
       .sidebar.open {
-        transform: translateX(0);
+        transform:  translateX(0);
       }
 
       .main-wrapper {
@@ -453,7 +610,7 @@
       }
 
       .main-content {
-        padding: 20px;
+        padding:  20px;
       }
 
       .header-time {
@@ -465,7 +622,7 @@
       }
 
       .info-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns:  1fr;
       }
 
       .action-grid {
@@ -475,6 +632,22 @@
       .stat-card-value {
         font-size: 28px;
       }
+
+      .schedule-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+      }
+
+      .schedule-time {
+        display: flex;
+        align-items: center;
+        gap:  10px;
+      }
+
+      .schedule-countdown {
+        align-self: flex-end;
+      }
     }
 
     @media (max-width: 480px) {
@@ -483,11 +656,11 @@
       }
 
       .sidebar-header {
-        padding: 20px;
+        padding:  20px;
       }
 
       .sidebar-title {
-        font-size: 20px;
+        font-size:  20px;
       }
     }
   </style>
@@ -514,15 +687,15 @@
     </div>
 
     <div class="sidebar-nav">
-      <a class="nav-item active" href="Lecturer.html">
+      <a class="nav-item active" href="Lecturer_Enhanced.html">
         <span class="nav-icon">📊</span>
         <span>Dashboard</span>
       </a>
-      <a class="nav-item" href="LecturerTimetable.html">
+      <a class="nav-item" href="LecturerTimetable_Enhanced.html">
         <span class="nav-icon">📅</span>
         <span>My Timetable</span>
       </a>
-      <a class="nav-item" href="LecturerEnrollment.html">
+      <a class="nav-item" href="LecturerEnrollment_Enhanced.html">
         <span class="nav-icon">👥</span>
         <span>Course Enrollment</span>
       </a>
@@ -548,7 +721,7 @@
 
     <main class="main-content">
       <!-- Dashboard content generated by JS -->
-      <div class="loading">Loading dashboard...</div>
+      <div class="loading">Loading dashboard... </div>
     </main>
   </div>
 
@@ -583,7 +756,7 @@
 
     // Session Check
     const session = localStorage.getItem("TTMSFC_userSession");
-    if (!session) {
+    if (! session) {
       alert("Please log in first.");
       window.location.replace("../index.html");
     }
@@ -593,18 +766,18 @@
       user = JSON.parse(session);
       const role = user.inferredRole || "unknown";
       if (role !== "lecturer") {
-        alert("Access denied: Lecturer access only.");
+        alert("Access denied:  Lecturer access only.");
         localStorage.removeItem("TTMSFC_userSession");
         window.location.replace("../index.html");
       }
     } catch (e) {
-      alert("Invalid session. Please log in again.");
+      alert("Invalid session.  Please log in again.");
       localStorage.removeItem("TTMSFC_userSession");
       window.location.replace("../index.html");
     }
 
     // Set UI
-    const userName = user.full_name || user.login || "Lecturer";
+    const userName = user. full_name || user.login || "Lecturer";
     const initials = userName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
     
     document.getElementById("userName").textContent = userName;
@@ -619,25 +792,196 @@
     };
 
     // Mark active nav item
-    document.querySelectorAll('.nav-item').forEach(link => {
-      if (link.getAttribute('href') === 'Lecturer.html') {
-        link.classList.add('active');
+    document. querySelectorAll('. nav-item').forEach(link => {
+      if (link.getAttribute('href') === 'Lecturer_Enhanced.html') {
+        link.classList. add('active');
       }
     });
 
+    // ===== NEW: Today's Schedule Feature =====
+    const dayMap = { 0: 1, 1: 2, 2: 3, 3: 4, 4: 5, 5: 6, 6: 7 }; // JS day to TTMS day
+    const timeSlotMap = {
+      2: { start: '08:00', end:  '09:00' },
+      3: { start: '09:00', end:  '10:00' },
+      4: { start: '10:00', end:  '11:00' },
+      5: { start: '11:00', end:  '12:00' },
+      6: { start: '12:00', end:  '13:00' },
+      7: { start: '13:00', end:  '14:00' },
+      8: { start: '14:00', end:  '15:00' },
+      9: { start: '15:00', end:  '16:00' },
+      10: { start: '16:00', end:  '17:00' }
+    };
+
+    function getCurrentAcademicSession() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth() + 1;
+      
+      // Academic year typically starts in September
+      if (month >= 9) {
+        return { sesi: `${year}/${year + 1}`, semester: 1 };
+      } else if (month >= 2) {
+        return { sesi: `${year - 1}/${year}`, semester: 2 };
+      } else {
+        return { sesi:  `${year - 1}/${year}`, semester: 1 };
+      }
+    }
+
+    function getTimeInMinutes(timeStr) {
+      const [hours, minutes] = timeStr.split(': ').map(Number);
+      return hours * 60 + minutes;
+    }
+
+    function formatCountdown(minutes) {
+      if (minutes < 0) return { value: 'Completed', isCompleted: true };
+      if (minutes === 0) return { value: 'Starting Now! ', isOngoing: true };
+      
+      const hours = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      
+      if (hours > 0) {
+        return { value:  `${hours}h ${mins}m`, isUpcoming: true };
+      }
+      return { value: `${mins} min`, isUpcoming: true };
+    }
+
+    async function loadTodaySchedule() {
+      const staffId = user.no_pekerja;
+      if (!staffId || staffId === "NOT SET") {
+        return [];
+      }
+
+      const { sesi, semester } = getCurrentAcademicSession();
+      const today = new Date();
+      const todayDay = dayMap[today.getDay()]; // Convert to TTMS day format
+
+      try {
+        const url = `http://web. fc.utm.my/ttms/web_man_webservice_json. cgi?entity=jadual_pensyarah&sesi=${encodeURIComponent(sesi)}&semester=${semester}&no_pekerja=${encodeURIComponent(staffId)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (! Array.isArray(data)) return [];
+
+        // Filter for today's classes
+        const todayClasses = data. filter(entry => entry. hari === todayDay);
+
+        // Sort by time slot
+        todayClasses.sort((a, b) => a.masa - b.masa);
+
+        return todayClasses;
+      } catch (err) {
+        console.error("Error loading today's schedule:", err);
+        return [];
+      }
+    }
+
+    function renderTodaySchedule(classes) {
+      if (classes.length === 0) {
+        return `
+          <div class="no-classes-today">
+            <div class="icon">🎉</div>
+            <p>No classes scheduled for today! </p>
+          </div>
+        `;
+      }
+
+      const now = new Date();
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+      let nextClassFound = false;
+
+      return `
+        <div class="schedule-list">
+          ${classes.map(cls => {
+            const timeSlot = timeSlotMap[cls. masa];
+            if (!timeSlot) return '';
+
+            const startMinutes = getTimeInMinutes(timeSlot.start);
+            const endMinutes = getTimeInMinutes(timeSlot.end);
+            
+            let status = 'upcoming';
+            let statusText = 'Upcoming';
+            let countdown = formatCountdown(startMinutes - currentMinutes);
+            let isNextClass = false;
+
+            if (currentMinutes >= endMinutes) {
+              status = 'completed';
+              statusText = 'Completed';
+              countdown = { value: '✓', isCompleted: true };
+            } else if (currentMinutes >= startMinutes && currentMinutes < endMinutes) {
+              status = 'ongoing';
+              statusText = 'Ongoing';
+              countdown = { value: `${endMinutes - currentMinutes}m left`, isOngoing: true };
+            } else if (! nextClassFound && currentMinutes < startMinutes) {
+              isNextClass = true;
+              nextClassFound = true;
+              status = 'next';
+              statusText = 'Next Class';
+            }
+
+            const roomName = cls.ruang?. nama_ruang_singkatan || cls.kod_ruang || 'TBA';
+            const subjectName = cls. nama_subjek || '';
+
+            return `
+              <div class="schedule-item ${isNextClass ? 'next-class' : ''} ${status === 'completed' ? 'past' : ''}">
+                <div class="schedule-time">
+                  <div class="time">${timeSlot.start}</div>
+                  <div class="duration">${timeSlot.start} - ${timeSlot.end}</div>
+                </div>
+                <div class="schedule-details">
+                  <div class="subject-code">${cls.kod_subjek || 'N/A'}</div>
+                  <div class="subject-name">${subjectName}</div>
+                  <div class="room-info">
+                    <span>📍 ${roomName}</span>
+                    <span>👥 Section ${cls.seksyen || 'N/A'}</span>
+                  </div>
+                </div>
+                <div class="schedule-countdown">
+                  <div class="countdown-value">${countdown. value}</div>
+                  <div class="countdown-label">${status === 'completed' ? 'Done' : status === 'ongoing' ? 'Remaining' : 'Until class'}</div>
+                </div>
+                <span class="schedule-status status-${status}">${statusText}</span>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
     // Load Dashboard
-    function loadDashboard() {
+    async function loadDashboard() {
       const staffIdStatus = user.no_pekerja && user.no_pekerja !== "NOT SET" 
         ? user.no_pekerja 
-        : `<span class="missing" style="color: var(--error-red); font-weight: 600;">⚠️ MISSING</span>`;
+        :  `<span class="missing" style="color: var(--error-red); font-weight: 600;">⚠️ MISSING</span>`;
 
-      document.querySelector(".main-content").innerHTML = `
-        ${!user.no_pekerja || user.no_pekerja === "NOT SET" ? `
+      // Load today's schedule
+      const todayClasses = await loadTodaySchedule();
+      const nextClass = todayClasses. find(cls => {
+        const timeSlot = timeSlotMap[cls.masa];
+        if (!timeSlot) return false;
+        const now = new Date();
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        const startMinutes = getTimeInMinutes(timeSlot.start);
+        return currentMinutes < startMinutes;
+      });
+
+      let nextClassTime = '--: --';
+      let nextClassSubject = 'No upcoming classes';
+      if (nextClass) {
+        const timeSlot = timeSlotMap[nextClass.masa];
+        nextClassTime = timeSlot.start;
+        nextClassSubject = nextClass.kod_subjek || 'N/A';
+      }
+
+      const todayName = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+      document.querySelector(". main-content").innerHTML = `
+        ${! user.no_pekerja || user.no_pekerja === "NOT SET" ? `
         <div class="alert alert-warning">
           <span>⚠️</span>
           <div>
             <strong>Profile Incomplete</strong><br>
-            Your Staff ID (no_pekerja) is missing. Some features may not work properly.
+            Your Staff ID (no_pekerja) is missing. Today's schedule feature requires this to work. 
           </div>
         </div>
         ` : ''}
@@ -654,21 +998,36 @@
 
           <div class="stat-card">
             <div class="stat-card-header">
-              <div class="stat-card-title">Current Semester</div>
+              <div class="stat-card-title">Today's Classes</div>
               <div class="stat-card-icon icon-green">📚</div>
             </div>
-            <div class="stat-card-value">2024/25</div>
-            <div class="stat-card-label">Academic session</div>
+            <div class="stat-card-value">${todayClasses.length}</div>
+            <div class="stat-card-label">Classes scheduled today</div>
           </div>
 
           <div class="stat-card">
             <div class="stat-card-header">
-              <div class="stat-card-title">Quick Access</div>
-              <div class="stat-card-icon icon-orange">⚡</div>
+              <div class="stat-card-title">Next Class</div>
+              <div class="stat-card-icon icon-purple">⏰</div>
             </div>
-            <div class="stat-card-value">Ready</div>
-            <div class="stat-card-label">All systems operational</div>
+            <div class="stat-card-value">${nextClassTime}</div>
+            <div class="stat-card-label">${nextClassSubject}</div>
           </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <div class="stat-card-title">Current Semester</div>
+              <div class="stat-card-icon icon-orange">📅</div>
+            </div>
+            <div class="stat-card-value">2024/25</div>
+            <div class="stat-card-label">Academic session</div>
+          </div>
+        </div>
+
+        <!-- NEW: Today's Schedule Panel -->
+        <div class="today-schedule-panel">
+          <h2>📅 Today's Schedule - ${todayName}</h2>
+          ${renderTodaySchedule(todayClasses)}
         </div>
 
         <div class="info-panel">
@@ -696,11 +1055,11 @@
         <div class="quick-actions">
           <h2>⚡ Quick Actions</h2>
           <div class="action-grid">
-            <a class="action-btn" href="LecturerTimetable.html">
+            <a class="action-btn" href="LecturerTimetable_Enhanced. html">
               <div class="action-btn-icon">📅</div>
               <div class="action-btn-text">View Timetable</div>
             </a>
-            <a class="action-btn" href="LecturerEnrollment.html">
+            <a class="action-btn" href="LecturerEnrollment_Enhanced.html">
               <div class="action-btn-icon">👥</div>
               <div class="action-btn-text">Course Enrollment</div>
             </a>
@@ -718,11 +1077,24 @@
         <div class="alert alert-info" style="margin-top: 20px;">
           <span>💡</span>
           <div>
-            <strong>Debug Information</strong><br>
-            Check browser console (F12) for detailed session information.
+            <strong>New Feature! </strong><br>
+            Today's schedule now shows real-time countdown to your next class. Check browser console (F12) for detailed session information.
           </div>
         </div>
       `;
+
+      // Update countdown every minute
+      setInterval(async () => {
+        const updatedClasses = await loadTodaySchedule();
+        const schedulePanel = document.querySelector('. today-schedule-panel');
+        if (schedulePanel) {
+          const todayName = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+          schedulePanel. innerHTML = `
+            <h2>📅 Today's Schedule - ${todayName}</h2>
+            ${renderTodaySchedule(updatedClasses)}
+          `;
+        }
+      }, 60000);
     }
 
     // Load dashboard on start
