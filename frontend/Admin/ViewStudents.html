@@ -589,12 +589,15 @@
           <button class="btn btn-secondary" id="clearSearchBtn">
             <i class="fas fa-times"></i> Clear
           </button>
+		  <!-- Debug auth & export button (not using)
           <button class="btn btn-info" id="debugAuthBtn">
             <i class="fas fa-bug"></i> Debug Auth
           </button>
+		  
           <button class="btn btn-purple" id="exportBtn" style="display:none;">
             <i class="fas fa-download"></i> Export
           </button>
+		  -->
         </div>
 
         <!-- Pagination Info -->
@@ -744,8 +747,8 @@ document.getElementById("semesterSelect").value = (month >= 2 && month <=7) ? "2
 document.getElementById('loadStudentsBtn').onclick = fetchStudentData;
 document.getElementById('applySearchBtn').onclick = applySearch;
 document.getElementById('clearSearchBtn').onclick = clearSearch;
-document.getElementById('exportBtn').onclick = exportData;
-document.getElementById('debugAuthBtn').onclick = debugAuthOnly;
+//document.getElementById('exportBtn').onclick = exportData;
+//document.getElementById('debugAuthBtn').onclick = debugAuthOnly;
 // Enter key support for search
 document.getElementById('searchInput').addEventListener('keypress', function(e) {
 if (e.key === 'Enter') applySearch();
@@ -901,7 +904,7 @@ currentOffset = 0;
 // Show loading
 showLoading(true);
 hideError();
-document.getElementById('exportBtn').style.display = 'none';
+//document.getElementById('exportBtn').style.display = 'none';
 try {
 // Step 1: Get real session ID
 const authUrl = `http://web.fc.utm.my/ttms/auth-admin.php?session_id=${encodeURIComponent(password)}`;
@@ -984,7 +987,7 @@ updatePaginationInfo();
 renderPaginationControls();
 updateStats(data);
 // Show export button
-document.getElementById('exportBtn').style.display = 'inline-block';
+//document.getElementById('exportBtn').style.display = 'inline-block';
 // Clear any error details
 document.getElementById('errorDetails').style.display = 'none';
 } catch (error) {
@@ -1455,7 +1458,7 @@ fetchStudentData();
 function showLoading(show) {
 document.getElementById('loadingSpinner').style.display = show ? 'flex' : 'none';
 document.getElementById('loadStudentsBtn').disabled = show;
-document.getElementById('debugAuthBtn').disabled = show;
+//document.getElementById('debugAuthBtn').disabled = show;
 }
 function showError(title, message) {
 document.getElementById('errorTitle').textContent = title;
