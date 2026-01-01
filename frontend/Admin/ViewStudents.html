@@ -542,7 +542,7 @@
             </label>
             <select class="w3-select" id="semesterSelect">
               <option value="1">Semester 1</option>
-              <option value="2" selected>Semester 2</option>
+              <option value="2">Semester 2</option>
               <option value="3">Special Semester</option>
             </select>
           </div>
@@ -720,9 +720,10 @@ document.getElementById('debugPassword').textContent = 'Invalid JSON';
 }
 }
 // Generate academic years
+const month = new Date().getMonth() + 1;
 const academicYears = generateAcademicYears();
 const currentYear = new Date().getFullYear();
-const defaultSession = `${currentYear}/${currentYear + 1}`;
+const defaultSession = (month >= 2 & month <=7) ? `${currentYear}/${currentYear + 1}` : `${currentYear - 1}/${currentYear}`
 // Populate session select
 const sessionSelect = document.getElementById('sessionSelect');
 sessionSelect.innerHTML = academicYears.map(year =>
@@ -736,6 +737,9 @@ let currentLimit = 20;
 let totalRecords = 0;
 let totalPages = 1;
 let currentOffset = 0;
+
+document.getElementById("semesterSelect").value = (month >= 2 & month <=7) ? "2" : "1";
+
 // Event listeners
 document.getElementById('loadStudentsBtn').onclick = fetchStudentData;
 document.getElementById('applySearchBtn').onclick = applySearch;
