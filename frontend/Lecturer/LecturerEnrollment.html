@@ -304,6 +304,7 @@
     .button-group {
       display: flex;
       gap: 10px;
+      flex-wrap: wrap;
     }
 
     .btn {
@@ -337,6 +338,16 @@
 
     .btn-secondary:hover {
       background: #e5e7eb;
+    }
+
+    .btn-export {
+      background: #e0f2ff;
+      color: #0369a1;
+      border: 1px solid #bae6fd;
+    }
+
+    .btn-export:hover {
+      background: #bae6fd;
     }
 
     .stats-banner {
@@ -760,6 +771,10 @@
                   <span>↺</span>
                   <span>Reset</span>
                 </button>
+                <button class="btn btn-export" id="btnExportCsv">
+                  <span>⬇️</span>
+                  <span>Export CSV</span>
+                </button>
               </div>
             </div>
           </div>
@@ -878,6 +893,7 @@
       }
 
       let allCourses = [];
+      let filteredCourses = [];
 
       const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pensyarah_subjek&no_pekerja=${no_pekerja}`;
       console.log("Fetching URL:", url);
@@ -902,6 +918,7 @@
           }
 
           allCourses = data;
+          filteredCourses = data;
 
           const sessions = [...new Set(data.map(c => c.sesi))].sort((a, b) => {
             const yearA = parseInt(a.split('/')[0] || 0);
@@ -935,6 +952,7 @@
 
       document.getElementById('btnFilter').addEventListener('click', filterCourses);
       document.getElementById('btnReset').addEventListener('click', resetFilters);
+      document.getElementById('btnExportCsv').addEventListener('click', exportCsv);
 
       function filterCourses() {
         const selectedSession = document.getElementById('filterSession').value;
@@ -944,6 +962,7 @@
         if (selectedSession) filtered = filtered.filter(c => c.sesi === selectedSession);
         if (selectedSemester) filtered = filtered.filter(c => c.semester == selectedSemester);
 
+        filteredCourses = filtered;
         displayCourses(filtered);
 
         const statsBox = document.getElementById('statsBox');
@@ -963,7 +982,42 @@
         document.getElementById('filterSession').value = '';
         document.getElementById('filterSemester').value = '';
         document.getElementById('statsBox').style.display = 'none';
+        filteredCourses = allCourses;
         displayCourses(allCourses);
+      }
+
+      function exportCsv() {
+        if (!filteredCourses || filteredCourses.length === 0) {
+          alert("No courses to export. Try adjusting your filters first.");
+          return;
+        }
+        const headers = ["Course Code","Subject Name","Section","Semester","Session","Students"];
+        const rows = filteredCourses.map(c => [
+          c.kod_subjek || "",
+          c.nama_subjek || "",
+          c.seksyen || "",
+          c.semester || "",
+          c.sesi || "",
+          c.bil_pelajar != null ? c.bil_pelajar : ""
+        ]);
+        const csv = [headers, ...rows]
+          .map(r => r.map(v => {
+            const s = String(v ?? "");
+            return s.includes(',') || s.includes('"') || s.includes('\n')
+              ? `"${s.replace(/"/g, '""')}"`
+              : s;
+          }).join(','))
+          .join('\n');
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'courses.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
       }
 
       function displayCourses(courses) {

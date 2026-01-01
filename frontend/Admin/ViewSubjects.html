@@ -426,6 +426,33 @@
         align-items: flex-start;
       }
     }
+
+    .avg-cell {
+  min-width: 140px;
+}
+
+.avg-bar {
+  position: relative;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 6px;
+  margin-top: 6px;
+}
+
+.avg-fill {
+  height: 100%;
+  background: #10b981;
+  border-radius: 6px;
+}
+
+.avg-marker {
+  position: absolute;
+  top: -6px;
+  width: 2px;
+  height: 20px;
+  background: #111827;
+}
+
   </style>
 </head>
 <body>
@@ -505,8 +532,8 @@
               <i class="fas fa-book"></i> Semester
             </label>
             <select class="w3-select" id="semesterSelect">
-              <option value="1">Semester 1</option>
-              <option value="2" selected>Semester 2</option>
+              <option value="1" selected>Semester 1</option>
+              <option value="2">Semester 2</option>
               <option value="3">Special Semester</option>
             </select>
           </div>
@@ -515,10 +542,25 @@
               <i class="fas fa-university"></i> Filter by Faculty
             </label>
             <select class="w3-select" id="facultyFilter">
-              <option value="">All Faculties</option>
-            </select>
+            <option value="all">All</option>
+            <option value="fsksm">FSKSM / FS</option>
+            <option value="other">Other</option>
+            </select> 
           </div>
         </div>
+        <div class="form-row">
+        <div class="form-group" id="fsksmLevelGroup" style="display:none;">
+        <label for="fsksmLevel">
+        <i class="fas fa-layer-group"></i> FSKSM Level
+        </label>
+        <select class="w3-select" id="fsksmLevel">
+        <option value="all" selected>All</option>
+        <option value="ug">Undergraduate (UG)</option>
+        <option value="pg">Postgraduate (PG)</option>
+        </select>
+        </div>
+        </div>
+
         <div class="form-row">
           <div class="form-group" style="flex: 2;">
             <label for="searchInput">
@@ -534,22 +576,20 @@
               <option value="all">All Fields</option>
               <option value="code">Course Code</option>
               <option value="name">Subject Name</option>
-              <option value="program">Program Code</option>
-              <option value="level">Study Level</option>
             </select>
           </div>
         </div>
         <div class="btn-group">
-          <button class="btn btn-primary" id="loadSubjectsBtn">
+          <button type="button" class="btn btn-primary" id="loadSubjectsBtn">
             <i class="fas fa-sync-alt"></i> Load Subjects
           </button>
-          <button class="btn btn-success" id="applySearchBtn">
+          <button type="button"class="btn btn-success" id="applySearchBtn">
             <i class="fas fa-search"></i> Search
           </button>
-          <button class="btn btn-secondary" id="clearSearchBtn">
+          <button type="button"class="btn btn-secondary" id="clearSearchBtn">
             <i class="fas fa-times"></i> Clear All
           </button>
-          <button class="btn btn-info" id="exportBtn" style="display:none;">
+          <button type="button"class="btn btn-info" id="exportBtn" style="display:none;">
             <i class="fas fa-download"></i> Export CSV
           </button>
         </div>
@@ -590,7 +630,7 @@
             <pre id="errorDetailsContent" style="background:#f8f8f8; padding:12px; border-radius:6px; overflow:auto; max-height:300px; font-size:13px;"></pre>
           </details>
         </div>
-        <button class="btn btn-secondary" style="margin-top:12px; padding:6px 12px; font-size:12px;" onclick="hideError()">
+        <button type="button" class="btn btn-secondary" style="margin-top:12px; padding:6px 12px; font-size:12px;" onclick="hideError()">
           <i class="fas fa-times"></i> Dismiss
         </button>
       </div>
@@ -626,8 +666,8 @@
         <p>Loading details...</p>
       </div>
       <footer class="w3-container w3-padding w3-light-gray" style="border-top:1px solid #eee;">
-        <button class="btn btn-secondary" onclick="closeSubjectModal()">Close</button>
-        <button class="btn btn-info" onclick="copySubjectDetails()">
+        <button type="button" class="btn btn-secondary" onclick="closeSubjectModal()">Close</button>
+          <button type="button" class="btn btn-info" onclick="copySubjectDetails()">
           <i class="fas fa-copy"></i> Copy Details
         </button>
       </footer>
@@ -674,32 +714,63 @@
       initSubjectsPage();
     });
 
-    function initSubjectsPage() {
-      const academicYears = Array.from({length: 7}, (_, i) => {
-        const y = new Date().getFullYear() - 5 + i;
-        return `${y}/${y + 1}`;
-      });
-      const defaultSession = academicYears[5] || academicYears[academicYears.length - 1];
-      document.getElementById('sessionSelect').innerHTML = academicYears.map(y =>
-        `<option value="${y}" ${y === defaultSession ? 'selected' : ''}>${y}</option>`
-      ).join('');
+    let totalStudents = 1710;
+    let averagePercentage = 0;
+    let currentRenderedSubjects = [];
+    let currentSubjectsData = [];
+    let allFaculties = new Set();
 
-      let currentSubjectsData = [];
-      let allFaculties = new Set();
+    function initSubjectsPage() {
+      const currentYear = new Date().getFullYear();
+
+      // Generate newest → oldest
+      const academicYears = Array.from({ length: 7 }, (_, i) => {
+      const y = currentYear - i;
+      return `${y}/${y + 1}`;
+      });
+
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = today.getMonth(); // 0 = Jan
+
+      const defaultSession = (month >= 9)
+      ? `${year}/${year + 1}`
+      : `${year - 1}/${year}`;
+
+      document.getElementById('sessionSelect').innerHTML = academicYears
+      .map(y => `<option value="${y}" ${y === defaultSession ? 'selected' : ''}>${y}</option>`)
+      .join('');
 
       // Event listeners
       document.getElementById('loadSubjectsBtn').onclick = fetchSubjectsData;
       document.getElementById('applySearchBtn').onclick = applySearch;
       document.getElementById('clearSearchBtn').onclick = clearAllFilters;
       document.getElementById('exportBtn').onclick = exportData;
-      document.getElementById('facultyFilter').onchange = applyFilters;
-      document.getElementById('searchInput').onkeypress = e => { if (e.key === 'Enter') applySearch(); };
+      document.getElementById('facultyFilter').onchange = function () {
+  const levelGroup = document.getElementById('fsksmLevelGroup');
+  const levelSelect = document.getElementById('fsksmLevel');
 
+  if (this.value === 'fsksm') {
+    levelGroup.style.display = 'flex';
+  } else {
+    levelGroup.style.display = 'none';
+    levelSelect.value = 'all'; // reset
+  }
+
+  applySearch();
+};
+
+      document.getElementById('searchInput').onkeypress = e => {
+      if (e.key === 'Enter') {
+      e.preventDefault();
+        applySearch();
+      }
+    };
       document.getElementById('sessionSelect').onchange = 
       document.getElementById('semesterSelect').onchange = function() {
-        if (document.getElementById('autoLoadCheckbox').checked && currentSubjectsData.length > 0) {
-          fetchSubjectsData();
-        }
+      if (document.getElementById('autoLoadCheckbox').checked) {
+      fetchSubjectsData();
+      }
       };
 
       // Fetch function
@@ -717,9 +788,12 @@
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           
           const text = await res.text();
-          if (!text.trim()) throw new Error("Empty response");
-          
-          let data = JSON.parse(text);
+          if (!text.trim().startsWith('[') && !text.trim().startsWith('{')) {
+          throw new Error("TTMS returned non-JSON data (server busy)");
+        }
+
+        let data = JSON.parse(text);
+
           if (!Array.isArray(data)) {
             if (data && data.data && Array.isArray(data.data)) data = data.data;
             else if (data && data.subjek && Array.isArray(data.subjek)) data = data.subjek;
@@ -728,11 +802,33 @@
           }
 
           currentSubjectsData = data;
-          extractFaculties(data);
-          renderSubjectsTable(data);
-          updateStats(data);
+          // 🔢 Sort by highest to lowest students
+          currentSubjectsData.sort(
+          (a, b) => (b.bil_pelajar || 0) - (a.bil_pelajar || 0)
+        );
+
+// attach percentage
+currentSubjectsData = currentSubjectsData.map(s => ({
+  ...s,
+  student_percentage: totalStudents
+    ? ((s.bil_pelajar || 0) / totalStudents * 100).toFixed(2)
+    : "0.00"
+}));
+
+   averagePercentage = currentSubjectsData.length
+  ? (100 / currentSubjectsData.length)
+  : 0;
+
+        document.getElementById('statsInfo').innerHTML =
+  `<i class="fas fa-check-circle" style="color:#4CAF50;"></i>
+   Loaded <strong>${data.length}</strong> subjects •
+   <strong>${totalStudents}</strong> students`;
+
+
+          //extractFaculties(data);
+          applySearch(); // ✅ APPLY CURRENT FILTERS
+
           document.getElementById('exportBtn').style.display = 'inline-block';
-          document.getElementById('statsInfo').innerHTML = `<i class="fas fa-check-circle" style="color:#4CAF50;"></i> Loaded <strong>${data.length}</strong> subjects for ${sesi} Semester ${semester}`;
         } catch (err) {
           console.error(err);
           showError("Load Failed", err.message);
@@ -747,6 +843,8 @@
         data.forEach(s => {
           const f = (s.fakulti || s.faculty || s.kod_fakulti || s.department || '').trim();
           if (f) allFaculties.add(f);
+          const isBelowAvg = parseFloat(s.student_percentage) < averagePercentage;
+          const fillColor = isBelowAvg ? '#ef4444' : '#10b981';
         });
         const sel = document.getElementById('facultyFilter');
         sel.innerHTML = '';
@@ -757,7 +855,7 @@
           sel.appendChild(opt);
         });
       }
-
+      
       function renderSubjectsTable(data, highlightTerm = '', highlightField = '') {
         const container = document.getElementById('subjectsTableContainer');
         if (!data.length) {
@@ -781,6 +879,8 @@
           ${hasFaculty ? '<th>Faculty</th>' : ''}
           ${hasLevel ? '<th>Level</th>' : ''}
           ${hasCredit ? '<th>Credits</th>' : ''}
+          <th>Students</th>
+          <th>% of Total<br><span style="font-size:11px; font-weight:400;"> Average: <strong>${averagePercentage.toFixed(2)}%</strong></span></th>
           <th>Actions</th>
         </tr></thead><tbody>`;
 
@@ -792,6 +892,9 @@
           const level = s.peringkat || 'N/A';
           const cred = s.kredit || 'N/A';
 
+          const isBelowAvg = parseFloat(s.student_percentage) < averagePercentage;
+          const fillColor = isBelowAvg ? '#ef4444' : '#10b981';
+
           const term = highlightTerm.toLowerCase();
           const shouldHighlight = highlightTerm && (
             (highlightField === 'all' && [code, name, prog, level].some(x => x.toLowerCase().includes(term))) ||
@@ -801,7 +904,7 @@
             (highlightField === 'level' && level.toLowerCase().includes(term))
           );
 
-          html += `<tr ${shouldHighlight ? 'style="background-color:#fff9c4;"' : ''} onclick="viewSubjectDetails(${i})">
+          html += `<tr ${shouldHighlight ? 'style="background-color:#fff9c4;"' : ''} onclick="viewSubjectDetails(${i},true)">
             <td>${i + 1}</td>
             ${hasCode ? `<td><strong>${code}</strong></td>` : ''}
             ${hasName ? `<td>${name}</td>` : ''}
@@ -809,11 +912,21 @@
             ${hasFaculty ? `<td>${fac}</td>` : ''}
             ${hasLevel ? `<td>${level}</td>` : ''}
             ${hasCredit ? `<td class="w3-center">${cred}</td>` : ''}
+            <td class="w3-center">${s.bil_pelajar || 0}</td>
+            <td class="avg-cell">
+            <strong>${s.student_percentage}%</strong>
+            <div class="avg-bar">
+            <div class="avg-fill"
+            style="width:${s.student_percentage}%; background:${fillColor};">
+            </div>
+            <div class="avg-marker" style="left:${averagePercentage}%"></div>
+            </div>
+            </td>
             <td>
-              <button class="btn btn-info action-btn" onclick="event.stopPropagation(); viewSubjectDetails(${i})">
+              <button type="button"class="btn btn-info action-btn" onclick="event.stopPropagation(); viewSubjectDetails(${i},true)">
                 <i class="fas fa-eye"></i> View
               </button>
-              <button class="btn btn-success action-btn" onclick="event.stopPropagation(); copySubjectCode('${code}', '${name}')">
+              <button type="button"class="btn btn-success action-btn" onclick="event.stopPropagation(); copySubjectCode('${code}', '${name}')">
                 <i class="fas fa-copy"></i> Copy
               </button>
             </td>
@@ -839,46 +952,98 @@
         applyFilters(term, by, fac);
       }
 
-      function applyFilters(searchTerm = '', searchBy = 'all', facultyFilter = '') {
-        if (!currentSubjectsData.length) return;
-        let filtered = currentSubjectsData;
-        if (facultyFilter) {
-          filtered = filtered.filter(s => (s.fakulti || '').includes(facultyFilter));
-        }
-        if (searchTerm) {
-          filtered = filtered.filter(s => {
-            const code = (s.kod_subjek || '').toLowerCase();
-            const name = (s.nama_subjek || '').toLowerCase();
-            const prog = (s.kod_program || '').toLowerCase();
-            const level = (s.peringkat || '').toLowerCase();
-            const term = searchTerm.toLowerCase();
-            switch(searchBy) {
-              case 'code': return code.includes(term);
-              case 'name': return name.includes(term);
-              case 'program': return prog.includes(term);
-              case 'level': return level.includes(term);
-              default: return code.includes(term) || name.includes(term) || prog.includes(term) || level.includes(term);
-            }
-          });
-        }
-        renderSubjectsTable(filtered, searchTerm, searchBy);
-        updateStats(filtered, searchTerm || facultyFilter);
-      }
+      function applyFilters(searchTerm, searchBy, facultyFilter) {
+      if (!currentSubjectsData.length) return;
+
+      // 🔒 Always read latest UI values
+    searchTerm = searchTerm ?? document.getElementById('searchInput').value.trim();
+    searchBy = searchBy ?? document.getElementById('searchBySelect').value;
+    facultyFilter = facultyFilter ?? document.getElementById('facultyFilter').value;
+
+    let filtered = currentSubjectsData;
+
+    // ✅ YOUR CONDITION (UNCHANGED)
+    if (facultyFilter === 'fsksm') {
+    filtered = filtered.filter(s =>
+      s.bil_seksyen != null &&
+      s.bil_pensyarah != null &&
+      s.bil_pensyarah > 0
+    );
+    } 
+    else if (facultyFilter === 'other') {
+      filtered = filtered.filter(s =>
+      s.bil_seksyen != null &&
+      (!s.bil_pensyarah || s.bil_pensyarah === 0)
+    );
+    }
+
+    // 🔽 FSKSM LEVEL FILTER (UG / PG)
+const fsksmLevel = document.getElementById('fsksmLevel')?.value || 'all';
+
+if (facultyFilter === 'fsksm' && fsksmLevel !== 'all') {
+  filtered = filtered.filter(s => {
+    const code = (s.kod_subjek || '').toUpperCase();
+
+    if (fsksmLevel === 'ug') {
+      return code.startsWith('SEC');
+    }
+
+    if (fsksmLevel === 'pg') {
+      return !code.startsWith('SEC');
+    }
+
+    return true;
+  });
+}
+
+
+  // Search filter
+  if (searchTerm) {
+  const term = searchTerm.toLowerCase();
+  filtered = filtered.filter(s => {
+    const code = (s.kod_subjek || '').toLowerCase();
+    const name = (s.nama_subjek || '').toLowerCase();
+
+    switch (searchBy) {
+      case 'code':
+        return code.includes(term);
+
+      case 'name':
+        return name.includes(term);
+
+      default: // ✅ ALL FIELDS
+        return code.includes(term) || name.includes(term);
+    }
+  });
+}
+
+  currentRenderedSubjects = filtered;
+  renderSubjectsTable(filtered, searchTerm, searchBy);
+  updateStats(filtered, searchTerm || facultyFilter);
+}
+
 
       function clearAllFilters() {
-        document.getElementById('searchInput').value = '';
-        document.getElementById('facultyFilter').value = '';
-        document.getElementById('searchBySelect').value = 'all';
-        if (currentSubjectsData.length) {
-          renderSubjectsTable(currentSubjectsData);
-          updateStats(currentSubjectsData);
-        }
-      }
+    document.getElementById('searchInput').value = '';
+    document.getElementById('facultyFilter').value = 'all';
+    document.getElementById('searchBySelect').value = 'all';
+    document.getElementById('fsksmLevel').value = 'all';
+    document.getElementById('fsksmLevelGroup').style.display = 'none';
+
+
+  if (currentSubjectsData.length) {
+    currentRenderedSubjects = currentSubjectsData; // ✅ IMPORTANT
+    renderSubjectsTable(currentSubjectsData);
+    updateStats(currentSubjectsData);
+  }
+}
 
       function updateStats(data, filterText = '') {
         let totalCredits = 0;
         const facCounts = {};
         data.forEach(s => {
+          const isBelowAvg = parseFloat(s.student_percentage) < averagePercentage;
+          const fillColor = isBelowAvg ? '#ef4444' : '#10b981';
           totalCredits += parseInt(s.kredit) || 0;
           const f = s.fakulti || 'Unknown';
           facCounts[f] = (facCounts[f] || 0) + 1;
@@ -890,49 +1055,65 @@
           html += `Loaded <strong>${data.length}</strong> subjects`;
         }
         html += ` • <strong>${totalCredits}</strong> credits • <strong>${Object.keys(facCounts).length}</strong> faculties`;
-        document.getElementById('statsInfo').innerHTML = html;
+       document.getElementById('statsInfo').innerHTML =
+  `${html} • <strong>${totalStudents}</strong> students`;
+
       }
 
       // ✅ FIXED EXPORT FUNCTION ✅
       function exportData() {
-        if (currentSubjectsData.length === 0) {
-          alert("No data to export!");
-          return;
-        }
-        try {
-          const headers = Object.keys(currentSubjectsData[0]);
-          const csvRows = [];
-          csvRows.push(headers.join(','));
-          currentSubjectsData.forEach(subject => {
-            const row = headers.map(h => {
-              const val = subject[h] == null ? '' : String(subject[h]);
-              return `"${val.replace(/"/g, '""')}"`;
-            });
-            csvRows.push(row.join(','));
-          });
-          // ✅ CORRECTED: Use \n, not literal newline ✅
-          const csvContent = csvRows.join('\n');
-          const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          const sesi = document.getElementById('sessionSelect').value.replace('/', '-');
-          const semester = document.getElementById('semesterSelect').value;
-          a.href = url;
-          a.download = `subjects_${sesi}_sem${semester}_${new Date().toISOString().slice(0,10)}.csv`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-          alert(`✅ Exported ${currentSubjectsData.length} subjects`);
-        } catch (err) {
-          alert("Export failed: " + err.message);
-        }
-      }
+      const exportDataSource = currentRenderedSubjects.length
+      ? currentRenderedSubjects
+      : currentSubjectsData;
+
+    if (!exportDataSource.length) {
+    alert("No data to export!");
+    return;
+    }
+
+    try {
+    const headers = Object.keys(exportDataSource[0]);
+    const csvRows = [];
+    csvRows.push(headers.join(','));
+
+    exportDataSource.forEach(subject => {
+      const row = headers.map(h => {
+        const val = subject[h] == null ? '' : String(subject[h]);
+        return `"${val.replace(/"/g, '""')}"`;
+      });
+      csvRows.push(row.join(','));
+    });
+
+    const csvContent = csvRows.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    const sesi = document.getElementById('sessionSelect').value.replace('/', '-');
+    const semester = document.getElementById('semesterSelect').value;
+    a.href = url;
+    a.download = `subjects_${sesi}_sem${semester}.csv`;
+
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    alert(`✅ Exported ${exportDataSource.length} subjects`);
+  } catch (err) {
+    alert("Export failed: " + err.message);
+  }
+}
+
 
       // Other functions (viewSubjectDetails, etc.) remain unchanged
-      window.viewSubjectDetails = async function(index) {
-        const data = currentSubjectsData[index];
-        if (!data) return;
+      window.viewSubjectDetails = async function(index, fromFiltered = false) {
+      const data = fromFiltered
+      ? currentRenderedSubjects[index]
+      : currentSubjectsData[index];
+
+      if (!data) return;
+
         const kod = data.kod_subjek;
         const sesi = document.getElementById('sessionSelect').value;
         const semester = document.getElementById('semesterSelect').value;
@@ -957,20 +1138,57 @@
             throw new Error("Bad format");
           }
 
-          const valid = (sectData.seksyen_list || []).filter(s => s.seksyen && s.pensyarah && s.pensyarah.trim() !== '—');
-          const totalStud = valid.reduce((sum, s) => sum + (parseInt(s.bil_pelajar) || 0), 0);
+          const allSections = sectData.seksyen_list || [];
+          const bilSeksyen = data.bil_seksyen ?? allSections.length;
+          const displayedSections = allSections.filter(
+          s => s.seksyen && s.seksyen.trim() !== ''
+          );
 
-          let html = `<div class="info-card"><h4>${sectData.nama_subjek || kod}</h4><p><strong>Code:</strong> ${kod}</p><p><strong>Valid Sections:</strong> ${valid.length}</p></div>`;
-          if (valid.length) {
+          const totalStud = displayedSections.reduce(
+          (sum, s) => sum + (parseInt(s.bil_pelajar) || 0), 0);
+
+          let html = `
+          <div class="info-card">
+          <h4>${sectData.nama_subjek || kod}</h4>
+          <p><strong>Code:</strong> ${kod}</p>
+          <p><strong>Total Sections :</strong> ${bilSeksyen}</p>
+          <p><strong>Total Students :</strong> ${data.bil_pelajar ?? 0}</p>
+          </div>
+          `;
+
+          if (displayedSections.length) {
             html += `<p><strong>Sections with lecturers:</strong></p><div class="table-wrapper"><table class="w3-table w3-bordered w3-striped"><thead><tr class="w3-teal"><th>Section</th><th>Lecturer</th><th>Students</th></tr></thead><tbody>`;
-            valid.forEach(s => {
-              html += `<tr><td>${s.seksyen}</td><td>${s.pensyarah}</td><td class="w3-center">${s.bil_pelajar || 0}</td></tr>`;
+            displayedSections.forEach(s => {
+              html += `<tr><td>${s.seksyen}</td><td>${s.pensyarah ? s.pensyarah : '<span style="color:#999;">Not Assigned</span>'}</td><td class="w3-center">${s.bil_pelajar || 0}</td></tr>`;
             });
             html += `</tbody></table></div>`;
             html += `<div class="summary-card" style="margin-top:12px;"><p><i class="fas fa-users"></i> <strong>Total Students:</strong> ${totalStud}</p></div>`;
-          } else {
-            html += `<div class="empty-state" style="padding:12px;"><i class="fas fa-exclamation-triangle"></i> No valid sections found</div>`;
-          }
+          } else if (bilSeksyen > 0) {
+          html += `
+          <div class="empty-state" style="padding:16px; background:#f5f5f5;">
+          <h5 style="margin-top:0;">
+          <i class="fas fa-layer-group"></i> Sections
+          </h5>
+          <p style="margin-bottom:12px; color:#666;">
+          Section data is not available, but this subject has <strong>${bilSeksyen}</strong> sections.
+      </p>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        ${Array.from({ length: bilSeksyen }, (_, i) =>
+          `<button class="btn btn-secondary action-btn" disabled>
+            Section ${i + 1}
+          </button>`
+        ).join('')}
+      </div>
+    </div>
+  `;
+} else {
+  html += `
+    <div class="empty-state" style="padding:12px;">
+      <i class="fas fa-info-circle"></i> No sections available
+    </div>
+  `;
+}
+
 
           document.getElementById('modalTitle').textContent = `Sections: ${kod}`;
           document.getElementById('modalContent').innerHTML = html;
