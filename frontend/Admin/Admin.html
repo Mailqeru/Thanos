@@ -760,12 +760,19 @@
         const lecturersData = safeJsonParse(await lecturersRes.text());
         document.getElementById('totalLecturers').textContent = lecturersData ? (Array.isArray(lecturersData) ? lecturersData.length : 1) : '0';
 
-        // --- Subjects ---
+        // --- Subjects (Filtered: only SEC & not starting with M) ---
         const subjectsUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=subjek&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}`;
         const subjectsRes = await fetch(subjectsUrl);
         const subjectsData = safeJsonParse(await subjectsRes.text()) || [];
-        const subjectsList = Array.isArray(subjectsData) ? subjectsData : [subjectsData];
-        document.getElementById('totalSubjects').textContent = subjectsList.length;
+        const subjectsList = Array.isArray(subjectsData) ? subjectsData : [subjectsData].filter(Boolean);
+
+        // Filter: must contain "SEC" AND must NOT start with "M"
+        const undergradSecSubjects = subjectsList.filter(subj => {
+          const kod = subj.kod_subjek || '';
+          return kod.includes('SEC') && !kod.startsWith('M');
+        });
+
+        document.getElementById('totalSubjects').textContent = undergradSecSubjects.length;
 
         // --- Students (direct) ---
         const studentsUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar&session_id=${encodeURIComponent(realSessionId)}&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}`;
