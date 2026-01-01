@@ -1075,42 +1075,89 @@ html += `
 </div>`;
 container.innerHTML = html;
 }
+async function fetchAllStudentsForCurrentFilters() {
+  if (!currentSessionId) {
+    alert("No valid session. Please reload students first.");
+    return [];
+  }
+
+  const sesi = document.getElementById('sessionSelect').value;
+  const semester = document.getElementById('semesterSelect').value;
+
+  const dataUrl =
+    `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar` +
+    `&session_id=${encodeURIComponent(currentSessionId)}` +
+    `&sesi=${encodeURIComponent(sesi)}` +
+    `&semester=${encodeURIComponent(semester)}`;
+
+  const res = await fetch(dataUrl);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const text = await res.text();
+  if (!text.trim()) return [];
+
+  let data = JSON.parse(text);
+  if (!Array.isArray(data)) {
+    if (data && data.data && Array.isArray(data.data)) data = data.data;
+    else data = [data];
+  }
+  return data;
+}
+
 // Apply search filter
-function applySearch() {
-const searchTerm = document.getElementById('searchInput').value.trim();
-const searchBy = document.getElementById('searchBySelect').value;
-if (!searchTerm) {
-// If no search term, show all data
-renderStudentTable(currentStudentData);
-updateStats(currentStudentData);
-return;
+async function applySearch() {
+  const searchTerm = document.getElementById('searchInput').value.trim();
+  const searchBy = document.getElementById('searchBySelect').value;
+
+  if (!searchTerm) {
+    renderStudentTable(currentStudentData);
+    updateStats(currentStudentData);
+    renderPaginationControls(); // show pagination normally
+    return;
+  }
+
+  showLoading(true);
+  hideError();
+
+  try {
+    const dataToSearch = (currentLimit > 0)
+      ? await fetchAllStudentsForCurrentFilters()   // search ALL students
+      : currentStudentData;                         // already all
+
+    const term = searchTerm.toLowerCase();
+
+    const filtered = dataToSearch.filter(student => {
+      const studentId = (student.no_matrik || student.id || student.no_pelajar || student.matric_no || '').toString().toLowerCase();
+      const studentName = (student.nama || student.name || '').toLowerCase();
+      const program = (student.program || student.kod_program || student.course || '').toLowerCase();
+      const faculty = (student.fakulti || student.faculty || student.department || '').toLowerCase();
+
+      switch (searchBy) {
+        case 'name': return studentName.includes(term);
+        case 'id': return studentId.includes(term);
+        case 'program': return program.includes(term) || faculty.includes(term);
+        case 'all':
+          return studentName.includes(term) || studentId.includes(term) || program.includes(term) || faculty.includes(term);
+        default:
+          return true;
+      }
+    });
+
+    // Show results
+    renderStudentTable(filtered, searchTerm, searchBy);
+    updateStats(filtered);
+
+    // Optional: hide pagination when showing search results (because it's not “page based” anymore)
+    document.getElementById('paginationControls').innerHTML = '';
+    document.getElementById('paginationInfo').textContent =
+      `Search results: ${filtered.length} record(s) matching "${searchTerm}"`;
+  } catch (err) {
+    console.error("Search all error:", err);
+    showError("Search failed", err.message);
+  } finally {
+    showLoading(false);
+  }
 }
-// Filter data
-const filtered = currentStudentData.filter(student => {
-const studentId = (student.no_matrik || student.id || student.no_pelajar || student.matric_no || '').toString().toLowerCase();
-const studentName = (student.nama || student.name || '').toLowerCase();
-const program = (student.program || student.kod_program || student.course || '').toLowerCase();
-const faculty = (student.fakulti || student.faculty || student.department || '').toLowerCase();
-const term = searchTerm.toLowerCase();
-switch(searchBy) {
-case 'name':
-return studentName.includes(term);
-case 'id':
-return studentId.includes(term);
-case 'program':
-return program.includes(term) || faculty.includes(term);
-case 'all':
-return studentName.includes(term) ||
-studentId.includes(term) ||
-program.includes(term) ||
-faculty.includes(term);
-default:
-return true;
-}
-});
-renderStudentTable(filtered, searchTerm, searchBy);
-updateStats(filtered);
-}
+
 // Clear search
 function clearSearch() {
 document.getElementById('searchInput').value = '';
