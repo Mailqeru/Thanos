@@ -611,345 +611,291 @@
   </div>
 
   <script>
-    // Time
-    function updateTime() {
-      const now = new Date();
-      const timeStr = now.toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        hour12: true 
-      });
-      document.getElementById('currentTime').textContent = timeStr;
-    }
-    updateTime();
-    setInterval(updateTime, 60000);
+  // Time
+  function updateTime() {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: true 
+    });
+    document.getElementById('currentTime').textContent = timeStr;
+  }
+  updateTime();
+  setInterval(updateTime, 60000);
 
-    // Sidebar
-    function toggleSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      const overlay = document.getElementById('overlay');
-      sidebar.classList.toggle('open');
-      overlay.classList.toggle('active');
-    }
+  // Sidebar
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('active');
+  }
 
-    function closeSidebar() {
-      document.getElementById('sidebar').classList.remove('open');
-      document.getElementById('overlay').classList.remove('active');
-    }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('active');
+  }
 
-    // Auth & Role Check
-    const session = localStorage.getItem("TTMSFC_userSession");
-    if (!session) {
-      alert("Please log in first.");
-      window.location.replace("../index.html");
-    }
+  // Auth & Role Check
+  const session = localStorage.getItem("TTMSFC_userSession");
+  if (!session) {
+    alert("Please log in first.");
+    window.location.replace("../index.html");
+  }
 
-    let user;
-    try {
-      user = JSON.parse(session);
-      const role = (user.inferredRole || "unknown").toLowerCase();
-      if (role !== "student") {
-        alert("Access denied: Student access only.");
-        localStorage.removeItem("TTMSFC_userSession");
-        window.location.replace("../index.html");
-      }
-    } catch (e) {
-      alert("Invalid session. Please log in again.");
+  let user;
+  try {
+    user = JSON.parse(session);
+    const role = (user.inferredRole || "unknown").toLowerCase();
+    if (role !== "student") {
+      alert("Access denied: Student access only.");
       localStorage.removeItem("TTMSFC_userSession");
       window.location.replace("../index.html");
     }
+  } catch (e) {
+    alert("Invalid session. Please log in again.");
+    localStorage.removeItem("TTMSFC_userSession");
+    window.location.replace("../index.html");
+  }
 
-    // Set UI
-    const fullName = user.full_name || user.login || "Student";
-    const matricNo = user.login || "N/A";
-    const initials = fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || "S";
-    
-    document.getElementById("userName").textContent = fullName;
-    document.getElementById("userAvatar").textContent = initials;
+  // Set UI
+  const fullName = user.full_name || user.login || "Student";
+  const matricNo = user.login || "N/A";
+  const initials = fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || "S";
+  
+  document.getElementById("userName").textContent = fullName;
+  document.getElementById("userAvatar").textContent = initials;
 
-    // Logout
-    document.getElementById("navLogout").onclick = function() {
-      if (confirm("Are you sure you want to logout?")) {
-        localStorage.removeItem("TTMSFC_userSession");
-        window.location.replace("../index.html");
-      }
+  // Logout
+  document.getElementById("navLogout").onclick = function() {
+    if (confirm("Are you sure you want to logout?")) {
+      localStorage.removeItem("TTMSFC_userSession");
+      window.location.replace("../index.html");
+    }
+  };
+
+  // ===== SUBJECT SECTIONS LOGIC =====
+  (function() {
+    const hariMap = { 2: "Mon", 3: "Tue", 4: "Wed", 5: "Thu", 6: "Fri", 7: "Sat", 8: "Sun" };
+    const masaMap = {
+      2: "08:00–09:00", 3: "09:00–10:00", 4: "10:00–11:00", 5: "11:00–12:00",
+      6: "12:00–13:00", 7: "13:00–14:00", 8: "14:00–15:00", 9: "15:00–16:00", 10: "16:00–17:00"
     };
 
-    // ===== SUBJECT SECTIONS LOGIC =====
-    (function() {
-      const hariMap = { 2: "Mon", 3: "Tue", 4: "Wed", 5: "Thu", 6: "Fri", 7: "Sat", 8: "Sun" };
-      const masaMap = {
-        2: "08:00–09:00", 3: "09:00–10:00", 4: "10:00–11:00", 5: "11:00–12:00",
-        6: "12:00–13:00", 7: "13:00–14:00", 8: "14:00–15:00", 9: "15:00–16:00", 10: "16:00–17:00"
-      };
+    const ITEMS_PER_PAGE = 10;
+    let currentPage = 1;
+    let validSubjectList = [];
+    let currentSesi = '';
+    let currentSemester = '';
+    let globalEnrichedData = [];
+    let totalPages = 0;
 
-      const ITEMS_PER_PAGE = 10;
-      let currentPage = 1;
-      let validSubjectList = [];
-      let currentSesi = '';
-      let currentSemester = '';
-      let globalEnrichedData = [];
-      let totalPages = 0;
+    document.getElementById("loadSectionsBtn").addEventListener("click", loadSubjectSections);
+    document.getElementById("searchInput").addEventListener("input", filterSections);
 
-      document.getElementById("loadSectionsBtn").addEventListener("click", loadSubjectSections);
-      document.getElementById("searchInput").addEventListener("input", filterSections);
+    (async function initFilters() {
+      const contentEl = document.getElementById("sectionsContent");
+      const sessionSelect = document.getElementById("sessionSelect");
+      const semesterSelect = document.getElementById("semesterSelect");
 
-      (async function initFilters() {
-        const userSession = localStorage.getItem("TTMSFC_userSession");
-        const contentEl = document.getElementById("sectionsContent");
-        const sessionSelect = document.getElementById("sessionSelect");
-        const semesterSelect = document.getElementById("semesterSelect");
+      try {
+        const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar_subjek&no_matrik=${encodeURIComponent(matricNo)}`;
+        const res = await fetch(url);
+        const data = await res.json();
 
-        if (!userSession) {
-          contentEl.innerHTML = `<div class="empty-message">Session expired. Please log in again.</div>`;
+        if (!Array.isArray(data) || data.length === 0) {
+          contentEl.innerHTML = `<div class="empty-message">No enrolled subjects found.</div>`;
           return;
         }
 
-        try {
-          const user = JSON.parse(userSession);
-          const matricNo = user.login;
-          const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar_subjek&no_matrik=${encodeURIComponent(matricNo)}`;
-          const res = await fetch(url);
-          const data = await res.json();
-
-          if (!Array.isArray(data) || data.length === 0) {
-            sessionSelect.innerHTML = "<option>No sessions found</option>";
-            contentEl.innerHTML = `<div class="empty-message">You are not enrolled in any subjects.</div>`;
-            return;
-          }
-
-          const sessions = {};
-          data.forEach(item => {
-            const sesi = item.sesi || 'Unknown';
-            const sem = item.semester || 'N/A';
-            if (!sessions[sesi]) sessions[sesi] = new Set();
-            sessions[sesi].add(sem);
-          });
-
-          let sessionOptions = '<option value="">-- Select Session --</option>';
-          Object.keys(sessions).sort().reverse().forEach(s => {
-            sessionOptions += `<option value="${s}">${s}</option>`;
-          });
-          sessionSelect.innerHTML = sessionOptions;
-
-          sessionSelect.addEventListener('change', () => {
-            const sesi = sessionSelect.value;
-            semesterSelect.innerHTML = sesi
-              ? Array.from(sessions[sesi]).sort().map(sem => `<option value="${sem}">Semester ${sem}</option>`).join('')
-              : '<option>Select session first</option>';
-          });
-
-          const latestSesi = Object.keys(sessions).sort().reverse()[0];
-          if (latestSesi) {
-            sessionSelect.value = latestSesi;
-            const latestSem = Array.from(sessions[latestSesi]).sort().reverse()[0];
-            semesterSelect.innerHTML = Array.from(sessions[latestSesi]).sort().map(sem =>
-              `<option value="${sem}" ${sem == latestSem ? 'selected' : ''}>Semester ${sem}</option>`
-            ).join('');
-          }
-
-          contentEl.innerHTML = `<p class="empty-message">Select session & semester, then click <strong>Load Valid Sections</strong>.</p>`;
-        } catch (err) {
-          contentEl.innerHTML = `<div class="empty-message">Failed to load sessions.</div>`;
-        }
-      })();
-
-      function isValidSection(sec) {
-        const lecturer = (sec.pensyarah || '').toString().trim().toLowerCase();
-        const hasLecturer = lecturer !== '' && lecturer !== 'tba';
-        const hasEnrolled = (sec.bil_pelajar || 0) > 0;
-        return hasLecturer && hasEnrolled;
-      }
-
-      async function loadSubjectSections() {
-        const userSession = localStorage.getItem("TTMSFC_userSession");
-        if (!userSession) {
-          document.getElementById("sectionsContent").innerHTML = `<div class="empty-message">Session expired.</div>`;
-          document.getElementById("searchContainer").style.display = "none";
-          return;
-        }
-
-        currentSesi = document.getElementById("sessionSelect").value;
-        currentSemester = document.getElementById("semesterSelect").value;
-        if (!currentSesi || !currentSemester) {
-          alert("Please select both session and semester.");
-          return;
-        }
-
-        currentPage = 1;
-        document.getElementById("sectionsContent").innerHTML = "<div class='loading'>Loading and filtering subjects...</div>";
-        document.getElementById("searchContainer").style.display = "none";
-
-        try {
-          const urlSections = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=subjek_seksyen&sesi=${encodeURIComponent(currentSesi)}&semester=${encodeURIComponent(currentSemester)}`;
-          const resSec = await fetch(urlSections);
-          const allSubjects = await resSec.json();
-
-          if (!Array.isArray(allSubjects) || allSubjects.length === 0) {
-            throw new Error("No subjects offered.");
-          }
-
-          const cleanedSubjects = allSubjects
-            .filter(subj => subj.seksyen_list && Array.isArray(subj.seksyen_list))
-            .map(subj => {
-              const validSections = subj.seksyen_list.filter(isValidSection);
-              return validSections.length > 0 ? { ...subj, seksyen_list: validSections } : null;
-            })
-            .filter(Boolean);
-
-          if (cleanedSubjects.length === 0) {
-            throw new Error("No valid sections found.");
-          }
-
-          validSubjectList = cleanedSubjects;
-          totalPages = Math.ceil(validSubjectList.length / ITEMS_PER_PAGE);
-          await loadPage(currentPage);
-          document.getElementById("searchContainer").style.display = "block";
-        } catch (err) {
-          document.getElementById("sectionsContent").innerHTML = 
-            `<div class="empty-message">Error: ${err.message || 'Failed to load sections'}</div>`;
-        }
-      }
-
-      async function loadPage(page) {
-        const startIndex = (page - 1) * ITEMS_PER_PAGE;
-        const pageSubjects = validSubjectList.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-
-        document.getElementById("sectionsContent").innerHTML = `<div class='loading'>Loading schedules for page ${page} of ${totalPages}...</div>`;
-
-        const fetchPromises = [];
-
-        pageSubjects.forEach(subj => {
-          const kod = (subj.kod_subjek || '').trim();
-          const nama = (subj.nama_subjek || '').trim();
-
-          (subj.seksyen_list || []).forEach(sec => {
-            const seksyen = (sec.seksyen || '').trim();
-            const lecturer = (sec.pensyarah || '').trim();
-            const enrolled = sec.bil_pelajar || 0;
-            const searchable = [kod, nama, lecturer].filter(x => x).join(' ').toLowerCase();
-
-            const promise = (async () => {
-              try {
-                const urlJadual = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=jadual_subjek&sesi=${encodeURIComponent(currentSesi)}&semester=${encodeURIComponent(currentSemester)}&kod_subjek=${encodeURIComponent(kod)}&seksyen=${encodeURIComponent(seksyen)}`;
-                const res = await fetch(urlJadual);
-                const jadualList = await res.json();
-
-                const scheduleEntries = (Array.isArray(jadualList) ? jadualList : [])
-                  .filter(e => e.hari && e.masa)
-                  .map(e => ({
-                    day: hariMap[e.hari] || `Day ${e.hari}`,
-                    time: masaMap[e.masa] || `Slot ${e.masa}`,
-                    room: (e.ruang?.kod_ruang) || '—'
-                  }));
-
-                return { kod, nama, seksyen, lecturer, enrolled, scheduleEntries, searchable };
-              } catch (err) {
-                return { kod, nama, seksyen, lecturer, enrolled, scheduleEntries: [], searchable };
-              }
-            })();
-
-            fetchPromises.push(promise);
-          });
+        const sessions = {};
+        data.forEach(item => {
+          const sesi = item.sesi || 'Unknown';
+          const sem = item.semester || 'N/A';
+          if (!sessions[sesi]) sessions[sesi] = new Set();
+          sessions[sesi].add(sem);
         });
 
-        try {
-          globalEnrichedData = await Promise.all(fetchPromises);
+        let sessionOptions = '<option value="">-- Select Session --</option>';
+        Object.keys(sessions).sort().reverse().forEach(s => {
+          sessionOptions += `<option value="${s}">${s}</option>`;
+        });
+        sessionSelect.innerHTML = sessionOptions;
 
-          const grouped = {};
-          globalEnrichedData.forEach(item => {
-            const key = item.kod || 'UNKNOWN';
-            if (!grouped[key]) {
-              grouped[key] = { kod: item.kod, nama: item.nama, sections: [] };
-            }
-            grouped[key].sections.push(item);
-          });
+        sessionSelect.addEventListener('change', () => {
+          const sesi = sessionSelect.value;
+          semesterSelect.innerHTML = sesi
+            ? Array.from(sessions[sesi]).sort().map(sem => `<option value="${sem}">Semester ${sem}</option>`).join('')
+            : '<option>Select session first</option>';
+        });
 
-          renderSections(Object.values(grouped), currentSesi, currentSemester, page);
-        } catch (err) {
-          document.getElementById("sectionsContent").innerHTML = 
-            `<div class="empty-message">Error loading schedules for page ${page}.</div>`;
+        const latestSesi = Object.keys(sessions).sort().reverse()[0];
+        if (latestSesi) {
+          sessionSelect.value = latestSesi;
+          const latestSem = Array.from(sessions[latestSesi]).sort().reverse()[0];
+          semesterSelect.innerHTML = Array.from(sessions[latestSesi]).sort().map(sem =>
+            `<option value="${sem}" ${sem == latestSem ? 'selected' : ''}>Semester ${sem}</option>`
+          ).join('');
         }
-      }
-
-      function renderSections(groups, sesi, semester, page) {
-        let html = `<h4 style="color: #003366; margin: 20px 0;">Valid Sections – ${sesi} Semester ${semester} (Page ${page} of ${totalPages})</h4>`;
-
-        groups.forEach(group => {
-          const allSearchable = group.sections
-            .map(s => s.searchable)
-            .join(' ')
-            .replace(/"/g, '&quot;');
-
-          html += `
-            <div class="subject-card" data-search="${allSearchable}">
-              <header><h5>${group.kod || '—'} – ${group.nama || 'Unnamed Subject'}</h5></header>
-              <div class="table-wrapper">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Section</th>
-                    <th>Lecturer</th>
-                    <th>Enrolled</th>
-                    <th>Schedule (Day – Time – Room)</th>
-                  </tr>
-                </thead>
-                <tbody>`;
-
-        group.sections.forEach(sec => {
-          const scheduleHtml = sec.scheduleEntries.length > 0
-            ? sec.scheduleEntries.map(e => `<div class="schedule-entry">${e.day} – ${e.time} – ${e.room}</div>`).join('')
-            : '<span style="color:#999;">No schedule</span>';
-
-          html += `
-            <tr>
-              <td><strong>${sec.seksyen || '—'}</strong></td>
-              <td>${sec.lecturer || 'TBA'}</td>
-              <td>${sec.enrolled}</td>
-              <td>${scheduleHtml}</td>
-            </tr>`;
-        });
-
-        html += `
-              </tbody>
-            </table>
-            </div>
-            <div class="summary">Total Sections: ${group.sections.length}</div>
-          </div>`;
-        });
-
-        // Pagination
-        html += `
-          <div class="pagination">
-            <button ${page <= 1 ? 'disabled' : ''} onclick="loadPage(${page - 1})">&laquo; Prev</button>
-            <span class="page-info">Page ${page} of ${totalPages}</span>
-            <button ${page >= totalPages ? 'disabled' : ''} onclick="loadPage(${page + 1})">Next &raquo;</button>
-          </div>`;
-
-        html += `<div class="summary">Page ${page}: ${globalEnrichedData.length} section(s) shown</div>`;
-
-        document.getElementById("sectionsContent").innerHTML = html;
-      }
-
-      window.loadPage = loadPage;
-
-      function filterSections() {
-        const input = document.getElementById("searchInput").value.trim();
-        const items = document.querySelectorAll(".subject-card");
-
-        if (!input) {
-          items.forEach(item => item.style.display = "");
-          return;
-        }
-
-        const queryWords = input.toLowerCase().split(/\s+/).filter(word => word);
-        items.forEach(item => {
-          const text = (item.getAttribute("data-search") || "").toLowerCase();
-          const matches = queryWords.every(word => text.includes(word));
-          item.style.display = matches ? "" : "none";
-        });
+        contentEl.innerHTML = `<p class="empty-message">Select session & semester, then click Load Valid Sections.</p>`;
+      } catch (err) {
+        contentEl.innerHTML = `<div class="empty-message">Failed to load sessions.</div>`;
       }
     })();
-  </script>
+
+    async function loadSubjectSections() {
+      currentSesi = document.getElementById("sessionSelect").value;
+      currentSemester = document.getElementById("semesterSelect").value;
+      if (!currentSesi || !currentSemester) {
+        alert("Please select both session and semester.");
+        return;
+      }
+
+      currentPage = 1;
+      document.getElementById("sectionsContent").innerHTML = "<div class='loading'>Filtering subjects and schedules...</div>";
+
+      try {
+        const resSec = await fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=subjek_seksyen&sesi=${encodeURIComponent(currentSesi)}&semester=${encodeURIComponent(currentSemester)}`);
+        const allSubjects = await resSec.json();
+
+        validSubjectList = allSubjects
+          .filter(subj => subj.seksyen_list && Array.isArray(subj.seksyen_list))
+          .map(subj => {
+            const validSections = subj.seksyen_list.filter(sec => (sec.pensyarah || '').trim() && (sec.bil_pelajar || 0) > 0);
+            return validSections.length > 0 ? { ...subj, seksyen_list: validSections } : null;
+          })
+          .filter(Boolean);
+
+        totalPages = Math.ceil(validSubjectList.length / ITEMS_PER_PAGE);
+        await loadPage(currentPage);
+        document.getElementById("searchContainer").style.display = "block";
+      } catch (err) {
+        document.getElementById("sectionsContent").innerHTML = `<div class="empty-message">Error: ${err.message}</div>`;
+      }
+    }
+
+    async function loadPage(page) {
+      const startIndex = (page - 1) * ITEMS_PER_PAGE;
+      const pageSubjects = validSubjectList.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+      document.getElementById("sectionsContent").innerHTML = `<div class='loading'>Fetching schedules (Page ${page})...</div>`;
+
+      const fetchPromises = [];
+      pageSubjects.forEach(subj => {
+        subj.seksyen_list.forEach(sec => {
+          fetchPromises.push((async () => {
+            try {
+              // Correctly defining local variables for this specific section
+              const kod = subj.kod_subjek;
+              const nama = subj.nama_subjek;
+              const seksyen = sec.seksyen;
+              const lecturer = sec.pensyarah;
+              const enrolled = sec.bil_pelajar;
+
+              const res = await fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=jadual_subjek&sesi=${encodeURIComponent(currentSesi)}&semester=${encodeURIComponent(currentSemester)}&kod_subjek=${encodeURIComponent(kod)}&seksyen=${encodeURIComponent(seksyen)}`);
+              const rawJadual = await res.json();
+
+              // --- STRUCTURED MERGING LOGIC ---
+              const sorted = (Array.isArray(rawJadual) ? rawJadual : [])
+                .filter(e => e.hari && e.masa)
+                .sort((a, b) => a.hari - b.hari || a.masa - b.masa);
+
+              const mergedEntries = [];
+              for (let i = 0; i < sorted.length; i++) {
+                let startSlot = sorted[i].masa;
+                let endSlot = sorted[i].masa;
+                const day = sorted[i].hari;
+                
+                // CHANGE: Use nama_ruang_singkatan for Room Name instead of Room Code
+                const roomName = sorted[i].ruang?.nama_ruang_singkatan || sorted[i].ruang?.kod_ruang || '—';
+
+                // Merge consecutive hours on the same day in the same room
+                while (i + 1 < sorted.length && 
+                       sorted[i+1].hari === day && 
+                       sorted[i+1].masa === endSlot + 1 && 
+                       (sorted[i+1].ruang?.nama_ruang_singkatan || sorted[i+1].ruang?.kod_ruang || '—') === roomName) {
+                  endSlot = sorted[i+1].masa;
+                  i++;
+                }
+
+                const startTime = masaMap[startSlot].split('–')[0];
+                const endTime = masaMap[endSlot].split('–')[1];
+
+                mergedEntries.push({
+                  day: hariMap[day],
+                  time: `${startTime}–${endTime}`,
+                  room: roomName
+                });
+              }
+
+              return { 
+                kod, 
+                nama, 
+                seksyen, 
+                lecturer, 
+                enrolled, 
+                scheduleEntries: mergedEntries,
+                searchable: `${kod} ${nama} ${lecturer}`.toLowerCase()
+              };
+            } catch (err) { 
+              console.error("Fetch error for " + subj.kod_subjek, err);
+              return null; 
+            }
+          })());
+        });
+      });
+
+      globalEnrichedData = (await Promise.all(fetchPromises)).filter(Boolean);
+      renderSections(page);
+    }
+
+    function renderSections(page) {
+      const grouped = {};
+      globalEnrichedData.forEach(item => {
+        if (!grouped[item.kod]) grouped[item.kod] = { kod: item.kod, nama: item.nama, sections: [] };
+        grouped[item.kod].sections.push(item);
+      });
+
+      let html = `<h4 style="color: #003366; margin: 20px 0;">Valid Sections – Page ${page} of ${totalPages}</h4>`;
+      Object.values(grouped).forEach(group => {
+        html += `
+          <div class="subject-card" data-search="${group.sections.map(s => s.searchable).join(' ')}">
+            <header><h5>${group.kod} – ${group.nama}</h5></header>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr><th>Section</th><th>Lecturer</th><th>Enrolled</th><th>Schedule (Day – Time – Room)</th></tr>
+                </thead>
+                <tbody>`;
+        group.sections.forEach(sec => {
+          const scheduleHtml = sec.scheduleEntries.length > 0
+            ? sec.scheduleEntries.map(e => `<div class="schedule-entry"><strong>${e.day}</strong> | ${e.time} | ${e.room}</div>`).join('')
+            : '<span style="color:#999;">No schedule</span>';
+          html += `<tr><td><strong>${sec.seksyen}</strong></td><td>${sec.lecturer}</td><td>${sec.enrolled}</td><td>${scheduleHtml}</td></tr>`;
+        });
+        html += `</tbody></table></div></div>`;
+      });
+
+      html += `
+        <div class="pagination">
+          <button ${page <= 1 ? 'disabled' : ''} onclick="loadPage(${page - 1})">Prev</button>
+          <span class="page-info">Page ${page} of ${totalPages}</span>
+          <button ${page >= totalPages ? 'disabled' : ''} onclick="loadPage(${page + 1})">Next</button>
+        </div>`;
+
+      document.getElementById("sectionsContent").innerHTML = html;
+    }
+
+    window.loadPage = loadPage;
+
+    function filterSections() {
+      const query = document.getElementById("searchInput").value.toLowerCase();
+      document.querySelectorAll(".subject-card").forEach(card => {
+        const text = card.getAttribute("data-search");
+        card.style.display = text.includes(query) ? "" : "none";
+      });
+    }
+  })();
+</script>
 </body>
 </html>
