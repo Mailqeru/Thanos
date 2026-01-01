@@ -754,15 +754,18 @@ if (e.key === 'Enter') applySearch();
 document.getElementById('limitSelect').addEventListener('change', function() {
 currentPage = 1;
 });
+
 // Generate academic years function
 function generateAcademicYears() {
 const currentYear = new Date().getFullYear();
 const years = [];
-for (let i = currentYear - 5; i <= currentYear + 1; i++) {
+const latestStartYear = (month >= 2 && month <= 7) ? currentYear : (currentYear - 1);
+for (let i = latestStartYear ; i >= latestStartYear - 5; i--) {
 years.push(`${i}/${i + 1}`);
 }
 return years;
 }
+
 // Debug: Test auth only
 async function debugAuthOnly() {
 const raw = localStorage.getItem("TTMSFC_userSession");
@@ -1365,10 +1368,19 @@ throw new Error("Response is not an array");
 }
 }
 const filtered = subjects.filter(subj => {
-const subjSesi = (subj.sesi || '').toString();
-const subjSem = (subj.semester || '').toString();
-return subjSesi === sesi && subjSem === semester;
+  const subjSesi = String(subj.sesi ?? '').trim();
+  const subjSem  = String(subj.semester ?? '').trim();
+
+  const selectedSesi = String(sesi).trim();
+  const selectedSem  = String(semester).trim();
+
+  // compare semester as number to avoid "01" vs "1" issues
+  const semOk = parseInt(subjSem, 10) === parseInt(selectedSem, 10);
+  const sesiOk = subjSesi === selectedSesi;
+
+  return sesiOk && semOk;
 });
+
 if (filtered.length === 0) {
 container.innerHTML = `
 <button class="back-btn" onclick="window.backToStudentsList()">
@@ -1397,10 +1409,7 @@ let html = `
 <th>#</th>
 <th>Subject Code</th>
 <th>Subject Name</th>
-<th>Credits</th>
 <th>Section</th>
-<th>Lecturer</th>
-<th>Status</th>
 </tr>
 </thead>
 <tbody>`;
@@ -1411,14 +1420,7 @@ html += `
 <td>${i + 1}</td>
 <td>${subj.kod_subjek || '—'}</td>
 <td>${subj.nama_subjek || '—'}</td>
-<td>${subj.kredit || '—'}</td>
 <td>${subj.seksyen || '—'}</td>
-<td>${subj.nama_pensyarah || subj.pensyarah || '—'}</td>
-<td>
-<span class="status-tag ${statusClass}">
-${subj.status || 'Active'}
-</span>
-</td>
 </tr>`;
 });
 html += `</tbody></table></div>`;

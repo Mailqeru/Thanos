@@ -638,13 +638,15 @@
     let currentSessionId = null;
     let currentSesi = '';
     let currentSemester = '';
+	const month = new Date().getMonth() + 1;
 
     function generateAcademicYears() {
       const currentYear = new Date().getFullYear();
       const years = [];
-      for (let i = currentYear - 5; i <= currentYear + 1; i++) {
-        years.push(`${i}/${i + 1}`);
-      }
+	  const latestStartYear = (month >= 2 && month <= 7) ? currentYear : (currentYear - 1);
+	  for (let i = latestStartYear ; i >= latestStartYear - 5; i--) {
+		years.push(`${i}/${i + 1}`);
+	  }
       return years;
     }
 
@@ -709,7 +711,7 @@
           <div class="table-wrapper">
             <table class="w3-table w3-striped w3-bordered">
               <thead><tr>
-                <th>No.</th><th>Subject Code</th><th>Subject Name</th><th>Credits</th>
+                <th>No.</th><th>Subject Code</th><th>Subject Name</th>
                 <th>Section</th><th>Session</th><th>Semester</th><th>Students</th>
               </tr></thead>
               <tbody>`;
@@ -719,7 +721,6 @@
               <td>${i + 1}</td>
               <td>${subj.kod_subjek || '—'}</td>
               <td>${subj.nama_subjek || '—'}</td>
-              <td>${subj.kredit || '—'}</td>
               <td>${subj.seksyen || '—'}</td>
               <td>${subj.sesi || '—'}</td>
               <td>${subj.semester || '—'}</td>
@@ -742,12 +743,16 @@
     }
 
     function initLecturersPageWithFilters(sesi, semester) {
-      initLecturersPage();
-      setTimeout(() => {
-        if (sesi) document.getElementById("sessionSelect").value = sesi;
-        if (semester) document.getElementById("semesterSelect").value = semester;
-      }, 100);
-    }
+	  initLecturersPage();
+
+	  setTimeout(() => {
+		if (sesi) document.getElementById("sessionSelect").value = sesi;
+		if (semester) document.getElementById("semesterSelect").value = semester;
+
+		document.getElementById("loadLecturersBtn").click();
+	  }, 150);
+	}
+
 	
 	function escapeHtml(s) {
 	  return (s ?? "").toString()
