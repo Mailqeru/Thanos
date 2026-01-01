@@ -722,14 +722,14 @@
 	  const month = new Date().getMonth() + 1;
       const academicYears = generateAcademicYears();
       const currentYear = new Date().getFullYear();
-      const defaultSession = (month >= 2 & month <=7) ? `${currentYear}/${currentYear + 1}` : `${currentYear - 1}/${currentYear}`  ;
+      const defaultSession = (month >= 2 && month <=7) ? `${currentYear}/${currentYear + 1}` : `${currentYear - 1}/${currentYear}`  ;
 
       document.getElementById("sessionSelect").innerHTML = academicYears.map(year => 
         `<option value="${year}" ${year === defaultSession ? 'selected' : ''}>${year}</option>`
       ).join('');
 	  
 	  
-	  document.getElementById("semesterSelect").value = (month >= 2 & month <=7) ? "2" : "1";
+	  document.getElementById("semesterSelect").value = (month >= 2 && month <=7) ? "2" : "1";
       document.getElementById("loadLecturersBtn").onclick = fetchLecturerData;
       document.getElementById("applySearchBtn").onclick = applySearch;
       document.getElementById("clearSearchBtn").onclick = clearSearch;
