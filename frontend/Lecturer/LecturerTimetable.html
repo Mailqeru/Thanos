@@ -564,9 +564,9 @@
         const dayStudents = Array.from(secMap.values()).reduce((a,b)=>a+b,0);
         return { day: d.name, dayId: d.id, slots: slotsCount, students: dayStudents, hours: slotsCount };
       });
-      const maxStudents = Math.max(...daySummary.map(d=>d.students), 0);
-      const busiestDays = daySummary.filter(d => d.students === maxStudents && maxStudents > 0).map(d => d.day);
-      const busiestLabel = busiestDays.length ? `Highest student load day(s): ${busiestDays.join(', ')}` : 'No classes scheduled';
+      const maxHours = Math.max(...daySummary.map(d=>d.hours), 0);
+      const busiestDaysByHours = daySummary.filter(d => d.hours === maxHours && maxHours > 0).map(d => d.day);
+      const busiestLabel = busiestDaysByHours.length ? `Highest teaching time day(s): ${busiestDaysByHours.join(', ')}` : 'No classes scheduled';
 
       // Build merged cells per day (merge consecutive slots for the same subject+section)
       const dayCellsHtml = (dayId) => {
@@ -680,7 +680,7 @@
                 <div class="title">${ds.day}</div>
                 <div>Slots: <strong>${ds.slots}</strong></div>
                 <div>Students: <strong>${ds.students}</strong></div>
-                ${(ds.students === maxStudents && maxStudents > 0) ? `<div class="badge">Busy</div>` : ''}
+                ${(ds.hours === maxHours && maxHours > 0) ? `<div class="badge">Busy</div>` : ''}
               </div>
             `).join('')}
           </div>
