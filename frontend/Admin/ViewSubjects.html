@@ -160,14 +160,13 @@
 
     /* Info Boxes */
     .info-card {
-      background: #f0f8ff;
-      border-left: 4px solid var(--utm-blue);
-      padding: 16px;
-      border-radius: 8px;
+      background: #f5f7fa;
+      border: 1px solid #e5e7eb;
+      padding: 14px 16px;
+      border-radius: 6px;
       margin-bottom: 20px;
       font-size: 14px;
     }
-
     .info-card code {
       background: #e6f0ff;
       padding: 2px 6px;
@@ -407,6 +406,32 @@
       border-radius: 12px 12px 0 0 !important;
     }
 
+    /* Percentage stacked bar */
+    .percent-cell {
+      min-width: 140px;
+    }
+
+    .percent-bar {
+      display: flex;
+      width: 80px;
+      height: 10px;
+      background: #e5e7eb;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+
+    .percent-joined {
+      background: #3b82f6;
+      height: 100%;
+      min-width: 3px;
+    }
+
+    .percent-not-joined {
+      background: #d1d5db;
+      height: 100%;
+    }
+
     @media (max-width: 768px) {
       .content-wrapper {
         padding: 20px;
@@ -424,36 +449,30 @@
       .stats-info {
         flex-direction: column;
         align-items: flex-start;
-      }
+      }  
     }
 
-    .avg-cell {
-  min-width: 140px;
+    #subjectsChart {
+      width: 100%;
+      height: 400px;
+    }
+    .section-btn {
+  padding:6px 12px;
+  border-radius:14px;
+  background:rgba(13,148,136,0.12);
+  color:#0f766e;
+  font-size:12px;
+  font-weight:500;
+  border:1px dashed rgba(13,148,136,0.4);
+  cursor:not-allowed;
 }
 
-.avg-bar {
-  position: relative;
-  height: 8px;
-  background: #e5e7eb;
-  border-radius: 6px;
-  margin-top: 6px;
-}
-
-.avg-fill {
-  height: 100%;
-  background: #10b981;
-  border-radius: 6px;
-}
-
-.avg-marker {
-  position: absolute;
-  top: -6px;
-  width: 2px;
-  height: 20px;
-  background: #111827;
+.section-btn:disabled {
+  opacity:0.9;
 }
 
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <!-- Sidebar -->
@@ -510,14 +529,6 @@
         <p>Browse subjects by academic session and semester. Search and filter by course code, name, or program.</p>
       </div>
 
-      <!-- API Info -->
-      <div class="card info-card">
-        <strong><i class="fas fa-plug"></i> API Information</strong><br>
-        • Endpoint: <code>entity=subjek&sesi=yyyy/yyyy&semester=[1|2]</code><br>
-        • Authentication: <span class="w3-tag w3-green" style="background: var(--success); color: white;">Not Required</span><br>
-        • Data Source: TTMS Public API
-      </div>
-
       <!-- Filters -->
       <div class="card">
         <div class="form-row">
@@ -542,25 +553,12 @@
               <i class="fas fa-university"></i> Filter by Faculty
             </label>
             <select class="w3-select" id="facultyFilter">
-            <option value="all">All</option>
-            <option value="fsksm">FSKSM / FS</option>
-            <option value="other">Other</option>
+              <option value="all">All</option>
+              <option value="fsksm">FSKSM / FS</option>
+              <option value="other">Other</option>
             </select> 
           </div>
         </div>
-        <div class="form-row">
-        <div class="form-group" id="fsksmLevelGroup" style="display:none;">
-        <label for="fsksmLevel">
-        <i class="fas fa-layer-group"></i> FSKSM Level
-        </label>
-        <select class="w3-select" id="fsksmLevel">
-        <option value="all" selected>All</option>
-        <option value="ug">Undergraduate (UG)</option>
-        <option value="pg">Postgraduate (PG)</option>
-        </select>
-        </div>
-        </div>
-
         <div class="form-row">
           <div class="form-group" style="flex: 2;">
             <label for="searchInput">
@@ -583,13 +581,13 @@
           <button type="button" class="btn btn-primary" id="loadSubjectsBtn">
             <i class="fas fa-sync-alt"></i> Load Subjects
           </button>
-          <button type="button"class="btn btn-success" id="applySearchBtn">
+          <button type="button" class="btn btn-success" id="applySearchBtn">
             <i class="fas fa-search"></i> Search
           </button>
-          <button type="button"class="btn btn-secondary" id="clearSearchBtn">
+          <button type="button" class="btn btn-secondary" id="clearSearchBtn">
             <i class="fas fa-times"></i> Clear All
           </button>
-          <button type="button"class="btn btn-info" id="exportBtn" style="display:none;">
+          <button type="button" class="btn btn-info" id="exportBtn" style="display:none;">
             <i class="fas fa-download"></i> Export CSV
           </button>
         </div>
@@ -635,7 +633,16 @@
         </button>
       </div>
 
-      <!-- Table -->
+      <!-- Chart Card -->
+      <div class="card" id="subjectsChartCard">
+        <div class="card-header">
+          <i class="fas fa-chart-bar"></i>
+          <h3>Crowd Analysis Chart</h3>
+        </div>
+        <canvas id="subjectsChart" style="max-height:400px;"></canvas>
+      </div>
+
+      <!-- Subjects Table -->
       <div id="subjectsTableContainer" class="card">
         <div class="empty-state">
           <i class="fas fa-book"></i>
@@ -667,12 +674,29 @@
       </div>
       <footer class="w3-container w3-padding w3-light-gray" style="border-top:1px solid #eee;">
         <button type="button" class="btn btn-secondary" onclick="closeSubjectModal()">Close</button>
-          <button type="button" class="btn btn-info" onclick="copySubjectDetails()">
-          <i class="fas fa-copy"></i> Copy Details
         </button>
       </footer>
     </div>
   </div>
+
+  <!-- Timetable Modal -->
+<div id="timetableModal" class="w3-modal">
+  <div class="w3-modal-content w3-card-4 w3-animate-zoom" style="max-width:900px; margin:40px auto;">
+    <header class="w3-container w3-teal">
+      <span onclick="closeTimetableModal()" class="w3-button w3-display-topright">&times;</span>
+      <h3 id="timetableModalTitle">Timetable</h3>
+    </header>
+
+    <div class="w3-container" id="timetableModalContent" style="padding:24px;">
+      <p>Loading timetable...</p>
+    </div>
+
+    <footer class="w3-container w3-light-gray w3-padding">
+      <button class="btn btn-secondary" onclick="closeTimetableModal()">Close</button>
+    </footer>
+  </div>
+</div>
+
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script>
@@ -709,37 +733,140 @@
       }
     };
 
-    // Init
+    // Initialize
     $(document).ready(function() {
       initSubjectsPage();
     });
 
+    let subjectsChart;
     let totalStudents = 1710;
-    let averagePercentage = 0;
     let currentRenderedSubjects = [];
     let currentSubjectsData = [];
     let allFaculties = new Set();
 
+function renderSubjectsBarChart(data) {
+  const ctx = document.getElementById('subjectsChart').getContext('2d');
+
+  // Filter only FSKSM subjects
+  const fsksmSubjects = data.filter(s =>
+    s.kod_subjek !== 'UBSS1032' &&
+    s.bil_seksyen > 0 &&
+    s.bil_pelajar > 0 &&
+    s.bil_pensyarah > 0
+  );
+
+  if (!fsksmSubjects.length) {
+    document.getElementById('subjectsChartCard').style.display = 'none';
+    return;
+  }
+  document.getElementById('subjectsChartCard').style.display = 'block';
+
+  const labels = fsksmSubjects.map(s => s.kod_subjek || 'N/A');
+  const avgPerSectionValues = fsksmSubjects.map(s => Math.round(s.bil_pelajar / s.bil_seksyen));
+
+  // Color coding based on average
+  const colors = avgPerSectionValues.map(v => {
+    if (v > 35) return 'rgb(204, 50, 50)';      // red → high
+    else if (v > 20) return 'rgb(45, 201, 55)'; // green → medium
+    else return 'rgb(231, 180, 22)';           // light green → low
+  });
+
+  if (subjectsChart) subjectsChart.destroy();
+
+  subjectsChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Avg Students per Section',
+        data: avgPerSectionValues,
+        backgroundColor: colors,
+        borderColor: colors,
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: 'Average Students per Section' }
+        },
+        x: {
+          title: { display: true, text: 'Course Code' },
+          ticks: { autoSkip: false, maxRotation: 45, minRotation: 0 }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          enabled: true,
+          callbacks: {
+            label: function(context) {
+              const index = context.dataIndex;
+              const subj = fsksmSubjects[index];
+              const avg = avgPerSectionValues[index];
+              return `${subj.nama_subjek || 'N/A'}: Avg ${avg} per section`;
+            }
+          }
+        },
+        title: {
+          display: true,
+          text: 'FSKSM Subjects - Avg Students per Section',
+          font: { size: 16, weight: 'bold' }
+        }
+      }
+    }
+  });
+
+  // Add color hint/legend
+  const chartCard = document.getElementById('subjectsChartCard');
+  let hint = document.getElementById('colorHint');
+  if (!hint) {
+    hint = document.createElement('div');
+    hint.id = 'colorHint';
+    hint.style.display = 'flex';
+    hint.style.gap = '16px';
+    hint.style.marginTop = '8px';
+    hint.style.alignItems = 'center';
+    chartCard.appendChild(hint);
+  }
+  hint.innerHTML = `
+    <div style="display:flex; align-items:center; gap:4px;">
+      <div style="width:20px;height:20px;background-color:rgb(231, 180, 22); border:1px solid #999;"></div>
+      <span style="font-size:12px;">Under-Enrolled</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:4px;">
+      <div style="width:20px;height:20px;background-color:rgb(45, 201, 55); border:1px solid #999;"></div>
+      <span style="font-size:12px;">Optimal</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:4px;">
+      <div style="width:20px;height:20px;background-color:rgb(204, 50, 50); border:1px solid #999;"></div>
+      <span style="font-size:12px;">Over-Capacity</span>
+    </div>
+  `;
+}
     function initSubjectsPage() {
       const currentYear = new Date().getFullYear();
 
       // Generate newest → oldest
       const academicYears = Array.from({ length: 7 }, (_, i) => {
-      const y = currentYear - i;
-      return `${y}/${y + 1}`;
+        const y = currentYear - i;
+        return `${y}/${y + 1}`;
       });
 
       const today = new Date();
       const year = today.getFullYear();
-      const month = today.getMonth(); // 0 = Jan
+      const month = today.getMonth();
 
       const defaultSession = (month >= 9)
-      ? `${year}/${year + 1}`
-      : `${year - 1}/${year}`;
+        ? `${year}/${year + 1}`
+        : `${year - 1}/${year}`;
 
       document.getElementById('sessionSelect').innerHTML = academicYears
-      .map(y => `<option value="${y}" ${y === defaultSession ? 'selected' : ''}>${y}</option>`)
-      .join('');
+        .map(y => `<option value="${y}" ${y === defaultSession ? 'selected' : ''}>${y}</option>`)
+        .join('');
 
       // Event listeners
       document.getElementById('loadSubjectsBtn').onclick = fetchSubjectsData;
@@ -747,30 +874,19 @@
       document.getElementById('clearSearchBtn').onclick = clearAllFilters;
       document.getElementById('exportBtn').onclick = exportData;
       document.getElementById('facultyFilter').onchange = function () {
-  const levelGroup = document.getElementById('fsksmLevelGroup');
-  const levelSelect = document.getElementById('fsksmLevel');
-
-  if (this.value === 'fsksm') {
-    levelGroup.style.display = 'flex';
-  } else {
-    levelGroup.style.display = 'none';
-    levelSelect.value = 'all'; // reset
-  }
-
-  applySearch();
-};
-
-      document.getElementById('searchInput').onkeypress = e => {
-      if (e.key === 'Enter') {
-      e.preventDefault();
         applySearch();
-      }
-    };
+      };
+      document.getElementById('searchInput').onkeypress = e => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          applySearch();
+        }
+      };
       document.getElementById('sessionSelect').onchange = 
       document.getElementById('semesterSelect').onchange = function() {
-      if (document.getElementById('autoLoadCheckbox').checked) {
-      fetchSubjectsData();
-      }
+        if (document.getElementById('autoLoadCheckbox').checked) {
+          fetchSubjectsData();
+        }
       };
 
       // Fetch function
@@ -789,10 +905,10 @@
           
           const text = await res.text();
           if (!text.trim().startsWith('[') && !text.trim().startsWith('{')) {
-          throw new Error("TTMS returned non-JSON data (server busy)");
-        }
+            throw new Error("TTMS returned non-JSON data (server busy)");
+          }
 
-        let data = JSON.parse(text);
+          let data = JSON.parse(text);
 
           if (!Array.isArray(data)) {
             if (data && data.data && Array.isArray(data.data)) data = data.data;
@@ -802,31 +918,25 @@
           }
 
           currentSubjectsData = data;
-          // 🔢 Sort by highest to lowest students
+          // Sort by highest to lowest students
           currentSubjectsData.sort(
-          (a, b) => (b.bil_pelajar || 0) - (a.bil_pelajar || 0)
-        );
+            (a, b) => (b.bil_pelajar || 0) - (a.bil_pelajar || 0)
+          );
 
-// attach percentage
-currentSubjectsData = currentSubjectsData.map(s => ({
-  ...s,
-  student_percentage: totalStudents
-    ? ((s.bil_pelajar || 0) / totalStudents * 100).toFixed(2)
-    : "0.00"
-}));
+          // Attach percentage
+          currentSubjectsData = currentSubjectsData.map(s => ({
+            ...s,
+            student_percentage: totalStudents
+              ? ((s.bil_pelajar || 0) / totalStudents * 100).toFixed(2)
+              : "0.00"
+          }));
 
-   averagePercentage = currentSubjectsData.length
-  ? (100 / currentSubjectsData.length)
-  : 0;
+          document.getElementById('statsInfo').innerHTML =
+            `<i class="fas fa-check-circle" style="color:#4CAF50;"></i>
+             Loaded <strong>${data.length}</strong> subjects •
+             <strong>${totalStudents}</strong> students`;
 
-        document.getElementById('statsInfo').innerHTML =
-  `<i class="fas fa-check-circle" style="color:#4CAF50;"></i>
-   Loaded <strong>${data.length}</strong> subjects •
-   <strong>${totalStudents}</strong> students`;
-
-
-          //extractFaculties(data);
-          applySearch(); // ✅ APPLY CURRENT FILTERS
+          applySearch(); // Apply current filters
 
           document.getElementById('exportBtn').style.display = 'inline-block';
         } catch (err) {
@@ -838,24 +948,6 @@ currentSubjectsData = currentSubjectsData.map(s => ({
         }
       }
 
-      function extractFaculties(data) {
-        allFaculties = new Set(['All Faculties']);
-        data.forEach(s => {
-          const f = (s.fakulti || s.faculty || s.kod_fakulti || s.department || '').trim();
-          if (f) allFaculties.add(f);
-          const isBelowAvg = parseFloat(s.student_percentage) < averagePercentage;
-          const fillColor = isBelowAvg ? '#ef4444' : '#10b981';
-        });
-        const sel = document.getElementById('facultyFilter');
-        sel.innerHTML = '';
-        Array.from(allFaculties).sort().forEach(f => {
-          const opt = document.createElement('option');
-          opt.value = f === 'All Faculties' ? '' : f;
-          opt.textContent = f;
-          sel.appendChild(opt);
-        });
-      }
-      
       function renderSubjectsTable(data, highlightTerm = '', highlightField = '') {
         const container = document.getElementById('subjectsTableContainer');
         if (!data.length) {
@@ -869,31 +961,36 @@ currentSubjectsData = currentSubjectsData.map(s => ({
         const hasProgram = 'kod_program' in first;
         const hasFaculty = 'fakulti' in first;
         const hasLevel = 'peringkat' in first;
-        const hasCredit = 'kredit' in first;
 
         let html = `<div class="table-wrapper"><table class="w3-table w3-striped w3-bordered"><thead><tr>
-          <th>#</th>
+          <th>No</th>
           ${hasCode ? '<th>Course Code</th>' : ''}
           ${hasName ? '<th>Subject Name</th>' : ''}
           ${hasProgram ? '<th>Program</th>' : ''}
           ${hasFaculty ? '<th>Faculty</th>' : ''}
           ${hasLevel ? '<th>Level</th>' : ''}
-          ${hasCredit ? '<th>Credits</th>' : ''}
+          <th>Credits</th>
           <th>Students</th>
-          <th>% of Total<br><span style="font-size:11px; font-weight:400;"> Average: <strong>${averagePercentage.toFixed(2)}%</strong></span></th>
-          <th>Actions</th>
+          <th style="text-align:center; line-height:1.2;">
+            Students<br>
+            <span style="font-size:13px; font-weight:500;margin-top:4px;">
+              Participation (%)
+            </span>
+          </th>
+          <th>Avg / Section</th>
         </tr></thead><tbody>`;
 
         data.forEach((s, i) => {
           const code = s.kod_subjek || 'N/A';
           const name = s.nama_subjek || 'N/A';
+          // Extract credit from last character of course code
+          let creditFromCode = 0;
+          if (code && /\d$/.test(code)) {
+            creditFromCode = parseInt(code.slice(-1), 10);
+          }
           const prog = s.kod_program || 'N/A';
           const fac = s.fakulti || 'N/A';
           const level = s.peringkat || 'N/A';
-          const cred = s.kredit || 'N/A';
-
-          const isBelowAvg = parseFloat(s.student_percentage) < averagePercentage;
-          const fillColor = isBelowAvg ? '#ef4444' : '#10b981';
 
           const term = highlightTerm.toLowerCase();
           const shouldHighlight = highlightTerm && (
@@ -904,6 +1001,13 @@ currentSubjectsData = currentSubjectsData.map(s => ({
             (highlightField === 'level' && level.toLowerCase().includes(term))
           );
 
+          const sections = s.bil_seksyen || 0;
+          const students = s.bil_pelajar || 0;
+
+          const avgPerSection = sections > 0
+            ? Math.round(students / sections)
+            : 0;
+
           html += `<tr ${shouldHighlight ? 'style="background-color:#fff9c4;"' : ''} onclick="viewSubjectDetails(${i},true)">
             <td>${i + 1}</td>
             ${hasCode ? `<td><strong>${code}</strong></td>` : ''}
@@ -911,24 +1015,30 @@ currentSubjectsData = currentSubjectsData.map(s => ({
             ${hasProgram ? `<td>${prog}</td>` : ''}
             ${hasFaculty ? `<td>${fac}</td>` : ''}
             ${hasLevel ? `<td>${level}</td>` : ''}
-            ${hasCredit ? `<td class="w3-center">${cred}</td>` : ''}
-            <td class="w3-center">${s.bil_pelajar || 0}</td>
-            <td class="avg-cell">
-            <strong>${s.student_percentage}%</strong>
-            <div class="avg-bar">
-            <div class="avg-fill"
-            style="width:${s.student_percentage}%; background:${fillColor};">
-            </div>
-            <div class="avg-marker" style="left:${averagePercentage}%"></div>
-            </div>
+            <td class="w3-center">${creditFromCode}</td>
+            <td class="w3-center">${students}</td>
+            <td class="percent-cell" style="text-align:center;">
+              <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
+                <strong>${s.student_percentage}%</strong>
+                <div class="percent-bar">
+                  <div
+                    class="percent-joined"
+                    style="width:${s.student_percentage}%"
+                    title="Joined: ${s.student_percentage}%"
+                  ></div>
+                  <div
+                    class="percent-not-joined"
+                    style="width:${100 - s.student_percentage}%"
+                    title="Not Joined: ${100 - s.student_percentage}%"
+                  ></div>
+                </div>
+              </div>
             </td>
-            <td>
-              <button type="button"class="btn btn-info action-btn" onclick="event.stopPropagation(); viewSubjectDetails(${i},true)">
-                <i class="fas fa-eye"></i> View
-              </button>
-              <button type="button"class="btn btn-success action-btn" onclick="event.stopPropagation(); copySubjectCode('${code}', '${name}')">
-                <i class="fas fa-copy"></i> Copy
-              </button>
+            <td class="w3-center">
+              <strong>${avgPerSection}</strong>
+              <div class="w3-tiny" style="color:#6b7280;">
+                ${sections} sections
+              </div>
             </td>
           </tr>`;
         });
@@ -936,10 +1046,7 @@ currentSubjectsData = currentSubjectsData.map(s => ({
 
         const totalCredits = data.reduce((sum, s) => sum + (parseInt(s.kredit) || 0), 0);
         html += `<div class="summary-card">
-          <div class="w3-row">
-            <div class="w3-col m6"><p><i class="fas fa-database"></i> <strong>Total:</strong> ${data.length}</p><p><i class="fas fa-graduation-cap"></i> <strong>Credits:</strong> ${totalCredits}</p></div>
-            <div class="w3-col m6"><p><i class="fas fa-university"></i> <strong>Faculties:</strong> ${allFaculties.size - 1}</p><p><i class="fas fa-info-circle"></i> <strong>Fields:</strong> ${Object.keys(first).length}</p></div>
-          </div>
+          <p><i class="fas fa-database"></i> <strong>Total Subjects:</strong> ${data.length}</p>
         </div>`;
 
         container.innerHTML = html;
@@ -953,168 +1060,150 @@ currentSubjectsData = currentSubjectsData.map(s => ({
       }
 
       function applyFilters(searchTerm, searchBy, facultyFilter) {
-      if (!currentSubjectsData.length) return;
+        if (!currentSubjectsData.length) return;
 
-      // 🔒 Always read latest UI values
-    searchTerm = searchTerm ?? document.getElementById('searchInput').value.trim();
-    searchBy = searchBy ?? document.getElementById('searchBySelect').value;
-    facultyFilter = facultyFilter ?? document.getElementById('facultyFilter').value;
+        // Always read latest UI values
+        searchTerm = searchTerm ?? document.getElementById('searchInput').value.trim();
+        searchBy = searchBy ?? document.getElementById('searchBySelect').value;
+        facultyFilter = facultyFilter ?? document.getElementById('facultyFilter').value;
 
-    let filtered = currentSubjectsData;
+        let filtered = currentSubjectsData;
 
-    // ✅ YOUR CONDITION (UNCHANGED)
-    if (facultyFilter === 'fsksm') {
-    filtered = filtered.filter(s =>
-      s.bil_seksyen != null &&
-      s.bil_pensyarah != null &&
-      s.bil_pensyarah > 0
-    );
-    } 
-    else if (facultyFilter === 'other') {
-      filtered = filtered.filter(s =>
-      s.bil_seksyen != null &&
-      (!s.bil_pensyarah || s.bil_pensyarah === 0)
-    );
-    }
+        // Faculty filter logic
+        if (facultyFilter === 'all') {
+          filtered = filtered.filter(s =>
+            (s.bil_seksyen || 0) > 0 &&
+            (s.bil_pelajar || 0) > 0
+          );
+        }
+        else if (facultyFilter === 'fsksm') {
+          filtered = filtered.filter(s =>
+            s.kod_subjek !== 'UBSS1032' &&
+            (s.bil_seksyen || 0) > 0 &&
+            (s.bil_pelajar || 0) > 0 &&
+            (s.bil_pensyarah || 0) > 0
+          );
+        }
+        else if (facultyFilter === 'other') {
+          filtered = filtered.filter(s =>
+            (s.bil_seksyen || 0) > 0 &&
+            (s.bil_pelajar || 0) > 0 &&
+            (
+              s.kod_subjek === 'UBSS1032' ||
+              !s.bil_pensyarah ||
+              s.bil_pensyarah === 0
+            )
+          );
+        }
 
-    // 🔽 FSKSM LEVEL FILTER (UG / PG)
-const fsksmLevel = document.getElementById('fsksmLevel')?.value || 'all';
+        // Search filter
+        if (searchTerm) {
+          const term = searchTerm.toLowerCase();
+          filtered = filtered.filter(s => {
+            const code = (s.kod_subjek || '').toLowerCase();
+            const name = (s.nama_subjek || '').toLowerCase();
 
-if (facultyFilter === 'fsksm' && fsksmLevel !== 'all') {
-  filtered = filtered.filter(s => {
-    const code = (s.kod_subjek || '').toUpperCase();
+            switch (searchBy) {
+              case 'code':
+                return code.includes(term);
+              case 'name':
+                return name.includes(term);
+              default:
+                return code.includes(term) || name.includes(term);
+            }
+          });
+        }
 
-    if (fsksmLevel === 'ug') {
-      return code.startsWith('SEC');
-    }
+        currentRenderedSubjects = filtered;
+        renderSubjectsTable(filtered, searchTerm, searchBy);
+        renderSubjectsBarChart(filtered);
 
-    if (fsksmLevel === 'pg') {
-      return !code.startsWith('SEC');
-    }
-
-    return true;
-  });
-}
-
-
-  // Search filter
-  if (searchTerm) {
-  const term = searchTerm.toLowerCase();
-  filtered = filtered.filter(s => {
-    const code = (s.kod_subjek || '').toLowerCase();
-    const name = (s.nama_subjek || '').toLowerCase();
-
-    switch (searchBy) {
-      case 'code':
-        return code.includes(term);
-
-      case 'name':
-        return name.includes(term);
-
-      default: // ✅ ALL FIELDS
-        return code.includes(term) || name.includes(term);
-    }
-  });
-}
-
-  currentRenderedSubjects = filtered;
-  renderSubjectsTable(filtered, searchTerm, searchBy);
-  updateStats(filtered, searchTerm || facultyFilter);
-}
-
+        updateStats(filtered, searchTerm || facultyFilter);
+      }
 
       function clearAllFilters() {
-    document.getElementById('searchInput').value = '';
-    document.getElementById('facultyFilter').value = 'all';
-    document.getElementById('searchBySelect').value = 'all';
-    document.getElementById('fsksmLevel').value = 'all';
-    document.getElementById('fsksmLevelGroup').style.display = 'none';
+        document.getElementById('searchInput').value = '';
+        document.getElementById('facultyFilter').value = 'all';
+        document.getElementById('searchBySelect').value = 'all';
 
-
-  if (currentSubjectsData.length) {
-    currentRenderedSubjects = currentSubjectsData; // ✅ IMPORTANT
-    renderSubjectsTable(currentSubjectsData);
-    updateStats(currentSubjectsData);
-  }
-}
+        if (currentSubjectsData.length) {
+          currentRenderedSubjects = currentSubjectsData;
+          renderSubjectsTable(currentSubjectsData);
+          renderSubjectsBarChart(currentSubjectsData);
+          updateStats(currentSubjectsData);
+        }
+      }
 
       function updateStats(data, filterText = '') {
-        let totalCredits = 0;
-        const facCounts = {};
-        data.forEach(s => {
-          const isBelowAvg = parseFloat(s.student_percentage) < averagePercentage;
-          const fillColor = isBelowAvg ? '#ef4444' : '#10b981';
-          totalCredits += parseInt(s.kredit) || 0;
-          const f = s.fakulti || 'Unknown';
-          facCounts[f] = (facCounts[f] || 0) + 1;
-        });
         let html = `<i class="fas fa-chart-bar"></i> `;
+
         if (filterText) {
           html += `Showing <strong>${data.length}</strong> subjects (filtered)`;
         } else {
           html += `Loaded <strong>${data.length}</strong> subjects`;
         }
-        html += ` • <strong>${totalCredits}</strong> credits • <strong>${Object.keys(facCounts).length}</strong> faculties`;
-       document.getElementById('statsInfo').innerHTML =
-  `${html} • <strong>${totalStudents}</strong> students`;
 
+        document.getElementById('statsInfo').innerHTML =
+          `${html} • <strong>${totalStudents}</strong> students`;
       }
 
-      // ✅ FIXED EXPORT FUNCTION ✅
       function exportData() {
-      const exportDataSource = currentRenderedSubjects.length
-      ? currentRenderedSubjects
-      : currentSubjectsData;
+        const exportDataSource = currentRenderedSubjects.length
+          ? currentRenderedSubjects
+          : currentSubjectsData;
 
-    if (!exportDataSource.length) {
-    alert("No data to export!");
-    return;
-    }
+        if (!exportDataSource.length) {
+          alert("No data to export!");
+          return;
+        }
 
-    try {
-    const headers = Object.keys(exportDataSource[0]);
-    const csvRows = [];
-    csvRows.push(headers.join(','));
+        try {
+          const headers = Object.keys(exportDataSource[0]);
+          const csvRows = [];
+          csvRows.push(headers.join(','));
 
-    exportDataSource.forEach(subject => {
-      const row = headers.map(h => {
-        const val = subject[h] == null ? '' : String(subject[h]);
-        return `"${val.replace(/"/g, '""')}"`;
-      });
-      csvRows.push(row.join(','));
-    });
+          exportDataSource.forEach(subject => {
+            const row = headers.map(h => {
+              const val = subject[h] == null ? '' : String(subject[h]);
+              return `"${val.replace(/"/g, '""')}"`;
+            });
+            csvRows.push(row.join(','));
+          });
 
-    const csvContent = csvRows.join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
+          const csvContent = csvRows.join('\n');
+          const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
 
-    const a = document.createElement('a');
-    const sesi = document.getElementById('sessionSelect').value.replace('/', '-');
-    const semester = document.getElementById('semesterSelect').value;
-    a.href = url;
-    a.download = `subjects_${sesi}_sem${semester}.csv`;
+          const a = document.createElement('a');
+          const sesi = document.getElementById('sessionSelect').value.replace('/', '-');
+          const semester = document.getElementById('semesterSelect').value;
+          a.href = url;
+          a.download = `subjects_${sesi}_sem${semester}.csv`;
 
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
 
-    alert(`✅ Exported ${exportDataSource.length} subjects`);
-  } catch (err) {
-    alert("Export failed: " + err.message);
-  }
-}
+          alert(`✅ Exported ${exportDataSource.length} subjects`);
+        } catch (err) {
+          alert("Export failed: " + err.message);
+        }
+      }
 
-
-      // Other functions (viewSubjectDetails, etc.) remain unchanged
       window.viewSubjectDetails = async function(index, fromFiltered = false) {
-      const data = fromFiltered
-      ? currentRenderedSubjects[index]
-      : currentSubjectsData[index];
+        const data = fromFiltered
+          ? currentRenderedSubjects[index]
+          : currentSubjectsData[index];
 
-      if (!data) return;
+        if (!data) return;
 
         const kod = data.kod_subjek;
+        // Extract credit from course code (last digit)
+        let creditFromCode = 0;
+        if (kod && /\d$/.test(kod)) {
+          creditFromCode = parseInt(kod.slice(-1), 10);
+        }
         const sesi = document.getElementById('sessionSelect').value;
         const semester = document.getElementById('semesterSelect').value;
         if (!kod) return;
@@ -1141,19 +1230,49 @@ if (facultyFilter === 'fsksm' && fsksmLevel !== 'all') {
           const allSections = sectData.seksyen_list || [];
           const bilSeksyen = data.bil_seksyen ?? allSections.length;
           const displayedSections = allSections.filter(
-          s => s.seksyen && s.seksyen.trim() !== ''
+            s => s.seksyen && s.seksyen.trim() !== ''
           );
 
           const totalStud = displayedSections.reduce(
-          (sum, s) => sum + (parseInt(s.bil_pelajar) || 0), 0);
+            (sum, s) => sum + (parseInt(s.bil_pelajar) || 0), 0);
 
           let html = `
-          <div class="info-card">
-          <h4>${sectData.nama_subjek || kod}</h4>
-          <p><strong>Code:</strong> ${kod}</p>
-          <p><strong>Total Sections :</strong> ${bilSeksyen}</p>
-          <p><strong>Total Students :</strong> ${data.bil_pelajar ?? 0}</p>
-          </div>
+            <div class="info-card" style="padding:14px;">
+              <h4 style="
+                margin:0 0 10px 0;
+                font-size:16.5px;
+                font-weight:600;
+                color:#111827;
+                padding-bottom:6px;
+                border-bottom:3px solid #e5e7eb;
+              ">
+                ${sectData.nama_subjek || kod}
+              </h4>
+              <div style="
+                font-size:13.5px;
+                line-height:1.6;
+              ">
+                <div style="margin-bottom:4px;">
+                  <span style="color:#6b7280;">Code:</span>
+                  <strong>${kod}</strong>
+                </div>
+
+                <div style="margin-bottom:4px;">
+                  <span style="color:#6b7280;">Credit:</span>
+                  <strong>${creditFromCode}</strong>
+                </div>
+
+                <div style="margin-bottom:4px;">
+                  <span style="color:#6b7280;">Total Sections:</span>
+                  <strong>${bilSeksyen}</strong>
+                </div>
+
+                <div>
+                  <span style="color:#6b7280;">Total Students:</span>
+                  <strong>${data.bil_pelajar ?? 0}</strong>
+                </div>
+              </div>
+            </div>
           `;
 
           if (displayedSections.length) {
@@ -1163,34 +1282,48 @@ if (facultyFilter === 'fsksm' && fsksmLevel !== 'all') {
             });
             html += `</tbody></table></div>`;
             html += `<div class="summary-card" style="margin-top:12px;"><p><i class="fas fa-users"></i> <strong>Total Students:</strong> ${totalStud}</p></div>`;
-          } else if (bilSeksyen > 0) {
-          html += `
-          <div class="empty-state" style="padding:16px; background:#f5f5f5;">
-          <h5 style="margin-top:0;">
-          <i class="fas fa-layer-group"></i> Sections
-          </h5>
-          <p style="margin-bottom:12px; color:#666;">
-          Section data is not available, but this subject has <strong>${bilSeksyen}</strong> sections.
-      </p>
-      <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        ${Array.from({ length: bilSeksyen }, (_, i) =>
-          `<button class="btn btn-secondary action-btn" disabled>
-            Section ${i + 1}
-          </button>`
-        ).join('')}
-      </div>
-    </div>
-  `;
-} else {
-  html += `
-    <div class="empty-state" style="padding:12px;">
-      <i class="fas fa-info-circle"></i> No sections available
-    </div>
-  `;
-}
+              } else if (bilSeksyen > 0) {
+              html += `
+                <div style="
+                  padding:14px;
+                  background:rgba(13,148,136,0.06);
+                  border-radius:8px;
+                  margin-top:14px;
+                ">
+                  <div style="
+                    display:flex;
+                    align-items:center;
+                    gap:8px;
+                    color:#0f766e;
+                    font-weight:500;
+                    margin-bottom:10px;
+                  ">
+                    <i class="fas fa-layer-group" style="opacity:0.8;"></i>
+                    <span>Sections</span>
+                  </div>
 
+                  <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    ${Array.from({ length: bilSeksyen }, (_, i) =>
+                    `<button
+                      class="btn btn-secondary action-btn"
+                      onclick="openTimetable('${kod}', '${i + 1}')">
+                      Section ${i + 1}
+                    </button>`
+                  ).join('')}
+                  </div>
+                </div>
+              `;
+            }
 
-          document.getElementById('modalTitle').textContent = `Sections: ${kod}`;
+            else {
+            html += `
+              <div class="empty-state" style="padding:12px;">
+                <i class="fas fa-info-circle"></i> No sections available
+              </div>
+            `;
+          }
+
+          document.getElementById('modalTitle').textContent = `Subject Details: ${kod}`;
           document.getElementById('modalContent').innerHTML = html;
           window.currentSubjectForCopy = sectData;
         } catch (err) {
@@ -1209,11 +1342,6 @@ if (facultyFilter === 'fsksm' && fsksmLevel !== 'all') {
         }
       };
 
-      window.copySubjectCode = (code, name) => {
-        navigator.clipboard.writeText(`${code} - ${name}`)
-          .then(() => alert(`Copied: ${code}`));
-      };
-
       function showLoading(show, msg = '') {
         document.getElementById('loadingSpinner').style.display = show ? 'flex' : 'none';
         if (msg) document.getElementById('loadingMessage').textContent = msg;
@@ -1226,10 +1354,211 @@ if (facultyFilter === 'fsksm' && fsksmLevel !== 'all') {
         document.getElementById('errorContainer').style.display = 'block';
       }
 
-      function hideError() {
+      window.hideError = function() {
         document.getElementById('errorContainer').style.display = 'none';
-      }
+      };
     }
+    // ===== TIMETABLE HELPERS =====
+const hariMap = {
+  1: "Ahad",
+  2: "Isnin",
+  3: "Selasa",
+  4: "Rabu",
+  5: "Khamis",
+  6: "Jumaat",
+  7: "Sabtu"
+};
+
+const masaMap = {
+  2: "08:00 - 09:00",
+  3: "09:00 - 10:00",
+  4: "10:00 - 11:00",
+  5: "11:00 - 12:00",
+  6: "12:00 - 13:00",
+  7: "13:00 - 14:00",
+  8: "14:00 - 15:00",
+  9: "15:00 - 16:00",
+  10: "16:00 - 17:00",
+  11: "17:00 - 18:00"
+};
+
+function groupTimetable(data) {
+  data.sort((a, b) => a.hari - b.hari || a.masa - b.masa);
+
+  const grouped = [];
+
+  data.forEach(item => {
+    const last = grouped[grouped.length - 1];
+
+    if (
+      last &&
+      last.hari === item.hari &&
+      last.endMasa + 1 === item.masa &&
+      last.ruang.kod_ruang === item.ruang.kod_ruang
+    ) {
+      last.endMasa = item.masa;
+    } else {
+      grouped.push({
+        hari: item.hari,
+        startMasa: item.masa,
+        endMasa: item.masa,
+        ruang: item.ruang
+      });
+    }
+  });
+
+  return grouped;
+}
+
+function renderTimetable(jsonData) {
+    // ===== CHECK IF TIMETABLE INFO EXISTS =====
+  const hasTimeAndDay = jsonData.some(
+    item => item.hari !== undefined && item.masa !== undefined
+  );
+    if (!hasTimeAndDay) {
+    // ===== FALLBACK VIEW (NO hari / masa) =====
+    let html = `
+      <div class="info-card">
+        <strong>Available Timetable Information</strong>
+        <div style="margin-top:8px; font-size:13.5px; line-height:1.6;">
+    `;
+
+    jsonData.forEach(item => {
+      html += `
+        <div style="padding:8px 0; border-bottom:1px dashed #e5e7eb;">
+          ${item.ruang?.nama_ruang ? `<div><strong>Room:</strong> ${item.ruang.nama_ruang}</div>` : ''}
+          ${item.ruang?.kod_ruang ? `<div><strong>Room Code:</strong> ${item.ruang.kod_ruang}</div>` : ''}
+          ${item.ruang?.nama_ruang_singkatan ? `<div><strong>Short:</strong> ${item.ruang.nama_ruang_singkatan}</div>` : ''}
+        </div>
+      `;
+    });
+
+    html += `
+        </div>
+        <div style="margin-top:8px; font-size:12px; color:#6b7280;">
+          Day and time information is not available for this section.
+        </div>
+      </div>
+    `;
+
+    document.getElementById('timetableModalContent').innerHTML = html;
+    return; // ⛔ STOP here, do not continue to table
+  }
+
+  // ===== ORIGINAL LOGIC CONTINUES BELOW =====
+  const grouped = groupTimetable(jsonData);
+
+
+  // ===== ANALYSIS =====
+  let totalHours = 0;
+  const daysSet = new Set();
+
+  grouped.forEach(item => {
+    const hours = item.endMasa - item.startMasa + 1;
+    totalHours += hours;
+    daysSet.add(item.hari);
+  });
+
+  const totalDays = daysSet.size;
+  const totalSessions = grouped.length;
+
+  // ===== ANALYSIS BOX =====
+  let analysisHtml = `
+    <div class="info-card" style="margin-bottom:16px;">
+      <strong>Weekly Timetable Summary</strong>
+      <div style="margin-top:6px; font-size:13.5px; line-height:1.6;">
+        <div>🕒 <strong>${totalHours}</strong> teaching hours / week</div>
+        <div>📅 <strong>${totalDays}</strong> teaching days</div>
+        <div>📚 <strong>${totalSessions}</strong> teaching sessions</div>
+      </div>
+    </div>
+  `;
+
+  // ===== TABLE =====
+  let html = analysisHtml + `
+    <div class="table-wrapper">
+      <table class="w3-table w3-bordered w3-striped">
+        <thead class="w3-teal">
+          <tr>
+            <th>Day</th>
+            <th>Time</th>
+            <th>Room</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+
+  grouped.forEach(item => {
+    const start = masaMap[item.startMasa].split(" - ")[0];
+    const end = masaMap[item.endMasa].split(" - ")[1];
+
+    html += `
+      <tr>
+        <td><strong>${hariMap[item.hari]}</strong></td>
+        <td>${start} – ${end}</td>
+        <td>
+          <strong>${item.ruang.nama_ruang_singkatan}</strong><br>
+          ${item.ruang.nama_ruang}<br>
+          <span style="color:#6b7280;">${item.ruang.kod_ruang}</span>
+        </td>
+      </tr>
+    `;
+  });
+
+  html += `
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  document.getElementById('timetableModalContent').innerHTML = html;
+}
+
+async function openTimetable(kodSubjek, seksyen) {
+  const sesi = document.getElementById('sessionSelect').value;
+  const semester = document.getElementById('semesterSelect').value;
+
+  const modal = document.getElementById('timetableModal');
+  document.getElementById('timetableModalTitle').textContent =
+    `Timetable • ${kodSubjek} (Section ${seksyen})`;
+  document.getElementById('timetableModalContent').innerHTML =
+    `<p>Loading timetable...</p>`;
+  modal.style.display = 'block';
+
+  try {
+    const url =
+      `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi` +
+      `?entity=jadual_subjek` +
+      `&sesi=${encodeURIComponent(sesi)}` +
+      `&semester=${encodeURIComponent(semester)}` +
+      `&kod_subjek=${encodeURIComponent(kodSubjek)}` +
+      `&seksyen=${encodeURIComponent(seksyen)}`;
+
+    const res = await fetch(url);
+    const text = await res.text();
+    if (!text.trim()) throw new Error("Empty timetable data");
+
+    const json = JSON.parse(text);
+    if (!Array.isArray(json) || json.length === 0) {
+      throw new Error("No timetable found for this section");
+    }
+
+    renderTimetable(json);
+  } catch (err) {
+    document.getElementById('timetableModalContent').innerHTML = `
+      <div class="error-container">
+        <h4>Error</h4>
+        <p>${err.message}</p>
+      </div>
+    `;
+  }
+}
+
+function closeTimetableModal() {
+  document.getElementById('timetableModal').style.display = 'none';
+}
+
+
   </script>
 </body>
 </html>

@@ -851,15 +851,16 @@ totalUsedSlotsAll += usedSlots;
     function renderTable(data) {
       let html = `<div class="table-wrapper"><table class="w3-table w3-striped w3-bordered">`;
       html += `<thead><tr>
-        <th>Room Name</th>
-        <th>Room Code</th>
-        <th>Scheduled Slots</th>
-        <th>Possible Slots</th>
-        <th>Utilization</th>
-        <th>Status</th>
-      </tr></thead><tbody>`;
+                <th>No</th>
+                <th>Room Name</th>
+                <th>Room Code</th>
+                <th>Scheduled Slots</th>
+                <th>Possible Slots</th>
+                <th>Utilization</th>
+                <th>Status</th>
+              </tr></thead> `;
 
-      data.forEach(item => {
+      data.forEach((item, index) => {
         let statusClass = 'status-low', statusText = 'Low';
         if (item.pct >= 80) { statusClass = 'status-high'; statusText = 'High'; }
         else if (item.pct >= 50) { statusClass = 'status-medium'; statusText = 'Medium'; }
@@ -868,11 +869,12 @@ totalUsedSlotsAll += usedSlots;
         const fillWidth = Math.min(100, item.pct);
         html += `
           <tr>
-            <td><strong>${item.name}</strong></td>
-            <td><code>${item.room}</code></td>
-            <td><strong>${item.used}</strong></td>
-            <td>${item.total}</td>
-            <td>
+              <td>${index + 1}</td>
+              <td><strong>${item.name}</strong></td>
+              <td><code>${item.room}</code></td>
+              <td><strong>${item.used}</strong></td>
+              <td>${item.total}</td>
+              <td>
               <div class="util-bar">
                 <div class="util-fill" style="width:${fillWidth}%">${item.pct}%</div>
               </div>
@@ -890,7 +892,7 @@ totalUsedSlotsAll += usedSlots;
       dataTable.addColumn('number', 'Utilization %');
 
       const topRooms = data.slice(0, 15);
-      topRooms.forEach(item => {
+      topRooms.forEach((item,index) => {
         dataTable.addRow([item.name, item.pct]);
       });
 
