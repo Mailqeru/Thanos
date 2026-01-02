@@ -308,6 +308,93 @@
       background-color: #f8f9fa;
     }
 
+    /* Capacity Badge */
+    .capacity-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .capacity-small {
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+
+    .capacity-medium {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .capacity-large {
+      background: #e8f5e9;
+      color: #1b5e20;
+    }
+
+    .capacity-xlarge {
+      background: #f3e5f5;
+      color: #6a1b9a;
+    }
+
+    /* Analysis Section */
+    .analysis-section {
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 3px solid var(--border-color);
+    }
+
+    .analysis-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .analysis-card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .analysis-card h4 {
+      margin: 0 0 16px 0;
+      font-size: 16px;
+      color: var(--utm-blue);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .capacity-breakdown {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .capacity-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      background: #f9fafb;
+      border-radius: 6px;
+      border-left: 3px solid var(--utm-blue);
+    }
+
+    .capacity-item-label {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .capacity-item-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--utm-blue);
+    }
+
     /* Status Tags */
     .status-high { color: var(--error); font-weight: 600; }
     .status-medium { color: #f59e0b; font-weight: 600; }
@@ -899,7 +986,9 @@
             name: nama_ruang,
             used: usedSlots,
             total: totalPossibleSlots,
-            pct: Number(pct)
+            pct: Number(pct),
+            capacity: room.kapasiti || 0,
+            roomType: room.jenis || 'N/A'
           });
         }
 
@@ -975,6 +1064,7 @@
       if (data.length > 0) {
         drawChart(data, isDateSpecific);
         renderTable(data);
+        renderCapacityAnalysis(data);
       } else {
         $('#chart_div').html('<div class="empty-state" style="height:400px; display:flex; align-items:center; justify-content:center;">No rooms meet the minimum 2-slot threshold for visualization</div>');
         $('#results').html(`
@@ -992,6 +1082,8 @@
                 <th>No</th>
                 <th>Room Name</th>
                 <th>Room Code</th>
+                <th>Capacity</th>
+                <th>Room Type</th>
                 <th>Scheduled Slots</th>
                 <th>Possible Slots</th>
                 <th>Utilization</th>
@@ -1004,12 +1096,30 @@
         else if (item.pct >= 50) { statusClass = 'status-medium'; statusText = 'Medium'; }
         else if (item.pct >= 20) { statusClass = 'status-normal'; statusText = 'Normal'; }
 
+        // Capacity badge
+        let capacityClass = 'capacity-small';
+        let capacityLabel = 'Small';
+        if (item.capacity >= 150) { 
+          capacityClass = 'capacity-xlarge'; 
+          capacityLabel = 'X-Large';
+        } else if (item.capacity >= 100) { 
+          capacityClass = 'capacity-large'; 
+          capacityLabel = 'Large';
+        } else if (item.capacity >= 50) { 
+          capacityClass = 'capacity-medium'; 
+          capacityLabel = 'Medium';
+        }
+
         const fillWidth = Math.min(100, item.pct);
         html += `
           <tr>
             <td>${index + 1}</td>
             <td><strong>${item.name}</strong></td>
             <td><code>${item.room}</code></td>
+            <td>
+              <span class="capacity-badge ${capacityClass}">${item.capacity > 0 ? item.capacity : 'N/A'}</span>
+            </td>
+            <td>${item.roomType}</td>
             <td><strong>${item.used}</strong></td>
             <td>${item.total}</td>
             <td>
@@ -1022,6 +1132,213 @@
       });
       html += `</tbody></table></div>`;
       $('#results').html(html);
+    }
+
+    function renderCapacityAnalysis(data) {
+      // Categorize rooms by capacity
+      const capacityRanges = {
+        'Small (< 50)': { count: 0, totalUtil: 0, rooms: [] },
+        'Medium (50-99)': { count: 0, totalUtil: 0, rooms: [] },
+        'Large (100-149)': { count: 0, totalUtil: 0, rooms: [] },
+        'X-Large (≥ 150)': { count: 0, totalUtil: 0, rooms: [] }
+      };
+
+      data.forEach(room => {
+        let category;
+        if (room.capacity >= 150) category = 'X-Large (≥ 150)';
+        else if (room.capacity >= 100) category = 'Large (100-149)';
+        else if (room.capacity >= 50) category = 'Medium (50-99)';
+        else category = 'Small (< 50)';
+
+        capacityRanges[category].count++;
+        capacityRanges[category].totalUtil += room.pct;
+        capacityRanges[category].rooms.push(room);
+      });
+
+      // Calculate averages
+      Object.keys(capacityRanges).forEach(key => {
+        if (capacityRanges[key].count > 0) {
+          capacityRanges[key].avgUtil = (capacityRanges[key].totalUtil / capacityRanges[key].count).toFixed(1);
+        } else {
+          capacityRanges[key].avgUtil = 0;
+        }
+      });
+
+      // Find insights
+      let highestUtilCategory = '';
+      let highestAvgUtil = 0;
+      let lowestUtilCategory = '';
+      let lowestAvgUtil = 100;
+
+      Object.keys(capacityRanges).forEach(key => {
+        if (capacityRanges[key].count > 0) {
+          const avg = parseFloat(capacityRanges[key].avgUtil);
+          if (avg > highestAvgUtil) {
+            highestAvgUtil = avg;
+            highestUtilCategory = key;
+          }
+          if (avg < lowestAvgUtil) {
+            lowestAvgUtil = avg;
+            lowestUtilCategory = key;
+          }
+        }
+      });
+
+      // Total capacity being utilized
+      const totalCapacity = data.reduce((sum, room) => sum + (room.capacity || 0), 0);
+      const avgCapacity = data.length > 0 ? (totalCapacity / data.length).toFixed(0) : 0;
+
+      // Prepare data for capacity chart
+      const capacityChartData = [];
+      Object.keys(capacityRanges).forEach(key => {
+        if (capacityRanges[key].count > 0) {
+          capacityChartData.push({
+            category: key,
+            count: capacityRanges[key].count,
+            avgUtil: parseFloat(capacityRanges[key].avgUtil)
+          });
+        }
+      });
+
+      let analysisHtml = `
+        <div class="analysis-section">
+          <div class="card-header">
+            <i class="fas fa-chart-pie"></i>
+            <h3>Capacity Analysis</h3>
+          </div>
+
+          <div class="analysis-grid">
+            <!-- Capacity Breakdown -->
+            <div class="analysis-card">
+              <h4><i class="fas fa-users"></i> Room Capacity Distribution</h4>
+              <div class="capacity-breakdown">
+                ${Object.keys(capacityRanges).map(key => {
+                  const range = capacityRanges[key];
+                  if (range.count === 0) return '';
+                  return `
+                    <div class="capacity-item">
+                      <div>
+                        <div class="capacity-item-label">${key}</div>
+                        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">
+                          Avg. Utilization: ${range.avgUtil}%
+                        </div>
+                      </div>
+                      <div class="capacity-item-value">${range.count}</div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+
+            <!-- Key Insights -->
+            <div class="analysis-card">
+              <h4><i class="fas fa-lightbulb"></i> Key Insights</h4>
+              <div style="font-size: 14px; line-height: 1.8;">
+                <p style="margin: 0 0 12px 0;">
+                  <strong>📊 Total Rooms Analyzed:</strong> ${data.length}
+                </p>
+                <p style="margin: 0 0 12px 0;">
+                  <strong>👥 Average Room Capacity:</strong> ${avgCapacity} seats
+                </p>
+                <p style="margin: 0 0 12px 0;">
+                  <strong>📈 Highest Utilization:</strong><br>
+                  <span style="color: var(--success); font-weight: 600;">${highestUtilCategory}</span> 
+                  (${highestAvgUtil}% avg)
+                </p>
+                <p style="margin: 0;">
+                  <strong>📉 Lowest Utilization:</strong><br>
+                  <span style="color: var(--warning); font-weight: 600;">${lowestUtilCategory}</span> 
+                  (${lowestAvgUtil}% avg)
+                </p>
+              </div>
+            </div>
+
+            <!-- Recommendations -->
+            <div class="analysis-card">
+              <h4><i class="fas fa-clipboard-check"></i> Recommendations</h4>
+              <div style="font-size: 13px; line-height: 1.7;">
+                ${lowestAvgUtil < 30 ? `
+                  <p style="margin: 0 0 10px 0;">
+                    ⚠️ <strong>${lowestUtilCategory}</strong> rooms show low utilization. Consider consolidating classes into fewer rooms.
+                  </p>
+                ` : ''}
+                ${highestAvgUtil > 70 ? `
+                  <p style="margin: 0 0 10px 0;">
+                    ✅ <strong>${highestUtilCategory}</strong> rooms are well-utilized. Consider adding more of this size for demand.
+                  </p>
+                ` : ''}
+                <p style="margin: 0;">
+                  💡 Balance room allocation across capacity ranges to optimize space usage and accommodate various class sizes.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Capacity Chart -->
+          <div id="capacity_chart_div" style="height: 350px; margin-top: 24px; background: white; border-radius: 12px; padding: 16px; box-shadow: var(--shadow-sm);"></div>
+        </div>
+      `;
+
+      $('#results').append(analysisHtml);
+
+      // Draw capacity chart
+      if (capacityChartData.length > 0) {
+        drawCapacityChart(capacityChartData);
+      }
+    }
+
+    function drawCapacityChart(capacityData) {
+      const dataTable = new google.visualization.DataTable();
+      dataTable.addColumn('string', 'Capacity Range');
+      dataTable.addColumn('number', 'Number of Rooms');
+      dataTable.addColumn('number', 'Avg Utilization %');
+
+      capacityData.forEach(item => {
+        dataTable.addRow([item.category, item.count, item.avgUtil]);
+      });
+
+      const options = {
+        title: 'Room Count vs Average Utilization by Capacity Range',
+        titleTextStyle: { fontSize: 16, color: '#1f2937' },
+        hAxis: {
+          title: 'Capacity Range',
+          textStyle: { fontSize: 11, color: '#6b7280' },
+          titleTextStyle: { fontSize: 12 }
+        },
+        vAxes: {
+          0: { 
+            title: 'Number of Rooms',
+            textStyle: { fontSize: 11, color: '#6b7280' },
+            titleTextStyle: { fontSize: 12 }
+          },
+          1: { 
+            title: 'Average Utilization %',
+            textStyle: { fontSize: 11, color: '#6b7280' },
+            titleTextStyle: { fontSize: 12 },
+            maxValue: 100
+          }
+        },
+        series: {
+          0: { 
+            type: 'bars',
+            targetAxisIndex: 0,
+            color: '#003366'
+          },
+          1: { 
+            type: 'line',
+            targetAxisIndex: 1,
+            color: '#10b981',
+            lineWidth: 3,
+            pointSize: 7
+          }
+        },
+        backgroundColor: '#ffffff',
+        chartArea: { left: 60, top: 40, width: '75%', height: '65%' },
+        legend: { position: 'bottom' }
+      };
+
+      const chart = new google.visualization.ComboChart(document.getElementById('capacity_chart_div'));
+      chart.draw(dataTable, options);
     }
 
     function drawChart(data, isDateSpecific = false) {
