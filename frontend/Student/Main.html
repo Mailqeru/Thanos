@@ -548,7 +548,8 @@
     // Load dashboard data
     async function loadDashboard() {
       let totalSubjects = 0;
-      let totalClasses = 0;
+      let totalSessionsPerWeek = 0; // Distinct class sessions
+      let totalHoursPerWeek = 0;    // Total contact hours
       let currentSession = "—";
       let currentSemester = "—";
 
@@ -576,7 +577,37 @@
             );
 
             totalSubjects = new Set(currentData.map(s => s.kod_subjek)).size;
-            totalClasses = currentData.length;
+
+            // NEW: Fetch specific schedules to count actual sessions and hours
+            const timetablePromises = currentData.map(async (subj) => {
+              const urlJadual = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=jadual_subjek&sesi=${currentSession}&semester=${currentSemester}&kod_subjek=${subj.kod_subjek}&seksyen=${subj.seksyen}`;
+              const resJ = await fetch(urlJadual);
+              const dataJ = await resJ.json();
+              return (Array.isArray(dataJ) ? dataJ : []).map(entry => ({
+                ...entry, 
+                kod_subjek: subj.kod_subjek 
+              }));
+            });
+
+            const schedules = await Promise.all(timetablePromises);
+            const allEntries = schedules.flat();
+            totalHoursPerWeek = allEntries.length;
+
+            // Logic to count distinct sessions (merging consecutive hours on the same day)
+            const sorted = allEntries.sort((a, b) => a.hari - b.hari || a.masa - b.masa);
+            let sessions = 0;
+            for (let i = 0; i < sorted.length; i++) {
+              sessions++;
+              const curr = sorted[i];
+              // Skip consecutive hours for the same subject/day
+              while (i + 1 < sorted.length && 
+                     sorted[i+1].hari === curr.hari && 
+                     sorted[i+1].kod_subjek === curr.kod_subjek && 
+                     sorted[i+1].masa === sorted[i].masa + 1) {
+                i++;
+              }
+            }
+            totalSessionsCount = sessions;
           }
         }
       } catch (e) {
@@ -587,7 +618,8 @@
         <div class="alert alert-info">
           <span>💡</span>
           <div>
-            <strong>Welcome!</strong> Stats below reflect <strong>${currentSession} Semester ${currentSemester}</strong> only.
+            <strong>Welcome!</strong> Stats below reflect <strong>${currentSession} Semester ${currentSemester}</strong>. 
+            You have <strong>${totalHoursPerWeek} total hours</strong> of classes this week.
           </div>
         </div>
 
@@ -597,7 +629,7 @@
             <div class="stat-card-label">Enrolled Subjects</div>
           </div>
           <div class="stat-card">
-            <div class="stat-card-value">${totalClasses}</div>
+            <div class="stat-card-value">${totalSessionsCount}</div>
             <div class="stat-card-label">Total Classes</div>
           </div>
           <div class="stat-card">

@@ -412,6 +412,26 @@
         justify-content: center;
       }
     }
+	
+	.tag {
+	  display: inline-block;
+	  padding: 6px 10px;
+	  border-radius: 999px;
+	  font-weight: 700;
+	  font-size: 12px;
+	  border: 1px solid var(--border-color);
+	  background: white;
+	}
+	.tag.hot {
+	  border-color: #fecaca;
+	  background: #fff1f2;
+	  color: #991b1b;
+	}
+	.tag.zero {
+	  border-color: #bfdbfe;
+	  background: #eff6ff;
+	  color: #1d4ed8;
+	}
   </style>
 </head>
 <body>
@@ -484,7 +504,7 @@
             </label>
             <select class="w3-select" id="semesterSelect">
               <option value="1">Semester 1</option>
-              <option value="2" selected>Semester 2</option>
+              <option value="2">Semester 2</option>
               <option value="3">Special Semester</option>
             </select>
           </div>
@@ -517,6 +537,9 @@
           <button class="btn btn-secondary" id="clearSearchBtn">
             <i class="fas fa-times"></i> Clear Search
           </button>
+		  <button class="btn btn-info" id="showWorkloadBtn">
+			<i class="fas fa-chart-line"></i> Show Workload Table
+		  </button>
         </div>
         <div class="refresh-info">
           <i class="fas fa-info-circle"></i> Data auto-refreshes every 25 minutes
@@ -559,6 +582,20 @@
           <p>Click "Load Lecturers" to begin</p>
         </div>
       </div>
+	  
+	  <!-- Workload Panel -->
+		<div id="workloadPanel" class="card" style="display:none;">
+		  <div class="card-header">
+			<i class="fas fa-chart-line"></i>
+			<h3>Lecturer Workload (Analytics)</h3>
+		  </div>
+		  <p class="w3-small" style="color: var(--text-secondary); margin-top:0;">
+			Ranking by Students / Subjects / Sections (TTMS: <code>bil_pelajar</code>, <code>bil_subjek</code>, <code>bil_seksyen</code>)
+		  </p>
+		  <span class="tag hot"><i class="fas fa-fire"></i> Student > 120</span>
+		  <div class="table-wrapper" id="workloadTableWrap"></div>
+		</div>
+		
     </div>
   </div>
 
@@ -603,16 +640,19 @@
     // ===== LECTURER LOGIC =====
     let autoRefreshInterval = null;
     let currentLecturerData = [];
+	let currentDisplayedLecturerData = [];
     let currentSessionId = null;
     let currentSesi = '';
     let currentSemester = '';
+	const month = new Date().getMonth() + 1;
 
     function generateAcademicYears() {
       const currentYear = new Date().getFullYear();
       const years = [];
-      for (let i = currentYear - 5; i <= currentYear + 1; i++) {
-        years.push(`${i}/${i + 1}`);
-      }
+	  const latestStartYear = (month >= 2 && month <= 7) ? currentYear : (currentYear - 1);
+	  for (let i = latestStartYear ; i >= latestStartYear - 5; i--) {
+		years.push(`${i}/${i + 1}`);
+	  }
       return years;
     }
 
@@ -677,7 +717,7 @@
           <div class="table-wrapper">
             <table class="w3-table w3-striped w3-bordered">
               <thead><tr>
-                <th>No.</th><th>Subject Code</th><th>Subject Name</th><th>Credits</th>
+                <th>No.</th><th>Subject Code</th><th>Subject Name</th>
                 <th>Section</th><th>Session</th><th>Semester</th><th>Students</th>
               </tr></thead>
               <tbody>`;
@@ -687,7 +727,6 @@
               <td>${i + 1}</td>
               <td>${subj.kod_subjek || '—'}</td>
               <td>${subj.nama_subjek || '—'}</td>
-              <td>${subj.kredit || '—'}</td>
               <td>${subj.seksyen || '—'}</td>
               <td>${subj.sesi || '—'}</td>
               <td>${subj.semester || '—'}</td>
@@ -710,26 +749,133 @@
     }
 
     function initLecturersPageWithFilters(sesi, semester) {
-      initLecturersPage();
-      setTimeout(() => {
-        if (sesi) document.getElementById("sessionSelect").value = sesi;
-        if (semester) document.getElementById("semesterSelect").value = semester;
-      }, 100);
-    }
+	  initLecturersPage();
+
+	  setTimeout(() => {
+		if (sesi) document.getElementById("sessionSelect").value = sesi;
+		if (semester) document.getElementById("semesterSelect").value = semester;
+
+		document.getElementById("loadLecturersBtn").click();
+	  }, 150);
+	}
+
+	
+	function escapeHtml(s) {
+	  return (s ?? "").toString()
+		.replaceAll("&","&amp;").replaceAll("<","&lt;")
+		.replaceAll(">","&gt;")
+		.replaceAll('"',"&quot;")
+		.replaceAll("'","&#039;");
+	}
+
+	function normalizeLecturer(r) {
+	  const name = r.nama || "—";
+	  const staffId = String(r.no_pekerja ?? "—");
+	  const subjects = Number(r.bil_subjek || 0);
+	  const sections = Number(r.bil_seksyen || 0);
+	  const students = Number(r.bil_pelajar || 0);
+
+	  const avg = sections > 0 ? (students / sections) : 0;
+	  return { name, staffId, subjects, sections, students, avg };
+	}
+
+
+	function renderWorkloadTableFromCurrentData() {
+	  if (!Array.isArray(currentLecturerData) || currentLecturerData.length === 0) {
+		alert("Please load lecturers first.");
+		return;
+	  }
+
+	  const base = (Array.isArray(currentDisplayedLecturerData) && currentDisplayedLecturerData.length) 
+	  ? currentDisplayedLecturerData : currentLecturerData;
+	  
+	  const rows = base.map(normalizeLecturer);
+
+
+	  // If you want workload table to follow your search filter, apply it here:
+	  const term = (document.getElementById("searchInput")?.value || "").trim().toLowerCase();
+	  const searchBy = document.getElementById("searchBySelect")?.value || "name";
+
+	  const filtered = term
+		? rows.filter(r => {
+			const nameOk = r.name.toLowerCase().includes(term);
+			const idOk = String(r.staffId ?? "").toLowerCase().includes(term);
+			if (searchBy === "name") return nameOk;
+			if (searchBy === "staffId") return idOk;
+			return nameOk || idOk; // both
+		  })
+		: rows;
+
+	  // Sort by students (descending)
+	  const sorted = [...filtered].sort((a,b) => b.students - a.students);
+
+	  const overloadThreshold = 120; // change if you want
+
+	  const html = `
+		<table class="w3-table w3-striped w3-bordered">
+		  <thead>
+			<tr>
+			  <th>#</th>
+			  <th>Lecturer</th>
+			  <th>Staff ID</th>
+			  <th>Students</th>
+			  <th>Subjects</th>
+			  <th>Sections</th>
+			  <th>Avg Students / Sections</th>
+			  <th>Flag</th>
+			</tr>
+		  </thead>
+		  <tbody>
+			${sorted.map((r, i) => {
+			  const flag =r.students === 0
+				? `<span class="tag zero"><i class="fas fa-user-slash"></i> 0 </span>`
+				:(r.students >= overloadThreshold
+					?`<span class="tag hot"><i class="fas fa-fire"></i> </span>`
+					: `<span class="tag"><i class="fas fa-check"></i> OK</span>`);
+			  return `
+				<tr>
+				  <td>${i + 1}</td>
+				  <td><b>${escapeHtml(r.name)}</b></td>
+				  <td>${escapeHtml(r.staffId)}</td>
+				  <td><b>${r.students}</b></td>
+				  <td>${r.subjects}</td>
+				  <td>${r.sections}</td>
+				  <td>${r.avg.toFixed(1)}</td>
+				  <td>${flag}</td>
+				</tr>
+			  `;
+			}).join("")}
+		  </tbody>
+		</table>
+	  `;
+
+	  document.getElementById("workloadTableWrap").innerHTML =
+		sorted.length ? html : `<div class="empty-state"><p>No data to analyze.</p></div>`;
+
+	  // show panel
+	  document.getElementById("workloadPanel").style.display = "block";
+	  document.getElementById("workloadPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+	}
+
 
     function initLecturersPage() {
       clearAutoRefresh();
+	  const month = new Date().getMonth() + 1;
       const academicYears = generateAcademicYears();
       const currentYear = new Date().getFullYear();
-      const defaultSession = `${currentYear}/${currentYear + 1}`;
+      const defaultSession = (month >= 2 && month <=7) ? `${currentYear}/${currentYear + 1}` : `${currentYear - 1}/${currentYear}`  ;
 
       document.getElementById("sessionSelect").innerHTML = academicYears.map(year => 
         `<option value="${year}" ${year === defaultSession ? 'selected' : ''}>${year}</option>`
       ).join('');
-
+	  
+	  
+	  document.getElementById("semesterSelect").value = (month >= 2 && month <=7) ? "2" : "1";
       document.getElementById("loadLecturersBtn").onclick = fetchLecturerData;
       document.getElementById("applySearchBtn").onclick = applySearch;
       document.getElementById("clearSearchBtn").onclick = clearSearch;
+	  document.getElementById("showWorkloadBtn").onclick = renderWorkloadTableFromCurrentData;
+
       document.getElementById("searchInput").addEventListener('keypress', e => { if (e.key === 'Enter') applySearch(); });
 
       function fetchLecturerData() {
@@ -778,6 +924,11 @@
             if (!Array.isArray(data)) data = [data];
             currentLecturerData = data;
             renderLecturerTable(data);
+			currentDisplayedLecturerData = data;
+			// If workload panel is open, refresh it too
+			if (document.getElementById("workloadPanel").style.display !== "none") {
+			  renderWorkloadTableFromCurrentData();
+			}
             clearAutoRefresh();
             autoRefreshInterval = setInterval(fetchLecturerData, 25 * 60 * 1000);
           })
@@ -839,12 +990,14 @@
         const searchBy = document.getElementById("searchBySelect").value;
         if (!currentLecturerData.length) { alert("Please load lecturers first!"); return; }
         const filteredData = filterLecturers(currentLecturerData, searchTerm, searchBy);
+		currentDisplayedLecturerData = filteredData;
         renderLecturerTable(filteredData, searchTerm, searchBy);
       }
 
       function clearSearch() {
         document.getElementById("searchInput").value = '';
         if (currentLecturerData.length) renderLecturerTable(currentLecturerData);
+		currentDisplayedLecturerData = currentLecturerData;
       }
     }
 

@@ -542,7 +542,7 @@
             </label>
             <select class="w3-select" id="semesterSelect">
               <option value="1">Semester 1</option>
-              <option value="2" selected>Semester 2</option>
+              <option value="2">Semester 2</option>
               <option value="3">Special Semester</option>
             </select>
           </div>
@@ -589,12 +589,15 @@
           <button class="btn btn-secondary" id="clearSearchBtn">
             <i class="fas fa-times"></i> Clear
           </button>
+		  <!-- Debug auth & export button (not using)
           <button class="btn btn-info" id="debugAuthBtn">
             <i class="fas fa-bug"></i> Debug Auth
           </button>
+		  
           <button class="btn btn-purple" id="exportBtn" style="display:none;">
             <i class="fas fa-download"></i> Export
           </button>
+		  -->
         </div>
 
         <!-- Pagination Info -->
@@ -720,9 +723,10 @@ document.getElementById('debugPassword').textContent = 'Invalid JSON';
 }
 }
 // Generate academic years
+const month = new Date().getMonth() + 1;
 const academicYears = generateAcademicYears();
 const currentYear = new Date().getFullYear();
-const defaultSession = `${currentYear}/${currentYear + 1}`;
+const defaultSession = (month >= 2 && month <=7) ? `${currentYear}/${currentYear + 1}` : `${currentYear - 1}/${currentYear}`
 // Populate session select
 const sessionSelect = document.getElementById('sessionSelect');
 sessionSelect.innerHTML = academicYears.map(year =>
@@ -736,12 +740,15 @@ let currentLimit = 20;
 let totalRecords = 0;
 let totalPages = 1;
 let currentOffset = 0;
+
+document.getElementById("semesterSelect").value = (month >= 2 && month <=7) ? "2" : "1";
+
 // Event listeners
 document.getElementById('loadStudentsBtn').onclick = fetchStudentData;
 document.getElementById('applySearchBtn').onclick = applySearch;
 document.getElementById('clearSearchBtn').onclick = clearSearch;
-document.getElementById('exportBtn').onclick = exportData;
-document.getElementById('debugAuthBtn').onclick = debugAuthOnly;
+//document.getElementById('exportBtn').onclick = exportData;
+//document.getElementById('debugAuthBtn').onclick = debugAuthOnly;
 // Enter key support for search
 document.getElementById('searchInput').addEventListener('keypress', function(e) {
 if (e.key === 'Enter') applySearch();
@@ -750,15 +757,18 @@ if (e.key === 'Enter') applySearch();
 document.getElementById('limitSelect').addEventListener('change', function() {
 currentPage = 1;
 });
+
 // Generate academic years function
 function generateAcademicYears() {
 const currentYear = new Date().getFullYear();
 const years = [];
-for (let i = currentYear - 5; i <= currentYear + 1; i++) {
+const latestStartYear = (month >= 2 && month <= 7) ? currentYear : (currentYear - 1);
+for (let i = latestStartYear ; i >= latestStartYear - 5; i--) {
 years.push(`${i}/${i + 1}`);
 }
 return years;
 }
+
 // Debug: Test auth only
 async function debugAuthOnly() {
 const raw = localStorage.getItem("TTMSFC_userSession");
@@ -894,7 +904,7 @@ currentOffset = 0;
 // Show loading
 showLoading(true);
 hideError();
-document.getElementById('exportBtn').style.display = 'none';
+//document.getElementById('exportBtn').style.display = 'none';
 try {
 // Step 1: Get real session ID
 const authUrl = `http://web.fc.utm.my/ttms/auth-admin.php?session_id=${encodeURIComponent(password)}`;
@@ -977,7 +987,7 @@ updatePaginationInfo();
 renderPaginationControls();
 updateStats(data);
 // Show export button
-document.getElementById('exportBtn').style.display = 'inline-block';
+//document.getElementById('exportBtn').style.display = 'inline-block';
 // Clear any error details
 document.getElementById('errorDetails').style.display = 'none';
 } catch (error) {
@@ -1071,42 +1081,89 @@ html += `
 </div>`;
 container.innerHTML = html;
 }
+async function fetchAllStudentsForCurrentFilters() {
+  if (!currentSessionId) {
+    alert("No valid session. Please reload students first.");
+    return [];
+  }
+
+  const sesi = document.getElementById('sessionSelect').value;
+  const semester = document.getElementById('semesterSelect').value;
+
+  const dataUrl =
+    `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar` +
+    `&session_id=${encodeURIComponent(currentSessionId)}` +
+    `&sesi=${encodeURIComponent(sesi)}` +
+    `&semester=${encodeURIComponent(semester)}`;
+
+  const res = await fetch(dataUrl);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const text = await res.text();
+  if (!text.trim()) return [];
+
+  let data = JSON.parse(text);
+  if (!Array.isArray(data)) {
+    if (data && data.data && Array.isArray(data.data)) data = data.data;
+    else data = [data];
+  }
+  return data;
+}
+
 // Apply search filter
-function applySearch() {
-const searchTerm = document.getElementById('searchInput').value.trim();
-const searchBy = document.getElementById('searchBySelect').value;
-if (!searchTerm) {
-// If no search term, show all data
-renderStudentTable(currentStudentData);
-updateStats(currentStudentData);
-return;
+async function applySearch() {
+  const searchTerm = document.getElementById('searchInput').value.trim();
+  const searchBy = document.getElementById('searchBySelect').value;
+
+  if (!searchTerm) {
+    renderStudentTable(currentStudentData);
+    updateStats(currentStudentData);
+    renderPaginationControls(); // show pagination normally
+    return;
+  }
+
+  showLoading(true);
+  hideError();
+
+  try {
+    const dataToSearch = (currentLimit > 0)
+      ? await fetchAllStudentsForCurrentFilters()   // search ALL students
+      : currentStudentData;                         // already all
+
+    const term = searchTerm.toLowerCase();
+
+    const filtered = dataToSearch.filter(student => {
+      const studentId = (student.no_matrik || student.id || student.no_pelajar || student.matric_no || '').toString().toLowerCase();
+      const studentName = (student.nama || student.name || '').toLowerCase();
+      const program = (student.program || student.kod_program || student.course || '').toLowerCase();
+      const faculty = (student.fakulti || student.faculty || student.department || '').toLowerCase();
+
+      switch (searchBy) {
+        case 'name': return studentName.includes(term);
+        case 'id': return studentId.includes(term);
+        case 'program': return program.includes(term) || faculty.includes(term);
+        case 'all':
+          return studentName.includes(term) || studentId.includes(term) || program.includes(term) || faculty.includes(term);
+        default:
+          return true;
+      }
+    });
+
+    // Show results
+    renderStudentTable(filtered, searchTerm, searchBy);
+    updateStats(filtered);
+
+    // Optional: hide pagination when showing search results (because it's not “page based” anymore)
+    document.getElementById('paginationControls').innerHTML = '';
+    document.getElementById('paginationInfo').textContent =
+      `Search results: ${filtered.length} record(s) matching "${searchTerm}"`;
+  } catch (err) {
+    console.error("Search all error:", err);
+    showError("Search failed", err.message);
+  } finally {
+    showLoading(false);
+  }
 }
-// Filter data
-const filtered = currentStudentData.filter(student => {
-const studentId = (student.no_matrik || student.id || student.no_pelajar || student.matric_no || '').toString().toLowerCase();
-const studentName = (student.nama || student.name || '').toLowerCase();
-const program = (student.program || student.kod_program || student.course || '').toLowerCase();
-const faculty = (student.fakulti || student.faculty || student.department || '').toLowerCase();
-const term = searchTerm.toLowerCase();
-switch(searchBy) {
-case 'name':
-return studentName.includes(term);
-case 'id':
-return studentId.includes(term);
-case 'program':
-return program.includes(term) || faculty.includes(term);
-case 'all':
-return studentName.includes(term) ||
-studentId.includes(term) ||
-program.includes(term) ||
-faculty.includes(term);
-default:
-return true;
-}
-});
-renderStudentTable(filtered, searchTerm, searchBy);
-updateStats(filtered);
-}
+
 // Clear search
 function clearSearch() {
 document.getElementById('searchInput').value = '';
@@ -1314,10 +1371,19 @@ throw new Error("Response is not an array");
 }
 }
 const filtered = subjects.filter(subj => {
-const subjSesi = (subj.sesi || '').toString();
-const subjSem = (subj.semester || '').toString();
-return subjSesi === sesi && subjSem === semester;
+  const subjSesi = String(subj.sesi ?? '').trim();
+  const subjSem  = String(subj.semester ?? '').trim();
+
+  const selectedSesi = String(sesi).trim();
+  const selectedSem  = String(semester).trim();
+
+  // compare semester as number to avoid "01" vs "1" issues
+  const semOk = parseInt(subjSem, 10) === parseInt(selectedSem, 10);
+  const sesiOk = subjSesi === selectedSesi;
+
+  return sesiOk && semOk;
 });
+
 if (filtered.length === 0) {
 container.innerHTML = `
 <button class="back-btn" onclick="window.backToStudentsList()">
@@ -1346,10 +1412,7 @@ let html = `
 <th>#</th>
 <th>Subject Code</th>
 <th>Subject Name</th>
-<th>Credits</th>
 <th>Section</th>
-<th>Lecturer</th>
-<th>Status</th>
 </tr>
 </thead>
 <tbody>`;
@@ -1360,14 +1423,7 @@ html += `
 <td>${i + 1}</td>
 <td>${subj.kod_subjek || '—'}</td>
 <td>${subj.nama_subjek || '—'}</td>
-<td>${subj.kredit || '—'}</td>
 <td>${subj.seksyen || '—'}</td>
-<td>${subj.nama_pensyarah || subj.pensyarah || '—'}</td>
-<td>
-<span class="status-tag ${statusClass}">
-${subj.status || 'Active'}
-</span>
-</td>
 </tr>`;
 });
 html += `</tbody></table></div>`;
@@ -1402,7 +1458,7 @@ fetchStudentData();
 function showLoading(show) {
 document.getElementById('loadingSpinner').style.display = show ? 'flex' : 'none';
 document.getElementById('loadStudentsBtn').disabled = show;
-document.getElementById('debugAuthBtn').disabled = show;
+//document.getElementById('debugAuthBtn').disabled = show;
 }
 function showError(title, message) {
 document.getElementById('errorTitle').textContent = title;
