@@ -498,6 +498,32 @@
           </div>
         </div>
         
+        <!-- Date-Specific Analysis (Optional) -->
+        <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid var(--border-color);">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input type="checkbox" id="enableDateFilter" style="width: 18px; height: 18px; cursor: pointer;">
+              <span style="font-weight: 600; font-size: 14px;">
+                <i class="fas fa-calendar-day"></i> Analyze Specific Date (Optional)
+              </span>
+            </label>
+          </div>
+          
+          <div id="dateFilterSection" style="display: none;">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="specificDate">
+                  <i class="fas fa-calendar"></i> Select Date
+                </label>
+                <input type="date" class="w3-input" id="specificDate">
+                <small style="color: var(--text-secondary); font-size: 12px; margin-top: 4px; display: block;">
+                  Date must fall within the selected semester period
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+        
         <button class="btn btn-primary" id="loadBtn" style="margin-top: 20px;">
           <i class="fas fa-sync-alt"></i> Analyze Utilization
         </button>
@@ -583,77 +609,139 @@
     }
 
     function getSemesterStatus(session, semester) {
-  const today = new Date();
+      const today = new Date();
 
-  const [startYear, endYear] = session.split('/').map(Number);
+      const [startYear, endYear] = session.split('/').map(Number);
 
-  let semStart, semEnd;
+      let semStart, semEnd;
 
-  switch (semester) {
-    case "1": // Semester 1: Oct – Jan
-      semStart = new Date(startYear, 9, 1);   // Oct 1
-      semEnd   = new Date(endYear, 0, 31);    // Jan 31
-      break;
+      switch (semester) {
+        case "1": // Semester 1: Oct – Feb
+          semStart = new Date(startYear, 9, 1);   // Oct 1
+          semEnd   = new Date(endYear, 1, 28);    // Feb 28
+          break;
 
-    case "2": // Semester 2: Mar – Jun
-      semStart = new Date(endYear, 2, 1);     // Mar 1
-      semEnd   = new Date(endYear, 5, 30);    // Jun 30
-      break;
+        case "2": // Semester 2: Mar – Jul
+          semStart = new Date(endYear, 2, 1);     // Mar 1
+          semEnd   = new Date(endYear, 6, 31);    // Jul 31
+          break;
 
-    case "3": // Special Semester: Jul – Sep
-      semStart = new Date(endYear, 6, 1);     // Jul 1
-      semEnd   = new Date(endYear, 8, 30);    // Sep 30
-      break;
-  }
+        case "3": // Special Semester: Aug – Sep
+          semStart = new Date(endYear, 7, 1);     // Aug 1
+          semEnd   = new Date(endYear, 8, 30);    // Sep 30
+          break;
+      }
 
-  if (today < semStart) return "future";
-  if (today > semEnd) return "past";
-  return "current";
-}
+      if (today < semStart) return "future";
+      if (today > semEnd) return "past";
+      return "current";
+    }
+
+    function getSemesterDateRange(session, semester) {
+      const [startYear, endYear] = session.split('/').map(Number);
+      let semStart, semEnd;
+
+      switch (semester) {
+        case "1":
+          semStart = new Date(startYear, 9, 1);
+          semEnd   = new Date(endYear, 1, 28);
+          break;
+        case "2":
+          semStart = new Date(endYear, 2, 1);
+          semEnd   = new Date(endYear, 6, 31);
+          break;
+        case "3":
+          semStart = new Date(endYear, 7, 1);
+          semEnd   = new Date(endYear, 8, 30);
+          break;
+      }
+
+      return { start: semStart, end: semEnd };
+    }
+
+    function formatDateForInput(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
 
     function getTeachingWeeks(semester) {
-  switch (semester) {
-    case "1": return 14; // Semester 1
-    case "2": return 14; // Semester 2
-    case "3": return 7;  // Special semester
-    default: return 14;
-  }
-}
-
+      switch (semester) {
+        case "1": return 14; // Semester 1
+        case "2": return 14; // Semester 2
+        case "3": return 7;  // Special semester
+        default: return 14;
+      }
+    }
 
     $(document).ready(function() {
-    const sessions = generateAcademicYears();
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = today.getMonth(); // 0 = Jan
+      const sessions = generateAcademicYears();
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = today.getMonth(); // 0 = Jan
 
-    const defaultSession = (month >= 9)
-    ? `${year}/${year + 1}`
-    : `${year - 1}/${year}`;
+      const defaultSession = (month >= 9)
+        ? `${year}/${year + 1}`
+        : `${year - 1}/${year}`;
 
-  $('#sessionSelect').html(
-    sessions.map(s =>
-      `<option value="${s}" ${s === defaultSession ? 'selected' : ''}>${s}</option>`
-    ).join('')
-  );
+      $('#sessionSelect').html(
+        sessions.map(s =>
+          `<option value="${s}" ${s === defaultSession ? 'selected' : ''}>${s}</option>`
+        ).join('')
+      );
 
-  $('#loadBtn').click(analyzeRoomUtilization);
-});
+      // Date filter toggle
+      $('#enableDateFilter').change(function() {
+        const isEnabled = $(this).is(':checked');
+        $('#dateFilterSection').slideToggle(300);
+        
+        if (isEnabled) {
+          updateDatePickerConstraints();
+        }
+      });
 
+      // Update date constraints when session/semester changes
+      $('#sessionSelect, #semesterSelect').change(function() {
+        if ($('#enableDateFilter').is(':checked')) {
+          updateDatePickerConstraints();
+        }
+      });
+
+      $('#loadBtn').click(analyzeRoomUtilization);
+    });
+
+    function updateDatePickerConstraints() {
+      const session = $('#sessionSelect').val();
+      const semester = $('#semesterSelect').val();
+      const { start, end } = getSemesterDateRange(session, semester);
+      
+      const $datePicker = $('#specificDate');
+      $datePicker.attr('min', formatDateForInput(start));
+      $datePicker.attr('max', formatDateForInput(end));
+      
+      // Set default to today if within range, otherwise first day of semester
+      const today = new Date();
+      if (today >= start && today <= end) {
+        $datePicker.val(formatDateForInput(today));
+      } else {
+        $datePicker.val(formatDateForInput(start));
+      }
+    }
 
     function getCurrentWeekRange() {
-  const today = new Date();
-  const dayOfWeek = today.getDay(); // 0=Sun
-  const start = new Date(today);
-  start.setDate(today.getDate() - dayOfWeek);
-  start.setHours(0,0,0,0);
+      const today = new Date();
+      const dayOfWeek = today.getDay(); // 0=Sun
+      const start = new Date(today);
+      start.setDate(today.getDate() - dayOfWeek);
+      start.setHours(0,0,0,0);
 
-  const end = new Date(start);
-  end.setDate(start.getDate() + 6);
-  end.setHours(23,59,59,999);
+      const end = new Date(start);
+      end.setDate(start.getDate() + 6);
+      end.setHours(23,59,59,999);
 
-  return { start, end };
-}
+      return { start, end };
+    }
 
     async function analyzeRoomUtilization() {
       const faculty = $('#facultySelect').val().trim().toUpperCase();
@@ -661,10 +749,33 @@
       const semester = $('#semesterSelect').val();
       const semesterStatus = getSemesterStatus(sesi, semester);
 
-      if (semesterStatus === "future") {
-      showError("Selected semester has not started yet.");
-      showLoading(false);
-      return;
+      // Check if date-specific analysis is enabled
+      const isDateSpecific = $('#enableDateFilter').is(':checked');
+      let specificDate = null;
+      let analysisDayOfWeek = null;
+
+      if (isDateSpecific) {
+        const dateValue = $('#specificDate').val();
+        if (!dateValue) {
+          showError("Please select a specific date for analysis.");
+          return;
+        }
+        
+        specificDate = new Date(dateValue + 'T00:00:00');
+        analysisDayOfWeek = specificDate.getDay() === 0 ? 7 : specificDate.getDay(); // Convert Sunday from 0 to 7
+        
+        // Validate date is within semester
+        const { start, end } = getSemesterDateRange(sesi, semester);
+        if (specificDate < start || specificDate > end) {
+          showError(`Selected date must be within the semester period (${formatDateForInput(start)} to ${formatDateForInput(end)})`);
+          return;
+        }
+      }
+
+      if (semesterStatus === "future" && !isDateSpecific) {
+        showError("Selected semester has not started yet.");
+        showLoading(false);
+        return;
       }
       const IS_CURRENT_SEMESTER = (semesterStatus === "current");
 
@@ -695,14 +806,13 @@
         let totalUsedSlotsAll = 0;
 
         // ===== GLOBAL WEEKLY SLOT CONSTANTS =====
-const START_HOUR = 7;   // 7am
-const END_HOUR = 23;    // 11pm
-const HOURS_PER_DAY = END_HOUR - START_HOUR; // 16
-const DAYS_PER_WEEK = 7;
-const TOTAL_POSSIBLE_SLOTS = HOURS_PER_DAY * DAYS_PER_WEEK; // 112
+        const START_HOUR = 7;   // 7am
+        const END_HOUR = 23;    // 11pm
+        const HOURS_PER_DAY = END_HOUR - START_HOUR; // 16
+        const DAYS_PER_WEEK = 7;
+        const TOTAL_POSSIBLE_SLOTS = HOURS_PER_DAY * DAYS_PER_WEEK; // 112
 
-       let totalPossibleSlotsAllRooms = 0;
-
+        let totalPossibleSlotsAllRooms = 0;
 
         // ===== STEP 2: Process EACH room =====
         for (const room of rooms) {
@@ -725,46 +835,58 @@ const TOTAL_POSSIBLE_SLOTS = HOURS_PER_DAY * DAYS_PER_WEEK; // 112
 
           const uniqueSlots = new Set();
 
-const { start, end } = getCurrentWeekRange();
+          const { start, end } = getCurrentWeekRange();
 
-schedule.forEach(s => {
-  const day = Number(s.hari);
-  const masa = Number(s.masa);
+          schedule.forEach(s => {
+            const day = Number(s.hari);
+            const masa = Number(s.masa);
 
-  if (day < 1 || day > 7) return;
-  if (masa < 1 || masa > 16) return;
+            if (day < 1 || day > 7) return;
+            if (masa < 1 || masa > 16) return;
 
-  const mula = new Date(s.tarikh_mula);
-  const tamat = new Date(s.tarikh_tamat);
+            const mula = new Date(s.tarikh_mula);
+            const tamat = new Date(s.tarikh_tamat);
 
-  // CURRENT semester → only if overlaps THIS WEEK
-  if (IS_CURRENT_SEMESTER) {
-    if (tamat < start || mula > end) return;
-  }
+            // DATE-SPECIFIC MODE
+            if (isDateSpecific) {
+              // Only count if: (1) matches the specific day, (2) date range overlaps
+              if (day !== analysisDayOfWeek) return;
+              if (tamat < specificDate || mula > specificDate) return;
+              uniqueSlots.add(`${day}-${masa}`);
+              return;
+            }
 
-  uniqueSlots.add(`${day}-${masa}`);
-});
+            // CURRENT semester → only if overlaps THIS WEEK
+            if (IS_CURRENT_SEMESTER) {
+              if (tamat < start || mula > end) return;
+            }
 
+            uniqueSlots.add(`${day}-${masa}`);
+          });
 
-const weeklySlots = uniqueSlots.size;
+          let usedSlots;
+          let totalPossibleSlots;
 
-let usedSlots;
-let totalPossibleSlots;
+          if (isDateSpecific) {
+            // ✅ DATE-SPECIFIC mode → count actual slots used on that day
+            usedSlots = uniqueSlots.size;
+            totalPossibleSlots = HOURS_PER_DAY; // 16 slots for that specific day
+          } else if (IS_CURRENT_SEMESTER) {
+            // ✅ CURRENT semester → CURRENT WEEK only
+            const weeklySlots = uniqueSlots.size;
+            usedSlots = weeklySlots;
+            totalPossibleSlots = TOTAL_POSSIBLE_SLOTS;
+          } else {
+            // ✅ PAST semester → FULL semester usage
+            const weeklySlots = uniqueSlots.size;
+            const weeks = getTeachingWeeks(semester);
+            usedSlots = weeklySlots * weeks;
+            totalPossibleSlots = TOTAL_POSSIBLE_SLOTS * weeks;
+          }
 
-if (IS_CURRENT_SEMESTER) {
-  // ✅ CURRENT semester → CURRENT WEEK only
-  usedSlots = weeklySlots;
-  totalPossibleSlots = TOTAL_POSSIBLE_SLOTS;
-} else {
-  // ✅ PAST semester → FULL semester usage
-  const weeks = getTeachingWeeks(semester);
-  usedSlots = weeklySlots * weeks;
-  totalPossibleSlots = TOTAL_POSSIBLE_SLOTS * weeks;
-}
-
-totalUsedSlotsAll += usedSlots;
-
+          totalUsedSlotsAll += usedSlots;
           totalPossibleSlotsAllRooms += totalPossibleSlots;
+          
           if (usedSlots < MIN_SLOTS_THRESHOLD) {
             roomsWithMinimalUsage++;
             continue;
@@ -784,22 +906,25 @@ totalUsedSlotsAll += usedSlots;
         filteredRoomsData.sort((a, b) => b.pct - a.pct);
         
         // Calculate total possible slots for summary
-        const totalPossibleForSummary = IS_CURRENT_SEMESTER
-        ? TOTAL_POSSIBLE_SLOTS
-        : TOTAL_POSSIBLE_SLOTS * getTeachingWeeks(semester);
-
+        const totalPossibleForSummary = isDateSpecific
+          ? HOURS_PER_DAY
+          : IS_CURRENT_SEMESTER
+          ? TOTAL_POSSIBLE_SLOTS
+          : TOTAL_POSSIBLE_SLOTS * getTeachingWeeks(semester);
 
         const overallUtilization = totalPossibleSlotsAllRooms > 0
-        ? ((totalUsedSlotsAll / totalPossibleSlotsAllRooms) * 100).toFixed(1)
-        : "0.0";
+          ? ((totalUsedSlotsAll / totalPossibleSlotsAllRooms) * 100).toFixed(1)
+          : "0.0";
 
         renderResults(
-        filteredRoomsData, faculty, sesi, semester,
-        totalUsedSlotsAll, totalPossibleForSummary,
-        rooms.length, roomsWithMinimalUsage, roomsWithNoData,
-        IS_CURRENT_SEMESTER,
-        overallUtilization
-      );
+          filteredRoomsData, faculty, sesi, semester,
+          totalUsedSlotsAll, totalPossibleForSummary,
+          rooms.length, roomsWithMinimalUsage, roomsWithNoData,
+          IS_CURRENT_SEMESTER,
+          overallUtilization,
+          isDateSpecific,
+          specificDate
+        );
 
       } catch (error) {
         console.error("Error:", error);
@@ -814,16 +939,29 @@ totalUsedSlotsAll += usedSlots;
       totalUsed, totalPossible,
       totalRooms, filteredOutCount, zeroSlotRooms,
       IS_CURRENT_SEMESTER,
-      overallUtilization
-      ) {
+      overallUtilization,
+      isDateSpecific = false,
+      specificDate = null
+    ) {
 
       const avgUtil = data.length > 0 
         ? (data.reduce((sum, r) => sum + r.pct, 0) / data.length).toFixed(1)
         : "0.0";
 
+      let modeText = "";
+      if (isDateSpecific) {
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const dayName = days[specificDate.getDay()];
+        modeText = `DATE-SPECIFIC (${specificDate.toLocaleDateString('en-GB')} - ${dayName})`;
+      } else if (IS_CURRENT_SEMESTER) {
+        modeText = "CURRENT (Weekly Utilization)";
+      } else {
+        modeText = "PAST (Full Semester Utilization)";
+      }
+
       $('#stats').html(`
         <strong>📊 Summary for ${faculty} • ${sesi} • Semester ${semester}
-        (${IS_CURRENT_SEMESTER ? "CURRENT (Weekly Utilization)" : "PAST (Full Semester Utilization)"})</strong><br><br>
+        (${modeText})</strong><br><br>
         • ${totalRooms} total rooms analyzed<br>
         • <strong>${data.length} rooms with ≥2 scheduled slots</strong><br>
         • Average utilization (filtered): <strong>${avgUtil}%</strong><br>
@@ -835,14 +973,14 @@ totalUsedSlotsAll += usedSlots;
       `).show();
 
       if (data.length > 0) {
-        drawChart(data);
+        drawChart(data, isDateSpecific);
         renderTable(data);
       } else {
         $('#chart_div').html('<div class="empty-state" style="height:400px; display:flex; align-items:center; justify-content:center;">No rooms meet the minimum 2-slot threshold for visualization</div>');
         $('#results').html(`
           <div class="empty-state">
             <i class="fas fa-exclamation-circle" style="color:var(--warning);"></i>
-            <p>No rooms meet the minimum 2-slot threshold.<br>Try selecting a different semester, academic session, or faculty.</p>
+            <p>No rooms meet the minimum 2-slot threshold.<br>Try selecting a different ${isDateSpecific ? 'date' : 'semester, academic session, or faculty'}.</p>
           </div>
         `);
       }
@@ -858,7 +996,7 @@ totalUsedSlotsAll += usedSlots;
                 <th>Possible Slots</th>
                 <th>Utilization</th>
                 <th>Status</th>
-              </tr></thead> `;
+              </tr></thead><tbody>`;
 
       data.forEach((item, index) => {
         let statusClass = 'status-low', statusText = 'Low';
@@ -869,12 +1007,12 @@ totalUsedSlotsAll += usedSlots;
         const fillWidth = Math.min(100, item.pct);
         html += `
           <tr>
-              <td>${index + 1}</td>
-              <td><strong>${item.name}</strong></td>
-              <td><code>${item.room}</code></td>
-              <td><strong>${item.used}</strong></td>
-              <td>${item.total}</td>
-              <td>
+            <td>${index + 1}</td>
+            <td><strong>${item.name}</strong></td>
+            <td><code>${item.room}</code></td>
+            <td><strong>${item.used}</strong></td>
+            <td>${item.total}</td>
+            <td>
               <div class="util-bar">
                 <div class="util-fill" style="width:${fillWidth}%">${item.pct}%</div>
               </div>
@@ -886,18 +1024,22 @@ totalUsedSlotsAll += usedSlots;
       $('#results').html(html);
     }
 
-    function drawChart(data) {
+    function drawChart(data, isDateSpecific = false) {
       const dataTable = new google.visualization.DataTable();
       dataTable.addColumn('string', 'Room');
       dataTable.addColumn('number', 'Utilization %');
 
       const topRooms = data.slice(0, 15);
-      topRooms.forEach((item,index) => {
+      topRooms.forEach((item) => {
         dataTable.addRow([item.name, item.pct]);
       });
 
+      const titleText = isDateSpecific 
+        ? 'Top 15 Rooms by Utilization (%) – Specific Date Analysis'
+        : 'Top 15 Rooms by Utilization (%)';
+
       const options = {
-        title: 'Top Room Utilization (%) – Minimum 2 Slots',
+        title: titleText,
         titleTextStyle: { fontSize: 16, color: '#1f2937' },
         hAxis: {
           title: 'Room Name',
