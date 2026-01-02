@@ -14,7 +14,7 @@
       --light-bg: #f8f9fc;
       --input-border: #d1d5db;
       --error-red: #d32f2f;
-      --sidebar-width: 240px;
+      --sidebar-width: 280px;
       --header-height: 70px;
     }
 
@@ -39,19 +39,39 @@
       transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       overflow-y: auto;
     }
-    .sidebar-header { padding: 25px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.15); }
-    .sidebar-title { color: white; font-size: 20px; font-weight: 600; margin-bottom: 8px; }
-    .sidebar-subtitle { color: rgba(255, 255, 255, 0.85); font-size: 13px; }
-    .sidebar-user { padding: 20px 20px 10px; border-bottom: 1px solid rgba(255,255,255,0.15); }
+    .sidebar-header {
+      padding: 30px 25px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .sidebar-title {
+      color: white;
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sidebar-subtitle { color: rgba(255, 255, 255, 0.85); font-size: 14px; }
+    .sidebar-user {
+      padding: 20px 25px 15px;
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+    }
     .user-avatar {
       width: 48px; height: 48px; border-radius: 50%;
       background: linear-gradient(135deg, var(--utm-gold) 0%, #8B6F3E 100%);
       display: flex; align-items: center; justify-content: center;
-      font-weight: 700; color: white; margin-bottom: 10px; font-size: 18px;
+      font-weight: 700; color: white; margin-bottom: 12px; font-size: 18px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
-    .user-name { color: white; font-size: 16px; font-weight: 600; margin-bottom: 4px; }
-    .user-role { color: rgba(255, 255, 255, 0.85); font-size: 12px; }
+    .user-name {
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      line-height: 1.25;
+    }
+    .user-role { color: rgba(255, 255, 255, 0.85); font-size: 13px; }
     .nav-item {
       display: flex; align-items: center;
       padding: 14px 20px;
@@ -80,7 +100,10 @@
     .menu-toggle:hover { background: #f0f4ff; }
     .header-title { font-size: 22px; font-weight: 600; color: var(--utm-blue); }
     .header-actions { margin-left: auto; display: flex; align-items: center; gap: 15px; }
-    .header-time { font-size: 14px; color: #555; padding: 8px 16px; background: #f0f4ff; border-radius: 8px; border: 1px solid #dde4f0; }
+    .header-time {
+      font-size: 14px; color: #555; padding: 8px 16px; background: #f0f4ff;
+      border-radius: 8px; border: 1px solid #dde4f0;
+    }
 
     .main-content { padding: 30px; max-width: 1400px; }
 
@@ -115,17 +138,19 @@
       border: 1px solid #eaeef5;
       margin-bottom: 20px;
       display: grid;
-      grid-template-columns: 100px repeat(9, 1fr);
+      grid-template-columns: 120px repeat(9, 1fr);
     }
     .day-label {
       background: linear-gradient(135deg, #003366 0%, #002244 100%);
       color: white; font-weight: 700; font-size: 13px;
       text-transform: uppercase; letter-spacing: 0.5px;
-      display: flex; align-items: center; justify-content: center;
-      padding: 12px 8px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 10px 8px;
       border-right: 1px solid rgba(255,255,255,0.2);
       border-bottom: 1px solid rgba(255,255,255,0.2);
+      gap: 4px;
     }
+    .day-hours { font-size: 12px; color: #e5e7eb; }
     .time-label {
       background: linear-gradient(135deg, #003366 0%, #002244 100%);
       color: white; font-weight: 700; font-size: 13px;
@@ -276,7 +301,7 @@
   <!-- Sidebar -->
   <nav class="sidebar" id="sidebar">
     <div class="sidebar-header">
-      <div class="sidebar-title">TTMS</div>
+      <div class="sidebar-title"><span>🎓</span><span>TTMS</span></div>
       <div class="sidebar-subtitle">Lecturer Portal</div>
     </div>
 
@@ -294,6 +319,9 @@
     </a>
     <a class="nav-item" href="LecturerEnrollment.html">
       <span class="nav-icon">👥</span><span>Course Enrollment</span>
+    </a>
+    <a class="nav-item" href="LecturerReport.html">
+      <span class="nav-icon">📈</span><span>Reports</span>
     </a>
 
     <div class="nav-logout">
@@ -321,7 +349,7 @@
           <div class="filter-group">
             <label for="sessionSelect">Academic Session</label>
             <select id="sessionSelect">
-              <option value="2025/2026" selected>2025/2026</option>
+              <option value="2025/2026">2025/2026</option>
               <option value="2024/2025">2024/2025</option>
               <option value="2023/2024">2023/2024</option>
               <option value="2022/2023">2022/2023</option>
@@ -428,7 +456,21 @@
       { slot: 10, label: "16:00 - 17:00" }
     ];
 
+    // Choose latest session automatically and load on start
+    function selectLatestSessionAndLoad() {
+      const select = document.getElementById("sessionSelect");
+      let bestVal = select.value;
+      let bestYear = -Infinity;
+      Array.from(select.options).forEach(opt => {
+        const y = parseInt((opt.value || "").split('/')[0] || -Infinity);
+        if (y > bestYear) { bestYear = y; bestVal = opt.value; }
+      });
+      select.value = bestVal;
+      loadTimetable();
+    }
+
     document.getElementById("loadBtn").addEventListener("click", loadTimetable);
+    window.addEventListener("DOMContentLoaded", selectLatestSessionAndLoad);
 
     async function loadTimetable() {
       const sesi = document.getElementById("sessionSelect").value;
@@ -510,7 +552,7 @@
       const totalStudents = Array.from(sectionMap.values()).reduce((a,b)=>a+b,0);
       const uniqueSubjects = new Set(entries.map(e => e.kod_subjek)).size;
 
-      // Per-day summary (slots + students)
+      // Per-day summary (slots + students + hours)
       const daySummary = days.map(d => {
         const dayEntries = entries.filter(e => e.hari === d.id);
         const slotsCount = dayEntries.length;
@@ -520,10 +562,11 @@
           if (!secMap.has(key)) secMap.set(key, parseInt(e.bil_pelajar) || 0);
         });
         const dayStudents = Array.from(secMap.values()).reduce((a,b)=>a+b,0);
-        return { day: d.name, slots: slotsCount, students: dayStudents };
+        return { day: d.name, dayId: d.id, slots: slotsCount, students: dayStudents, hours: slotsCount };
       });
-      const busiestByStudents = daySummary.reduce((acc, cur) => cur.students > acc.students ? cur : acc, { students: -1 });
-      const busiestBySlots = daySummary.reduce((acc, cur) => cur.slots > acc.slots ? cur : acc, { slots: -1 });
+      const maxStudents = Math.max(...daySummary.map(d=>d.students), 0);
+      const busiestDays = daySummary.filter(d => d.students === maxStudents && maxStudents > 0).map(d => d.day);
+      const busiestLabel = busiestDays.length ? `Highest student load day(s): ${busiestDays.join(', ')}` : 'No classes scheduled';
 
       // Build merged cells per day (merge consecutive slots for the same subject+section)
       const dayCellsHtml = (dayId) => {
@@ -532,7 +575,6 @@
         for (let i = 0; i < slotValues.length; i++) {
           const slotNum = slotValues[i];
           const cellEntries = daySlotMap[dayId][slotNum] || [];
-          // If multiple different entries in same slot, stack them (no merge across)
           if (cellEntries.length > 1) {
             const items = cellEntries.map(c => `
               <div class="class-item">
@@ -548,7 +590,6 @@
           if (cellEntries.length === 1) {
             const c = cellEntries[0];
             let spanLen = 1;
-            // Try to merge forward while next slots have exactly one entry with same subject+section
             for (let j = i + 1; j < slotValues.length; j++) {
               const nextSlot = slotValues[j];
               const nextEntries = daySlotMap[dayId][nextSlot] || [];
@@ -557,13 +598,9 @@
                 const sameClass = (n.kod_subjek === c.kod_subjek) && (n.seksyen === c.seksyen);
                 if (sameClass) {
                   spanLen += 1;
-                  i = j; // advance outer loop
-                } else {
-                  break;
-                }
-              } else {
-                break;
-              }
+                  i = j;
+                } else break;
+              } else break;
             }
             const itemHtml = `
               <div class="class-item">
@@ -576,7 +613,6 @@
             continue;
           }
 
-          // No entries: empty
           html += `<div class="grid-cell" style="--span:1"></div>`;
         }
         return html;
@@ -587,12 +623,13 @@
       desktopHtml += `<div class="corner-cell"></div>`;
       slots.forEach(s => desktopHtml += `<div class="time-label">${s.label}</div>`);
       days.forEach(d => {
-        desktopHtml += `<div class="day-label">${d.name}</div>`;
+        const dSum = daySummary.find(x => x.dayId === d.id) || { hours: 0 };
+        desktopHtml += `<div class="day-label"><div>${d.name}</div><div class="day-hours">${dSum.hours} hour${dSum.hours===1?'':'s'}</div></div>`;
         desktopHtml += dayCellsHtml(d.id);
       });
       desktopHtml += `</div></div>`;
 
-      // Mobile list (no merge, stacked)
+      // Mobile list
       let mobileHtml = `<div class="mobile-timetable">`;
       days.forEach(d => {
         const dayHas = slots.some(s => daySlotMap[d.id][s.slot].length);
@@ -630,6 +667,7 @@
       const summary = `
         <div class="summary">
           ${entries.length} slot(s) · ${uniqueSubjects} subject(s) · ${totalStudents} student(s) · ${sesi} Semester ${semester}
+          <br>${busiestLabel}
         </div>
       `;
 
@@ -642,7 +680,7 @@
                 <div class="title">${ds.day}</div>
                 <div>Slots: <strong>${ds.slots}</strong></div>
                 <div>Students: <strong>${ds.students}</strong></div>
-                ${(ds.day === busiestByStudents.day || ds.day === busiestBySlots.day) ? `<div class="badge">Busiest</div>` : ''}
+                ${(ds.students === maxStudents && maxStudents > 0) ? `<div class="badge">Busy</div>` : ''}
               </div>
             `).join('')}
           </div>
