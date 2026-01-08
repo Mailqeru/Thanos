@@ -228,8 +228,7 @@
       color: #444;
     }
 
-    .filter-group select,
-    .filter-group button {
+    .filter-group select {
       width: 100%;
       padding: 12px 16px;
       border: 1px solid #d1d5db;
@@ -237,29 +236,11 @@
       font-size: 16px;
       background: white;
       color: #333;
-    }
-
-    .filter-group select {
       appearance: none;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23003366' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 16px center;
       padding-right: 40px;
-    }
-
-    .filter-group button {
-      background: linear-gradient(135deg, #003366 0%, #002244 100%); /* UTM blue gradient */
-      color: white;
-      border: none;
-      cursor: pointer;
-      font-weight: 600;
-      transition: transform 0.2s, box-shadow 0.2s;
-      box-shadow: 0 2px 6px rgba(0, 51, 102, 0.3);
-    }
-
-    .filter-group button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 10px rgba(0, 51, 102, 0.4);
     }
 
     .search-container {
@@ -417,8 +398,7 @@
         font-size: 13px;
       }
 
-      .filter-group select,
-      .filter-group button {
+      .filter-group select {
         padding: 10px 14px;
         font-size: 14px;
         padding-right: 36px;
@@ -443,8 +423,7 @@
         font-size: 16px;
       }
 
-      .filter-group select,
-      .filter-group button {
+      .filter-group select {
         padding: 8px 12px;
         font-size: 14px;
       }
@@ -590,21 +569,17 @@
               <option value="">Select session first</option>
             </select>
           </div>
-          <div class="filter-group">
-            <label>&nbsp;</label>
-            <button id="loadSectionsBtn">Load Valid Sections</button>
-          </div>
         </div>
 
         <!-- Search -->
-        <div id="searchContainer" class="search-container" style="display:none;">
+        <div class="search-container">
           <input type="text" id="searchInput" placeholder="Search by course code or subject name..." />
           <div class="info-note">Only sections with lecturer & ≥1 enrolled student are shown.</div>
         </div>
 
         <!-- Content -->
         <div id="sectionsContent">
-          <div class="loading">Loading enrolled sessions...</div>
+          <div class="loading">Loading enrolled sessions and subject sections...</div>
         </div>
       </div>
     </main>
@@ -685,16 +660,19 @@
 
     const ITEMS_PER_PAGE = 10;
     let currentPage = 1;
-    let validSubjectList = [];
+    let allEnrichedData = []; // ✅ Cache all sections in memory
     let currentSesi = '';
     let currentSemester = '';
-    let globalEnrichedData = [];
     let totalPages = 0;
 
-    document.getElementById("loadSectionsBtn").addEventListener("click", loadSubjectSections);
-    document.getElementById("searchInput").addEventListener("input", filterSections);
+    // Initialize filters and auto-load
+    document.getElementById("searchInput").addEventListener("input", filterAndRender);
+    document.getElementById("sessionSelect").addEventListener("change", handleSessionChange);
+    document.getElementById("semesterSelect").addEventListener("change", handleSemesterChange);
 
-    (async function initFilters() {
+    initAndLoad();
+
+    async function initAndLoad() {
       const contentEl = document.getElementById("sectionsContent");
       const sessionSelect = document.getElementById("sessionSelect");
       const semesterSelect = document.getElementById("semesterSelect");
@@ -717,49 +695,86 @@
           sessions[sesi].add(sem);
         });
 
+        // Sort sessions descending
+        const sortedSessions = Object.keys(sessions).sort((a, b) => {
+          const [y1] = a.split('/');
+          const [y2] = b.split('/');
+          return parseInt(y2) - parseInt(y1);
+        });
+
         let sessionOptions = '<option value="">-- Select Session --</option>';
-        Object.keys(sessions).sort().reverse().forEach(s => {
+        sortedSessions.forEach(s => {
           sessionOptions += `<option value="${s}">${s}</option>`;
         });
         sessionSelect.innerHTML = sessionOptions;
 
-        sessionSelect.addEventListener('change', () => {
-          const sesi = sessionSelect.value;
-          semesterSelect.innerHTML = sesi
-            ? Array.from(sessions[sesi]).sort().map(sem => `<option value="${sem}">Semester ${sem}</option>`).join('')
-            : '<option>Select session first</option>';
-        });
-
-        const latestSesi = Object.keys(sessions).sort().reverse()[0];
-        if (latestSesi) {
+        if (sortedSessions.length > 0) {
+          const latestSesi = sortedSessions[0];
           sessionSelect.value = latestSesi;
-          const latestSem = Array.from(sessions[latestSesi]).sort().reverse()[0];
-          semesterSelect.innerHTML = Array.from(sessions[latestSesi]).sort().map(sem =>
-            `<option value="${sem}" ${sem == latestSem ? 'selected' : ''}>Semester ${sem}</option>`
-          ).join('');
+          const latestSem = Array.from(sessions[latestSesi]).sort((a, b) => b - a)[0];
+          semesterSelect.innerHTML = Array.from(sessions[latestSesi]).sort((a, b) => b - a)
+            .map(sem => `<option value="${sem}" ${sem == latestSem ? 'selected' : ''}>Semester ${sem}</option>`)
+            .join('');
+          
+          currentSesi = latestSesi;
+          currentSemester = latestSem;
+          await loadAllSections(); // ✅ Auto-load on init
+        } else {
+          contentEl.innerHTML = `<div class="empty-message">No sessions available.</div>`;
         }
-        contentEl.innerHTML = `<p class="empty-message">Select session & semester, then click Load Valid Sections.</p>`;
       } catch (err) {
         contentEl.innerHTML = `<div class="empty-message">Failed to load sessions.</div>`;
+        console.error(err);
       }
-    })();
+    }
 
-    async function loadSubjectSections() {
-      currentSesi = document.getElementById("sessionSelect").value;
-      currentSemester = document.getElementById("semesterSelect").value;
-      if (!currentSesi || !currentSemester) {
-        alert("Please select both session and semester.");
+    function handleSessionChange() {
+      const sesi = document.getElementById("sessionSelect").value;
+      const semesterSelect = document.getElementById("semesterSelect");
+      if (!sesi) {
+        semesterSelect.innerHTML = '<option>Select session first</option>';
         return;
       }
+      // Re-fetch sessions map
+      fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar_subjek&no_matrik=${encodeURIComponent(matricNo)}`)
+        .then(r => r.json())
+        .then(data => {
+          const sessions = {};
+          data.forEach(item => {
+            const s = item.sesi || 'Unknown';
+            const sem = item.semester || 'N/A';
+            if (!sessions[s]) sessions[s] = new Set();
+            sessions[s].add(sem);
+          });
+          if (sessions[sesi]) {
+            semesterSelect.innerHTML = Array.from(sessions[sesi]).sort((a, b) => b - a)
+              .map(sem => `<option value="${sem}">Semester ${sem}</option>`)
+              .join('');
+            currentSesi = sesi;
+            currentSemester = semesterSelect.value;
+            loadAllSections();
+          }
+        });
+    }
 
-      currentPage = 1;
-      document.getElementById("sectionsContent").innerHTML = "<div class='loading'>Filtering subjects and schedules...</div>";
+    function handleSemesterChange() {
+      currentSemester = document.getElementById("semesterSelect").value;
+      if (currentSesi && currentSemester) {
+        loadAllSections();
+      }
+    }
+
+    async function loadAllSections() {
+      const contentEl = document.getElementById("sectionsContent");
+      if (!currentSesi || !currentSemester) return;
+
+      contentEl.innerHTML = "<div class='loading'>Loading all valid subject sections...</div>";
 
       try {
         const resSec = await fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=subjek_seksyen&sesi=${encodeURIComponent(currentSesi)}&semester=${encodeURIComponent(currentSemester)}`);
         const allSubjects = await resSec.json();
 
-        validSubjectList = allSubjects
+        const validSubjects = allSubjects
           .filter(subj => subj.seksyen_list && Array.isArray(subj.seksyen_list))
           .map(subj => {
             const validSections = subj.seksyen_list.filter(sec => (sec.pensyarah || '').trim() && (sec.bil_pelajar || 0) > 0);
@@ -767,134 +782,143 @@
           })
           .filter(Boolean);
 
-        totalPages = Math.ceil(validSubjectList.length / ITEMS_PER_PAGE);
-        await loadPage(currentPage);
-        document.getElementById("searchContainer").style.display = "block";
+        // Enrich all at once
+        const fetchPromises = [];
+        validSubjects.forEach(subj => {
+          subj.seksyen_list.forEach(sec => {
+            fetchPromises.push((async () => {
+              try {
+                const kod = subj.kod_subjek;
+                const nama = subj.nama_subjek;
+                const seksyen = sec.seksyen;
+                const lecturer = sec.pensyarah;
+                const enrolled = sec.bil_pelajar;
+
+                const res = await fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=jadual_subjek&sesi=${encodeURIComponent(currentSesi)}&semester=${encodeURIComponent(currentSemester)}&kod_subjek=${encodeURIComponent(kod)}&seksyen=${encodeURIComponent(seksyen)}`);
+                const rawJadual = await res.json();
+
+                const sorted = (Array.isArray(rawJadual) ? rawJadual : [])
+                  .filter(e => e.hari && e.masa)
+                  .sort((a, b) => a.hari - b.hari || a.masa - b.masa);
+
+                const mergedEntries = [];
+                for (let i = 0; i < sorted.length; i++) {
+                  let startSlot = sorted[i].masa;
+                  let endSlot = sorted[i].masa;
+                  const day = sorted[i].hari;
+                  const roomName = sorted[i].ruang?.nama_ruang_singkatan || sorted[i].ruang?.kod_ruang || '—';
+
+                  while (i + 1 < sorted.length && 
+                         sorted[i+1].hari === day && 
+                         sorted[i+1].masa === endSlot + 1 && 
+                         (sorted[i+1].ruang?.nama_ruang_singkatan || sorted[i+1].ruang?.kod_ruang || '—') === roomName) {
+                    endSlot = sorted[i+1].masa;
+                    i++;
+                  }
+
+                  const startTime = masaMap[startSlot]?.split('–')[0] || '—';
+                  const endTime = masaMap[endSlot]?.split('–')[1] || '—';
+                  mergedEntries.push({
+                    day: hariMap[day] || '—',
+                    time: `${startTime}–${endTime}`,
+                    room: roomName
+                  });
+                }
+
+                return { 
+                  kod, 
+                  nama, 
+                  seksyen, 
+                  lecturer, 
+                  enrolled, 
+                  scheduleEntries: mergedEntries,
+                  searchable: `${kod} ${nama} ${lecturer}`.toLowerCase()
+                };
+              } catch (err) {
+                console.error("Error loading section:", err);
+                return null;
+              }
+            })());
+          });
+        });
+
+        allEnrichedData = (await Promise.all(fetchPromises)).filter(Boolean);
+        totalPages = Math.ceil(allEnrichedData.length / ITEMS_PER_PAGE);
+        currentPage = 1;
+        filterAndRender(); // render first page + enable search
       } catch (err) {
-        document.getElementById("sectionsContent").innerHTML = `<div class="empty-message">Error: ${err.message}</div>`;
+        contentEl.innerHTML = `<div class="empty-message">Error loading sections: ${err.message}</div>`;
+        console.error(err);
       }
     }
 
-    async function loadPage(page) {
-      const startIndex = (page - 1) * ITEMS_PER_PAGE;
-      const pageSubjects = validSubjectList.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-      document.getElementById("sectionsContent").innerHTML = `<div class='loading'>Fetching schedules (Page ${page})...</div>`;
+    function filterAndRender() {
+      const query = document.getElementById("searchInput").value.toLowerCase();
+      let filteredData = allEnrichedData;
 
-      const fetchPromises = [];
-      pageSubjects.forEach(subj => {
-        subj.seksyen_list.forEach(sec => {
-          fetchPromises.push((async () => {
-            try {
-              // Correctly defining local variables for this specific section
-              const kod = subj.kod_subjek;
-              const nama = subj.nama_subjek;
-              const seksyen = sec.seksyen;
-              const lecturer = sec.pensyarah;
-              const enrolled = sec.bil_pelajar;
+      if (query) {
+        filteredData = allEnrichedData.filter(item => item.searchable.includes(query));
+      }
 
-              const res = await fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=jadual_subjek&sesi=${encodeURIComponent(currentSesi)}&semester=${encodeURIComponent(currentSemester)}&kod_subjek=${encodeURIComponent(kod)}&seksyen=${encodeURIComponent(seksyen)}`);
-              const rawJadual = await res.json();
+      totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+      const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+      const pageData = filteredData.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
-              // --- STRUCTURED MERGING LOGIC ---
-              const sorted = (Array.isArray(rawJadual) ? rawJadual : [])
-                .filter(e => e.hari && e.masa)
-                .sort((a, b) => a.hari - b.hari || a.masa - b.masa);
-
-              const mergedEntries = [];
-              for (let i = 0; i < sorted.length; i++) {
-                let startSlot = sorted[i].masa;
-                let endSlot = sorted[i].masa;
-                const day = sorted[i].hari;
-                
-                // CHANGE: Use nama_ruang_singkatan for Room Name instead of Room Code
-                const roomName = sorted[i].ruang?.nama_ruang_singkatan || sorted[i].ruang?.kod_ruang || '—';
-
-                // Merge consecutive hours on the same day in the same room
-                while (i + 1 < sorted.length && 
-                       sorted[i+1].hari === day && 
-                       sorted[i+1].masa === endSlot + 1 && 
-                       (sorted[i+1].ruang?.nama_ruang_singkatan || sorted[i+1].ruang?.kod_ruang || '—') === roomName) {
-                  endSlot = sorted[i+1].masa;
-                  i++;
-                }
-
-                const startTime = masaMap[startSlot].split('–')[0];
-                const endTime = masaMap[endSlot].split('–')[1];
-
-                mergedEntries.push({
-                  day: hariMap[day],
-                  time: `${startTime}–${endTime}`,
-                  room: roomName
-                });
-              }
-
-              return { 
-                kod, 
-                nama, 
-                seksyen, 
-                lecturer, 
-                enrolled, 
-                scheduleEntries: mergedEntries,
-                searchable: `${kod} ${nama} ${lecturer}`.toLowerCase()
-              };
-            } catch (err) { 
-              console.error("Fetch error for " + subj.kod_subjek, err);
-              return null; 
-            }
-          })());
-        });
-      });
-
-      globalEnrichedData = (await Promise.all(fetchPromises)).filter(Boolean);
-      renderSections(page);
+      renderSections(pageData, filteredData.length);
     }
 
-    function renderSections(page) {
+    function renderSections(pageData, totalItems) {
+      const contentEl = document.getElementById("sectionsContent");
       const grouped = {};
-      globalEnrichedData.forEach(item => {
-        if (!grouped[item.kod]) grouped[item.kod] = { kod: item.kod, nama: item.nama, sections: [] };
+
+      pageData.forEach(item => {
+        if (!grouped[item.kod]) {
+          grouped[item.kod] = { kod: item.kod, nama: item.nama, sections: [] };
+        }
         grouped[item.kod].sections.push(item);
       });
 
-      let html = `<h4 style="color: #003366; margin: 20px 0;">Valid Sections – Page ${page} of ${totalPages}</h4>`;
-      Object.values(grouped).forEach(group => {
-        html += `
-          <div class="subject-card" data-search="${group.sections.map(s => s.searchable).join(' ')}">
-            <header><h5>${group.kod} – ${group.nama}</h5></header>
-            <div class="table-wrapper">
-              <table>
-                <thead>
-                  <tr><th>Section</th><th>Lecturer</th><th>Enrolled</th><th>Schedule (Day – Time – Room)</th></tr>
-                </thead>
-                <tbody>`;
-        group.sections.forEach(sec => {
-          const scheduleHtml = sec.scheduleEntries.length > 0
-            ? sec.scheduleEntries.map(e => `<div class="schedule-entry"><strong>${e.day}</strong> | ${e.time} | ${e.room}</div>`).join('')
-            : '<span style="color:#999;">No schedule</span>';
-          html += `<tr><td><strong>${sec.seksyen}</strong></td><td>${sec.lecturer}</td><td>${sec.enrolled}</td><td>${scheduleHtml}</td></tr>`;
+      let html = `<div class="summary">Showing ${pageData.length} of ${totalItems} sections | Page ${currentPage} of ${totalPages}</div>`;
+
+      if (totalItems === 0) {
+        html += `<div class="empty-message">No sections match your search.</div>`;
+      } else {
+        Object.values(grouped).forEach(group => {
+          html += `
+            <div class="subject-card">
+              <header><h5>${group.kod} – ${group.nama}</h5></header>
+              <div class="table-wrapper">
+                <table>
+                  <thead>
+                    <tr><th>Section</th><th>Lecturer</th><th>Enrolled</th><th>Schedule (Day – Time – Room)</th></tr>
+                  </thead>
+                  <tbody>`;
+          group.sections.forEach(sec => {
+            const scheduleHtml = sec.scheduleEntries.length > 0
+              ? sec.scheduleEntries.map(e => `<div class="schedule-entry"><strong>${e.day}</strong> | ${e.time} | ${e.room}</div>`).join('')
+              : '<span style="color:#999;">No schedule</span>';
+            html += `<tr><td><strong>${sec.seksyen}</strong></td><td>${sec.lecturer}</td><td>${sec.enrolled}</td><td>${scheduleHtml}</td></tr>`;
+          });
+          html += `</tbody></table></div></div>`;
         });
-        html += `</tbody></table></div></div>`;
-      });
 
-      html += `
-        <div class="pagination">
-          <button ${page <= 1 ? 'disabled' : ''} onclick="loadPage(${page - 1})">Prev</button>
-          <span class="page-info">Page ${page} of ${totalPages}</span>
-          <button ${page >= totalPages ? 'disabled' : ''} onclick="loadPage(${page + 1})">Next</button>
-        </div>`;
+        // Pagination
+        html += `
+          <div class="pagination">
+            <button ${currentPage <= 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">Prev</button>
+            <span class="page-info">Page ${currentPage} of ${totalPages}</span>
+            <button ${currentPage >= totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">Next</button>
+          </div>`;
+      }
 
-      document.getElementById("sectionsContent").innerHTML = html;
+      contentEl.innerHTML = html;
     }
 
-    window.loadPage = loadPage;
-
-    function filterSections() {
-      const query = document.getElementById("searchInput").value.toLowerCase();
-      document.querySelectorAll(".subject-card").forEach(card => {
-        const text = card.getAttribute("data-search");
-        card.style.display = text.includes(query) ? "" : "none";
-      });
-    }
+    window.changePage = function(page) {
+      if (page < 1 || page > totalPages) return;
+      currentPage = page;
+      filterAndRender();
+    };
   })();
 </script>
 </body>

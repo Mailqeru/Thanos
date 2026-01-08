@@ -760,29 +760,61 @@
         const lecturersData = safeJsonParse(await lecturersRes.text());
         document.getElementById('totalLecturers').textContent = lecturersData ? (Array.isArray(lecturersData) ? lecturersData.length : 1) : '0';
 
-        // --- Subjects (Filtered: only SEC & not starting with M) ---
+        // --- Subjects (Filtered: SEC or SCS, and not starting with M) ---
         const subjectsUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=subjek&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}`;
         const subjectsRes = await fetch(subjectsUrl);
         const subjectsData = safeJsonParse(await subjectsRes.text()) || [];
         const subjectsList = Array.isArray(subjectsData) ? subjectsData : [subjectsData].filter(Boolean);
 
-        // Filter: must contain "SEC" AND must NOT start with "M"
+        // ✅ UPDATED FILTER: Include SEC or SCS, exclude M*
         const undergradSecSubjects = subjectsList.filter(subj => {
           const kod = subj.kod_subjek || '';
-          return kod.includes('SEC') && !kod.startsWith('M');
+          return (kod.includes('SEC') || kod.includes('SCS')) && !kod.startsWith('M');
         });
 
         document.getElementById('totalSubjects').textContent = undergradSecSubjects.length;
 
-        // --- Students (direct) ---
-        const studentsUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar&session_id=${encodeURIComponent(realSessionId)}&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}`;
-        const studentsRes = await fetch(studentsUrl);
-        const studentsText = await studentsRes.text();
-        if (studentsText.trim().startsWith("The most simple ever")) {
-          document.getElementById('totalStudents').textContent = '0';
-        } else {
-          const studentsData = safeJsonParse(studentsText);
-          document.getElementById('totalStudents').textContent = studentsData ? (Array.isArray(studentsData) ? studentsData.length : 1) : '—';
+        // --- Students (PAGINATED) ---
+        let totalStudentCount = 0;
+        let offset = 0;
+        const limit = 1000;
+        const maxTotal = 10000; // safety cap
+
+        try {
+          while (totalStudentCount < maxTotal) {
+            const studentsUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar&session_id=${encodeURIComponent(realSessionId)}&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}&limit=${limit}&offset=${offset}`;
+            const studentsRes = await fetch(studentsUrl);
+            const studentsText = await studentsRes.text();
+
+            if (!studentsText.trim() || studentsText.trim().startsWith("The most simple ever")) {
+              if (offset === 0) totalStudentCount = 0;
+              break;
+            }
+
+            const studentsData = safeJsonParse(studentsText);
+            let pageData = [];
+            if (Array.isArray(studentsData)) {
+              pageData = studentsData;
+            } else if (studentsData && typeof studentsData === 'object') {
+              pageData = [studentsData];
+            }
+
+            const countThisPage = pageData.length;
+            totalStudentCount += countThisPage;
+
+            if (countThisPage < limit) break;
+
+            offset += limit;
+            if (offset >= maxTotal) {
+              console.warn("Student count capped at", maxTotal);
+              break;
+            }
+          }
+
+          document.getElementById('totalStudents').textContent = totalStudentCount.toLocaleString();
+        } catch (err) {
+          console.error("Error in student pagination:", err);
+          document.getElementById('totalStudents').textContent = '—';
         }
 
         // --- ROOMS: Total + With Classes ---
@@ -809,14 +841,12 @@
             const schedData = safeJsonParse(schedText);
             if (!schedData) return false;
             const list = Array.isArray(schedData) ? schedData : [schedData];
-            // Check if ANY entry has subjek.kod_subjek
             return list.some(entry => entry.subjek && entry.subjek.kod_subjek);
           } catch (e) {
             return false;
           }
         });
 
-        // Wait for all checks to complete (with concurrency)
         const results = await Promise.all(roomCheckPromises);
         roomsWithClasses = results.filter(Boolean).length;
 

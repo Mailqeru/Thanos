@@ -1,1474 +1,967 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>TTMS - View Students</title>
-  <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    :root {
-      --utm-blue: #003366;
-      --utm-gold: #C9A85C;
-      --light-bg: #f5f7fa;
-      --card-bg: #ffffff;
-      --border-color: #e5e7eb;
-      --text-primary: #1f2937;
-      --text-secondary: #6b7280;
-      --success: #10b981;
-      --warning: #f59e0b;
-      --error: #ef4444;
-      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background-color: var(--light-bg);
-      color: var(--text-primary);
-      line-height: 1.6;
-    }
-
-    /* Sidebar */
-    .w3-sidebar {
-      background: linear-gradient(180deg, var(--utm-blue) 0%, #002244 100%) !important;
-      box-shadow: 2px 0 12px rgba(0,0,0,0.15);
-      z-index: 1000;
-    }
-
-    .sidebar-header {
-      padding: 24px 20px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      text-align: center;
-    }
-
-    .sidebar-logo {
-      font-size: 28px;
-      color: var(--utm-gold);
-      margin-bottom: 8px;
-    }
-
-    .sidebar-title {
-      color: white;
-      font-size: 16px;
-      font-weight: 600;
-      margin: 0;
-      letter-spacing: 0.5px;
-    }
-
-    .sidebar-subtitle {
-      color: rgba(255,255,255,0.7);
-      font-size: 12px;
-      margin: 4px 0 0;
-    }
-
-    .w3-sidebar .w3-bar-item {
-      color: rgba(255,255,255,0.9) !important;
-      border-bottom: none;
-      padding: 16px 20px;
-      transition: all 0.3s ease;
-      font-weight: 500;
-      position: relative;
-    }
-
-    .w3-sidebar .w3-bar-item:hover {
-      background-color: rgba(201, 168, 92, 0.15) !important;
-      color: white !important;
-      padding-left: 28px;
-    }
-
-    .w3-sidebar .w3-bar-item.active {
-      background-color: var(--utm-gold) !important;
-      color: var(--utm-blue) !important;
-      font-weight: 600;
-    }
-
-    .w3-sidebar .w3-bar-item i {
-      margin-right: 12px;
-      width: 20px;
-      text-align: center;
-    }
-
-    /* Header */
-    .w3-teal {
-      background: linear-gradient(135deg, var(--utm-blue) 0%, #004080 100%) !important;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    .header-content {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 0;
-    }
-
-    .header-title {
-      margin: 0;
-      color: white;
-      font-size: 28px;
-      font-weight: 700;
-    }
-
-    /* Main Content */
-    .w3-main {
-      background-color: var(--light-bg);
-      min-height: 100vh;
-      transition: margin-left 0.3s;
-    }
-
-    .content-wrapper {
-      padding: 32px;
-      max-width: 1400px;
-    }
-
-    /* Cards */
-    .card {
-      background: var(--card-bg);
-      border-radius: 12px;
-      padding: 24px;
-      margin-bottom: 24px;
-      box-shadow: var(--shadow-md);
-      border: 1px solid var(--border-color);
-    }
-
-    .card-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 16px;
-      padding-bottom: 16px;
-      border-bottom: 2px solid var(--border-color);
-    }
-
-    .card-header i {
-      font-size: 24px;
-      color: var(--utm-blue);
-    }
-
-    .card-header h3 {
-      margin: 0;
-      font-size: 20px;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-
-    /* Form Controls */
-    .form-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 16px;
-      align-items: end;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .form-group label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 600;
-      font-size: 14px;
-      margin-bottom: 8px;
-      color: var(--text-primary);
-    }
-
-    .form-group label i {
-      color: var(--utm-blue);
-    }
-
-    .w3-input, .w3-select {
-      width: 100%;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 12px;
-      font-size: 14px;
-      background: white;
-      transition: border-color 0.2s;
-    }
-
-    .w3-input:focus, .w3-select:focus {
-      outline: none;
-      border-color: var(--utm-blue);
-    }
-
-    .btn {
-      padding: 12px 24px;
-      border-radius: 8px;
-      border: none;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      white-space: nowrap;
-    }
-
-    .btn-primary { background: linear-gradient(135deg, var(--utm-blue) 0%, #004080 100%); color: white; }
-    .btn-success { background: var(--success); color: white; }
-    .btn-secondary { background: #6c757d; color: white; }
-    .btn-info { background: #0ea5e9; color: white; }
-    .btn-purple { background: #7c3aed; color: white; }
-
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .btn-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 16px;
-    }
-
-    /* Stats & Debug */
-    .stats-card {
-      background: #e8f5e9;
-      border-left: 4px solid var(--success);
-      padding: 16px;
-      border-radius: 8px;
-      margin: 16px 0;
-      font-size: 14px;
-    }
-
-    .debug-card {
-      background: #f0f8ff;
-      border-left: 4px solid var(--utm-blue);
-      padding: 16px;
-      border-radius: 8px;
-      margin: 16px 0;
-      font-size: 14px;
-      color: #2c3e50;
-    }
-
-    /* Table */
-    .table-wrapper {
-      overflow-x: auto;
-      margin: 20px 0;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-    }
-
-    table.w3-table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      margin: 0;
-      font-size: 14px;
-    }
-
-    table.w3-table thead tr {
-      background: linear-gradient(135deg, var(--utm-blue) 0%, #004080 100%);
-      color: white;
-    }
-
-    table.w3-table th {
-      padding: 14px 12px;
-      text-align: left;
-      font-weight: 600;
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    table.w3-table td {
-      padding: 12px;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    table.w3-table tbody tr:hover {
-      background-color: #f8f9fa;
-    }
-
-    .status-tag {
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    .status-active { background-color: #e8f5e9; color: #2e7d32; }
-    .status-inactive { background-color: #f5f5f5; color: #666; }
-
-    .action-btn {
-      padding: 6px 12px !important;
-      font-size: 12px !important;
-    }
-
-    .back-btn {
-      margin-bottom: 20px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--utm-blue) !important;
-      color: white !important;
-      padding: 8px 16px !important;
-      border-radius: 8px !important;
-    }
-
-    .back-btn:hover {
-      background: #002244 !important;
-    }
-
-    /* Pagination */
-    .pagination-info {
-      font-size: 13px;
-      color: var(--text-secondary);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin: 16px 0;
-    }
-
-    .pagination-controls .w3-bar {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 6px;
-    }
-
-    .pagination-controls .w3-button {
-      min-width: 36px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-      font-size: 13px;
-      border-radius: 6px;
-    }
-
-    /* Empty State */
-    .empty-state {
-      text-align: center;
-      padding: 48px 24px;
-      color: var(--text-secondary);
-      background: #fafafa;
-      border-radius: 12px;
-      margin: 24px 0;
-    }
-
-    .empty-state i {
-      font-size: 48px;
-      color: var(--utm-blue);
-      margin-bottom: 16px;
-    }
-
-    /* Loading & Error */
-    .loading-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 48px;
-      gap: 16px;
-    }
-
-    .spinner {
-      width: 48px;
-      height: 48px;
-      border: 4px solid var(--border-color);
-      border-top-color: var(--utm-blue);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .loading-text {
-      font-size: 16px;
-      color: var(--text-secondary);
-      font-weight: 500;
-    }
-
-    .error-container {
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      border-left: 4px solid var(--error);
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 24px;
-    }
-
-    .error-container h4 {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin: 0 0 8px 0;
-      color: #991b1b;
-      font-size: 16px;
-    }
-
-    .error-container p {
-      margin: 0;
-      color: #991b1b;
-      font-size: 14px;
-    }
-
-    #errorDetails {
-      margin-top: 16px;
-    }
-
-    #errorDetailsContent {
-      background: #f8f8f8;
-      padding: 12px;
-      border-radius: 6px;
-      overflow: auto;
-      max-height: 300px;
-      font-size: 13px;
-      font-family: monospace;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-      .content-wrapper {
-        padding: 20px;
-      }
-      .form-row {
-        grid-template-columns: 1fr;
-      }
-      .btn-group {
-        flex-direction: column;
-      }
-      .btn {
-        width: 100%;
-        justify-content: center;
-      }
-      .pagination-info {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-      }
-      .card-header {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>TTMS - View Students</title>
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+--utm-blue: #003366;
+--utm-gold: #C9A85C;
+--light-bg: #f5f7fa;
+--card-bg: #ffffff;
+--border-color: #e5e7eb;
+--text-primary: #1f2937;
+--text-secondary: #6b7280;
+--success: #10b981;
+--warning: #f59e0b;
+--error: #ef4444;
+--shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+--shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+--shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+* {
+box-sizing: border-box;
+}
+body {
+margin: 0;
+font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+background-color: var(--light-bg);
+color: var(--text-primary);
+line-height: 1.6;
+}
+/* Sidebar */
+.w3-sidebar {
+background: linear-gradient(180deg, var(--utm-blue) 0%, #002244 100%) !important;
+box-shadow: 2px 0 12px rgba(0,0,0,0.15);
+z-index: 1000;
+}
+.sidebar-header {
+padding: 24px 20px;
+border-bottom: 1px solid rgba(255,255,255,0.1);
+text-align: center;
+}
+.sidebar-logo {
+font-size: 28px;
+color: var(--utm-gold);
+margin-bottom: 8px;
+}
+.sidebar-title {
+color: white;
+font-size: 16px;
+font-weight: 600;
+margin: 0;
+letter-spacing: 0.5px;
+}
+.sidebar-subtitle {
+color: rgba(255,255,255,0.7);
+font-size: 12px;
+margin: 4px 0 0;
+}
+.w3-sidebar .w3-bar-item {
+color: rgba(255,255,255,0.9) !important;
+border-bottom: none;
+padding: 16px 20px;
+transition: all 0.3s ease;
+font-weight: 500;
+position: relative;
+}
+.w3-sidebar .w3-bar-item:hover {
+background-color: rgba(201, 168, 92, 0.15) !important;
+color: white !important;
+padding-left: 28px;
+}
+.w3-sidebar .w3-bar-item.active {
+background-color: var(--utm-gold) !important;
+color: var(--utm-blue) !important;
+font-weight: 600;
+}
+.w3-sidebar .w3-bar-item i {
+margin-right: 12px;
+width: 20px;
+text-align: center;
+}
+/* Header */
+.w3-teal {
+background: linear-gradient(135deg, var(--utm-blue) 0%, #004080 100%) !important;
+box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.header-content {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 20px 0;
+}
+.header-title {
+margin: 0;
+color: white;
+font-size: 28px;
+font-weight: 700;
+}
+/* Main Content */
+.w3-main {
+background-color: var(--light-bg);
+min-height: 100vh;
+transition: margin-left 0.3s;
+}
+.content-wrapper {
+padding: 32px;
+max-width: 1400px;
+}
+/* Cards */
+.card {
+background: var(--card-bg);
+border-radius: 12px;
+padding: 24px;
+margin-bottom: 24px;
+box-shadow: var(--shadow-md);
+border: 1px solid var(--border-color);
+}
+.card-header {
+display: flex;
+align-items: center;
+gap: 12px;
+margin-bottom: 16px;
+padding-bottom: 16px;
+border-bottom: 2px solid var(--border-color);
+}
+.card-header i {
+font-size: 24px;
+color: var(--utm-blue);
+}
+.card-header h3 {
+margin: 0;
+font-size: 20px;
+font-weight: 600;
+color: var(--text-primary);
+}
+/* Form Controls */
+.form-row {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+gap: 16px;
+align-items: end;
+}
+.form-group {
+display: flex;
+flex-direction: column;
+}
+.form-group label {
+display: flex;
+align-items: center;
+gap: 8px;
+font-weight: 600;
+font-size: 14px;
+margin-bottom: 8px;
+color: var(--text-primary);
+}
+.form-group label i {
+color: var(--utm-blue);
+}
+.w3-input, .w3-select {
+width: 100%;
+border: 1px solid var(--border-color);
+border-radius: 8px;
+padding: 12px;
+font-size: 14px;
+background: white;
+transition: border-color 0.2s;
+}
+.w3-input:focus, .w3-select:focus {
+outline: none;
+border-color: var(--utm-blue);
+}
+.btn {
+padding: 12px 24px;
+border-radius: 8px;
+border: none;
+font-size: 14px;
+font-weight: 600;
+cursor: pointer;
+transition: all 0.2s;
+display: inline-flex;
+align-items: center;
+gap: 8px;
+white-space: nowrap;
+}
+.btn-primary { background: linear-gradient(135deg, var(--utm-blue) 0%, #004080 100%); color: white; }
+.btn-success { background: var(--success); color: white; }
+.btn-secondary { background: #6c757d; color: white; }
+.btn-info { background: #0ea5e9; color: white; }
+.btn-purple { background: #7c3aed; color: white; }
+.btn:hover {
+transform: translateY(-2px);
+box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.btn:disabled {
+opacity: 0.6;
+cursor: not-allowed;
+}
+.btn-group {
+display: flex;
+flex-wrap: wrap;
+gap: 12px;
+margin-top: 16px;
+}
+/* Stats & Debug */
+.stats-card {
+background: #e8f5e9;
+border-left: 4px solid var(--success);
+padding: 16px;
+border-radius: 8px;
+margin: 16px 0;
+font-size: 14px;
+}
+.debug-card {
+background: #f0f8ff;
+border-left: 4px solid var(--utm-blue);
+padding: 16px;
+border-radius: 8px;
+margin: 16px 0;
+font-size: 14px;
+color: #2c3e50;
+}
+/* Table */
+.table-wrapper {
+overflow-x: auto;
+margin: 20px 0;
+border-radius: 8px;
+border: 1px solid var(--border-color);
+}
+table.w3-table {
+width: 100%;
+border-collapse: collapse;
+background: white;
+margin: 0;
+font-size: 14px;
+}
+table.w3-table thead tr {
+background: linear-gradient(135deg, var(--utm-blue) 0%, #004080 100%);
+color: white;
+}
+table.w3-table th {
+padding: 14px 12px;
+text-align: left;
+font-weight: 600;
+font-size: 13px;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+}
+table.w3-table td {
+padding: 12px;
+border-bottom: 1px solid var(--border-color);
+}
+table.w3-table tbody tr:hover {
+background-color: #f8f9fa;
+}
+.status-tag {
+padding: 4px 10px;
+border-radius: 20px;
+font-size: 12px;
+font-weight: 600;
+}
+.status-active { background-color: #e8f5e9; color: #2e7d32; }
+.status-inactive { background-color: #f5f5f5; color: #666; }
+.action-btn {
+padding: 6px 12px !important;
+font-size: 12px !important;
+}
+.back-btn {
+margin-bottom: 20px;
+display: inline-flex;
+align-items: center;
+gap: 8px;
+background: var(--utm-blue) !important;
+color: white !important;
+padding: 8px 16px !important;
+border-radius: 8px !important;
+}
+.back-btn:hover {
+background: #002244 !important;
+}
+/* Pagination */
+.pagination-info {
+font-size: 13px;
+color: var(--text-secondary);
+display: flex;
+align-items: center;
+gap: 8px;
+margin: 16px 0;
+}
+.pagination-controls .w3-bar {
+display: flex;
+flex-wrap: wrap;
+justify-content: center;
+gap: 6px;
+}
+.pagination-controls .w3-button {
+min-width: 36px;
+height: 36px;
+display: flex;
+align-items: center;
+justify-content: center;
+padding: 0;
+font-size: 13px;
+border-radius: 6px;
+}
+/* Empty State */
+.empty-state {
+text-align: center;
+padding: 48px 24px;
+color: var(--text-secondary);
+background: #fafafa;
+border-radius: 12px;
+margin: 24px 0;
+}
+.empty-state i {
+font-size: 48px;
+color: var(--utm-blue);
+margin-bottom: 16px;
+}
+/* Loading & Error */
+.loading-container {
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+padding: 48px;
+gap: 16px;
+}
+.spinner {
+width: 48px;
+height: 48px;
+border: 4px solid var(--border-color);
+border-top-color: var(--utm-blue);
+border-radius: 50%;
+animation: spin 1s linear infinite;
+}
+@keyframes spin {
+to { transform: rotate(360deg); }
+}
+.loading-text {
+font-size: 16px;
+color: var(--text-secondary);
+font-weight: 500;
+}
+.error-container {
+background: #fef2f2;
+border: 1px solid #fecaca;
+border-left: 4px solid var(--error);
+border-radius: 12px;
+padding: 20px;
+margin-bottom: 24px;
+}
+.error-container h4 {
+display: flex;
+align-items: center;
+gap: 8px;
+margin: 0 0 8px 0;
+color: #991b1b;
+font-size: 16px;
+}
+.error-container p {
+margin: 0;
+color: #991b1b;
+font-size: 14px;
+}
+#errorDetails {
+margin-top: 16px;
+}
+#errorDetailsContent {
+background: #f8f8f8;
+padding: 12px;
+border-radius: 6px;
+overflow: auto;
+max-height: 300px;
+font-size: 13px;
+font-family: monospace;
+}
+/* Responsive */
+@media (max-width: 768px) {
+.content-wrapper {
+padding: 20px;
+}
+.form-row {
+grid-template-columns: 1fr;
+}
+.btn-group {
+flex-direction: column;
+}
+.btn {
+width: 100%;
+justify-content: center;
+}
+.pagination-info {
+flex-direction: column;
+align-items: flex-start;
+gap: 8px;
+}
+.card-header {
+flex-direction: column;
+align-items: flex-start;
+}
+}
+</style>
 </head>
 <body>
-  <!-- Sidebar -->
-  <div class="w3-sidebar w3-bar-block w3-collapse w3-card" style="width:260px;" id="mySidebar">
-    <div class="sidebar-header">
-      <div class="sidebar-logo">
-        <i class="fas fa-graduation-cap"></i>
-      </div>
-      <h2 class="sidebar-title">TTMS</h2>
-      <p class="sidebar-subtitle">Timetable Management System</p>
-    </div>
-    
-    <a href="Admin.html" class="w3-bar-item w3-button">
-      <i class="fas fa-home"></i> Dashboard
-    </a>
-    <a href="ViewLecturers.html" class="w3-bar-item w3-button">
-      <i class="fas fa-chalkboard-teacher"></i> Lecturers
-    </a>
-    <a href="ViewStudents.html" class="w3-bar-item w3-button active">
-      <i class="fas fa-user-graduate"></i> Students
-    </a>
-    <a href="ViewSubjects.html" class="w3-bar-item w3-button">
-      <i class="fas fa-book-open"></i> Subjects
-    </a>
-    <a href="RoomUtilization.html" class="w3-bar-item w3-button">
-      <i class="fas fa-door-open"></i> Room Utilization
-    </a>
-    <a href="Reports.html" class="w3-bar-item w3-button">
-      <i class="fas fa-chart-bar"></i> Reports
-    </a>
-    <a href="#" class="w3-bar-item w3-button" id="navLogout" style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
-      <i class="fas fa-sign-out-alt"></i> Logout
-    </a>
-  </div>
-
-  <!-- Main Content -->
-  <div class="w3-main" style="margin-left:260px">
-    <div class="w3-teal">
-      <button class="w3-button w3-teal w3-xlarge w3-hide-large" onclick="w3_open()" style="padding: 16px;">&#9776;</button>
-      <div class="w3-container">
-        <div class="header-content">
-          <h1 class="header-title">View Students</h1>
-        </div>
-      </div>
-    </div>
-
-    <div class="content-wrapper">
-      <!-- Description Card -->
-      <div class="card">
-        <div class="card-header">
-          <i class="fas fa-graduation-cap"></i>
-          <h3>View Students</h3>
-        </div>
-        <p>Browse and search students by session, semester, and apply pagination limits.</p>
-      </div>
-
-      <!-- Debug Info -->
-      <div class="card debug-card">
-        <strong><i class="fas fa-bug"></i> Session Information</strong><br>
-        • Stored Session ID (Password): <code id="debugPassword">Loading...</code><br>
-        • Extracted Real Session ID: <span id="debugRealSession">Not extracted yet</span><br>
-        • Auth URL: <span id="debugAuthUrl">Not generated</span>
-      </div>
-
-      <!-- Filters -->
-      <div class="card">
-        <div class="form-row">
-          <div class="form-group">
-            <label for="sessionSelect">
-              <i class="fas fa-calendar-alt"></i> Academic Session
-            </label>
-            <select class="w3-select" id="sessionSelect"></select>
-          </div>
-          <div class="form-group">
-            <label for="semesterSelect">
-              <i class="fas fa-book"></i> Semester
-            </label>
-            <select class="w3-select" id="semesterSelect">
-              <option value="1">Semester 1</option>
-              <option value="2">Semester 2</option>
-              <option value="3">Special Semester</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="limitSelect">
-              <i class="fas fa-list-ol"></i> Records Per Page
-            </label>
-            <select class="w3-select" id="limitSelect">
-              <option value="10">10 records</option>
-              <option value="20" selected>20 records</option>
-              <option value="50">50 records</option>
-              <option value="100">100 records</option>
-              <option value="200">200 records</option>
-              <option value="0">All records</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="searchInput">
-              <i class="fas fa-search"></i> Search Student
-            </label>
-            <input type="text" class="w3-input" id="searchInput" placeholder="Search by name or ID...">
-          </div>
-          <div class="form-group">
-            <label for="searchBySelect">
-              <i class="fas fa-filter"></i> Search By
-            </label>
-            <select class="w3-select" id="searchBySelect">
-              <option value="name">Student Name</option>
-              <option value="id">Student ID</option>
-              <option value="program">Program</option>
-              <option value="all">All Fields</option>
-            </select>
-          </div>
-        </div>
-        <div class="btn-group">
-          <button class="btn btn-primary" id="loadStudentsBtn">
-            <i class="fas fa-sync-alt"></i> Load Students
-          </button>
-          <button class="btn btn-success" id="applySearchBtn">
-            <i class="fas fa-search"></i> Search
-          </button>
-          <button class="btn btn-secondary" id="clearSearchBtn">
-            <i class="fas fa-times"></i> Clear
-          </button>
-		  <!-- Debug auth & export button (not using)
-          <button class="btn btn-info" id="debugAuthBtn">
-            <i class="fas fa-bug"></i> Debug Auth
-          </button>
-		  
-          <button class="btn btn-purple" id="exportBtn" style="display:none;">
-            <i class="fas fa-download"></i> Export
-          </button>
-		  -->
-        </div>
-
-        <!-- Pagination Info -->
-        <div class="w3-row" style="margin-top: 20px;">
-          <div class="w3-col s12 m6">
-            <div id="paginationInfo" class="pagination-info">
-              Page info will appear here
-            </div>
-          </div>
-          <div class="w3-col s12 m6">
-            <div id="paginationControls" class="pagination-controls w3-right"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Session Info -->
-      <div id="sessionInfo" class="card debug-card" style="display:none;">
-        <strong><i class="fas fa-key"></i> Session Details</strong><br>
-        • Real Session ID: <code id="sessionUsedDisplay">Not loaded yet</code><br>
-        • API Status: <span id="apiStatus">Inactive</span>
-      </div>
-
-      <!-- Loading -->
-      <div id="loadingSpinner" class="card" style="display:none;">
-        <div class="loading-container">
-          <div class="spinner"></div>
-          <div class="loading-text">Loading student data...</div>
-        </div>
-      </div>
-
-      <!-- Error -->
-      <div id="errorContainer" class="error-container" style="display:none;">
-        <h4>
-          <i class="fas fa-exclamation-triangle"></i>
-          <span id="errorTitle">Error</span>
-        </h4>
-        <p id="errorMessage"></p>
-        <div id="errorDetails" style="display:none;">
-          <details>
-            <summary>Debug Details</summary>
-            <pre id="errorDetailsContent"></pre>
-          </details>
-        </div>
-      </div>
-
-      <!-- Debug Response -->
-      <div id="debugResponseContainer" class="card" style="display:none;">
-        <h4><i class="fas fa-code"></i> Auth Response Debug</h4>
-        <div style="max-height: 400px; overflow-y: auto; background: #f9f9f9; padding: 12px; border-radius:8px; margin:12px 0;">
-          <pre id="debugResponseContent" style="margin:0; font-size:13px;"></pre>
-        </div>
-        <button class="btn btn-secondary" style="padding:6px 12px; font-size:12px;" onclick="document.getElementById('debugResponseContainer').style.display='none'">
-          <i class="fas fa-times"></i> Close
-        </button>
-      </div>
-
-      <!-- Stats -->
-      <div id="studentStats" class="stats-card" style="display:none;"></div>
-
-      <!-- Table -->
-      <div id="studentTableContainer" class="card">
-        <div class="empty-state">
-          <i class="fas fa-users"></i>
-          <h4>Ready to Load Students</h4>
-          <p>Configure your filters above and click <strong>Load Students</strong> to begin.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-  <script>
-    // Include your entire existing JavaScript logic here (unchanged)
-    // ↓↓↓↓↓↓ PASTE YOUR FULL JS FROM THE FILE BELOW THIS LINE ↓↓↓↓↓↓
+<!-- Sidebar -->
+<div class="w3-sidebar w3-bar-block w3-collapse w3-card" style="width:260px;" id="mySidebar">
+<div class="sidebar-header">
+<div class="sidebar-logo">
+<i class="fas fa-graduation-cap"></i>
+</div>
+<h2 class="sidebar-title">TTMS</h2>
+<p class="sidebar-subtitle">Timetable Management System</p>
+</div>
+<a href="Admin.html" class="w3-bar-item w3-button">
+<i class="fas fa-home"></i> Dashboard
+</a>
+<a href="ViewLecturers.html" class="w3-bar-item w3-button">
+<i class="fas fa-chalkboard-teacher"></i> Lecturers
+</a>
+<a href="ViewStudents.html" class="w3-bar-item w3-button active">
+<i class="fas fa-user-graduate"></i> Students
+</a>
+<a href="ViewSubjects.html" class="w3-bar-item w3-button">
+<i class="fas fa-book-open"></i> Subjects
+</a>
+<a href="RoomUtilization.html" class="w3-bar-item w3-button">
+<i class="fas fa-door-open"></i> Room Utilization
+</a>
+<a href="Reports.html" class="w3-bar-item w3-button">
+<i class="fas fa-chart-bar"></i> Reports
+</a>
+<a href="#" class="w3-bar-item w3-button" id="navLogout" style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+<i class="fas fa-sign-out-alt"></i> Logout
+</a>
+</div>
+<!-- Main Content -->
+<div class="w3-main" style="margin-left:260px">
+<div class="w3-teal">
+<button class="w3-button w3-teal w3-xlarge w3-hide-large" onclick="w3_open()" style="padding: 16px;">&#9776;</button>
+<div class="w3-container">
+<div class="header-content">
+<h1 class="header-title">View Students</h1>
+</div>
+</div>
+</div>
+<div class="content-wrapper">
+<!-- Description Card -->
+<div class="card">
+<div class="card-header">
+<i class="fas fa-graduation-cap"></i>
+<h3>View Students</h3>
+</div>
+<p>Browse and search students by session, semester, and apply pagination limits.</p>
+</div>
+<!-- Debug Info -->
+<div class="card debug-card">
+<strong><i class="fas fa-bug"></i> Session Information</strong><br>
+• Stored Session ID (Password): <code id="debugPassword">Loading...</code><br>
+• Extracted Real Session ID: <span id="debugRealSession">Not extracted yet</span><br>
+• Auth URL: <span id="debugAuthUrl">Not generated</span>
+</div>
+<!-- Filters -->
+<div class="card">
+<div class="form-row">
+<div class="form-group">
+<label for="sessionSelect">
+<i class="fas fa-calendar-alt"></i> Academic Session
+</label>
+<select class="w3-select" id="sessionSelect"></select>
+</div>
+<div class="form-group">
+<label for="semesterSelect">
+<i class="fas fa-book"></i> Semester
+</label>
+<select class="w3-select" id="semesterSelect">
+<option value="1">Semester 1</option>
+<option value="2">Semester 2</option>
+<option value="3">Special Semester</option>
+</select>
+</div>
+<div class="form-group">
+<label for="limitSelect">
+<i class="fas fa-list-ol"></i> Records Per Page
+</label>
+<select class="w3-select" id="limitSelect">
+<option value="10">10 records</option>
+<option value="20" selected>20 records</option>
+<option value="50">50 records</option>
+<option value="100">100 records</option>
+<option value="200">200 records</option>
+<option value="0">All records</option>
+</select>
+</div>
+</div>
+<div class="form-row">
+<div class="form-group">
+<label for="searchInput">
+<i class="fas fa-search"></i> Search Student
+</label>
+<input type="text" class="w3-input" id="searchInput" placeholder="Search by name or ID...">
+</div>
+<div class="form-group">
+<label for="searchBySelect">
+<i class="fas fa-filter"></i> Search By
+</label>
+<select class="w3-select" id="searchBySelect">
+<option value="name">Student Name</option>
+<option value="id">Student ID</option>
+<option value="program">Program</option>
+<option value="all">All Fields</option>
+</select>
+</div>
+</div>
+<div class="btn-group">
+<button class="btn btn-primary" id="loadStudentsBtn">
+<i class="fas fa-sync-alt"></i> Load Students
+</button>
+<button class="btn btn-success" id="applySearchBtn">
+<i class="fas fa-search"></i> Search
+</button>
+<button class="btn btn-secondary" id="clearSearchBtn">
+<i class="fas fa-times"></i> Clear
+</button>
+</div>
+<!-- Pagination Info -->
+<div class="w3-row" style="margin-top: 20px;">
+<div class="w3-col s12 m6">
+<div id="paginationInfo" class="pagination-info">
+Page info will appear here
+</div>
+</div>
+<div class="w3-col s12 m6">
+<div id="paginationControls" class="pagination-controls w3-right"></div>
+</div>
+</div>
+</div>
+<!-- Session Info -->
+<div id="sessionInfo" class="card debug-card" style="display:none;">
+<strong><i class="fas fa-key"></i> Session Details</strong><br>
+• Real Session ID: <code id="sessionUsedDisplay">Not loaded yet</code><br>
+• API Status: <span id="apiStatus">Inactive</span>
+</div>
+<!-- Loading -->
+<div id="loadingSpinner" class="card" style="display:none;">
+<div class="loading-container">
+<div class="spinner"></div>
+<div class="loading-text">Loading all student data... This may take a moment.</div>
+</div>
+</div>
+<!-- Error -->
+<div id="errorContainer" class="error-container" style="display:none;">
+<h4>
+<i class="fas fa-exclamation-triangle"></i>
+<span id="errorTitle">Error</span>
+</h4>
+<p id="errorMessage"></p>
+</div>
+<!-- Stats -->
+<div id="studentStats" class="stats-card" style="display:none;"></div>
+<!-- Table -->
+<div id="studentTableContainer" class="card">
+<div class="empty-state">
+<i class="fas fa-users"></i>
+<h4>Ready to Load Students</h4>
+<p>Configure your filters above and click <strong>Load Students</strong> to begin.</p>
+</div>
+</div>
+</div>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script>
 // Sidebar toggle
 function w3_open() {
-document.getElementById("mySidebar").style.display = "block";
+  document.getElementById("mySidebar").style.display = "block";
 }
 function w3_close() {
-document.getElementById("mySidebar").style.display = "none";
+  document.getElementById("mySidebar").style.display = "none";
 }
-// Session validation
+
+// Auth validation
 const rawSession = localStorage.getItem("TTMSFC_userSession");
 if (!rawSession) {
-alert("Please log in first.");
-window.location.replace("../index.html");
+  alert("Please log in first.");
+  window.location.replace("../index.html");
 }
 let user;
 try {
-user = JSON.parse(rawSession);
+  user = JSON.parse(rawSession);
 } catch (e) {
-localStorage.removeItem("TTMSFC_userSession");
-window.location.replace("../index.html");
+  localStorage.removeItem("TTMSFC_userSession");
+  window.location.replace("../index.html");
 }
 if (user.inferredRole !== "admin") {
-alert("Admin access required.");
-window.location.replace("../index.html");
+  alert("Admin access required.");
+  window.location.replace("../index.html");
 }
-// Logout
-document.getElementById("navLogout").onclick = function() {
-if (confirm("Logout now?")) {
-// Clear ALL authentication tokens
-localStorage.removeItem("TTMSFC_userSession");
-localStorage.removeItem("TTMSFC_adminAuth"); // ← ADD THIS
-window.location.replace("../index.html");
-}
-};
-// ===== YOUR STUDENT LOGIC (EXACTLY AS PROVIDED) =====
-// Initialize when page loads
-$(document).ready(function() {
-initStudentsPage();
-});
-function initStudentsPage() {
-console.log("📚 Initializing View Students page");
-// Get user session for debugging
-const raw = localStorage.getItem("TTMSFC_userSession");
-if (raw) {
-try {
-const session = JSON.parse(raw);
-document.getElementById('debugPassword').textContent = session.session_id || 'No session ID';
-} catch (e) {
-document.getElementById('debugPassword').textContent = 'Invalid JSON';
-}
-}
-// Generate academic years
-const month = new Date().getMonth() + 1;
-const academicYears = generateAcademicYears();
-const currentYear = new Date().getFullYear();
-const defaultSession = (month >= 2 && month <=7) ? `${currentYear}/${currentYear + 1}` : `${currentYear - 1}/${currentYear}`
-// Populate session select
-const sessionSelect = document.getElementById('sessionSelect');
-sessionSelect.innerHTML = academicYears.map(year =>
-`<option value="${year}" ${year === defaultSession ? 'selected' : ''}>${year}</option>`
-).join('');
-// Initialize variables
+
+// Global state
 let currentSessionId = null;
-let currentStudentData = [];
+let fullStudentList = []; // ✅ All students in memory
+let currentSesi = '';
+let currentSemester = '';
 let currentPage = 1;
 let currentLimit = 20;
-let totalRecords = 0;
-let totalPages = 1;
-let currentOffset = 0;
 
-document.getElementById("semesterSelect").value = (month >= 2 && month <=7) ? "2" : "1";
+// Logout
+document.getElementById("navLogout").onclick = function() {
+  if (confirm("Logout now?")) {
+    localStorage.removeItem("TTMSFC_userSession");
+    localStorage.removeItem("TTMSFC_adminAuth");
+    window.location.replace("../index.html");
+  }
+};
 
-// Event listeners
-document.getElementById('loadStudentsBtn').onclick = fetchStudentData;
-document.getElementById('applySearchBtn').onclick = applySearch;
-document.getElementById('clearSearchBtn').onclick = clearSearch;
-//document.getElementById('exportBtn').onclick = exportData;
-//document.getElementById('debugAuthBtn').onclick = debugAuthOnly;
-// Enter key support for search
-document.getElementById('searchInput').addEventListener('keypress', function(e) {
-if (e.key === 'Enter') applySearch();
-});
-// When limit changes, reset to page 1
-document.getElementById('limitSelect').addEventListener('change', function() {
-currentPage = 1;
+// Initialize UI
+$(document).ready(function() {
+  initStudentsPage();
 });
 
-// Generate academic years function
-function generateAcademicYears() {
-const currentYear = new Date().getFullYear();
-const years = [];
-const latestStartYear = (month >= 2 && month <= 7) ? currentYear : (currentYear - 1);
-for (let i = latestStartYear ; i >= latestStartYear - 5; i--) {
-years.push(`${i}/${i + 1}`);
-}
-return years;
+function initStudentsPage() {
+  // Session debug
+  if (rawSession) {
+    try {
+      const session = JSON.parse(rawSession);
+      document.getElementById('debugPassword').textContent = session.session_id || 'No session ID';
+    } catch (e) {
+      document.getElementById('debugPassword').textContent = 'Invalid JSON';
+    }
+  }
+
+  // Academic years
+  const month = new Date().getMonth() + 1;
+  const currentYear = new Date().getFullYear();
+  const latestStartYear = (month >= 2 && month <= 7) ? currentYear : (currentYear - 1);
+  const academicYears = [];
+  for (let i = latestStartYear; i >= latestStartYear - 5; i--) {
+    academicYears.push(`${i}/${i + 1}`);
+  }
+  const defaultSession = (month >= 2 && month <= 7) ? `${currentYear}/${currentYear + 1}` : `${currentYear - 1}/${currentYear}`;
+  const sessionSelect = document.getElementById('sessionSelect');
+  sessionSelect.innerHTML = academicYears.map(year =>
+    `<option value="${year}" ${year === defaultSession ? 'selected' : ''}>${year}</option>`
+  ).join('');
+  document.getElementById("semesterSelect").value = (month >= 2 && month <= 7) ? "2" : "1";
+
+  // Event listeners
+  document.getElementById('loadStudentsBtn').onclick = fetchStudentData;
+  document.getElementById('applySearchBtn').onclick = applySearch;
+  document.getElementById('clearSearchBtn').onclick = clearSearch;
+  document.getElementById('searchInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') applySearch();
+  });
 }
 
-// Debug: Test auth only
-async function debugAuthOnly() {
-const raw = localStorage.getItem("TTMSFC_userSession");
-if (!raw) {
-alert("No session found in localStorage");
-return;
-}
-let session;
-try {
-session = JSON.parse(raw);
-} catch (e) {
-alert("Invalid JSON in session");
-return;
-}
-const password = session.session_id;
-if (!password) {
-alert("No session_id in user session");
-return;
-}
-// Show auth URL in debug
-const authUrl = `http://web.fc.utm.my/ttms/auth-admin.php?session_id=${encodeURIComponent(password)}`;
-document.getElementById('debugAuthUrl').textContent = authUrl;
-showLoading(true);
-try {
-console.log("🔍 [Debug] Testing auth with URL:", authUrl);
-const response = await fetch(authUrl);
-const responseText = await response.text();
-console.log("🔍 [Debug] Response status:", response.status);
-console.log("🔍 [Debug] Response text (first 500 chars):", responseText.substring(0, 500));
-// Display response for inspection
-document.getElementById('debugResponseContent').textContent = responseText;
-document.getElementById('debugResponseContainer').style.display = 'block';
-// Try multiple extraction patterns
-const patterns = [
-/name\s*=\s*["']session_id["']\s+value\s*=\s*["']([^"']+)/i,
-/value\s*=\s*["']([^"']+)["']\s+name\s*=\s*["']session_id["']/i,
-/session_id["']?\s*:\s*["']([^"']+)/i,
-/<input[^>]*name=["']session_id["'][^>]*value=["']([^"']+)/i,
-/value=["']([^"']+)["'][^>]*name=["']session_id["']/i
-];
-let extractedId = null;
-let patternUsed = null;
-for (let i = 0; i < patterns.length; i++) {
-const match = responseText.match(patterns[i]);
-if (match && match[1]) {
-extractedId = match[1].trim();
-patternUsed = `Pattern ${i+1}`;
-break;
-}
-}
-if (extractedId) {
-document.getElementById('debugRealSession').textContent = extractedId;
-document.getElementById('debugRealSession').style.color = 'green';
-alert(`✅ Success! Extracted session ID: ${extractedId}
-Using: ${patternUsed}`);
-} else {
-document.getElementById('debugRealSession').textContent = 'NOT FOUND';
-document.getElementById('debugRealSession').style.color = 'red';
-// Look for any input fields with session_id
-const sessionIdInputs = responseText.match(/<input[^>]*session_id[^>]*>/gi);
-if (sessionIdInputs) {
-console.log("🔍 [Debug] Found session_id inputs:", sessionIdInputs);
-alert(`❌ Could not extract session ID.
-Found ${sessionIdInputs.length} input(s) with session_id.
-Check debug panel for full response.`);
-} else {
-alert("❌ No session_id input found in response. Check debug panel.");
-}
-}
-} catch (error) {
-console.error("🔍 [Debug] Auth test failed:", error);
-alert(`Debug auth failed: ${error.message}`);
-} finally {
-showLoading(false);
-}
-}
-// Extract session ID from auth response
+// Extract session ID from auth HTML
 function extractSessionIdFromResponse(text) {
-console.log("🔄 Extracting session ID from response");
-// Try multiple extraction patterns
-const patterns = [
-/name\s*=\s*["']session_id["']\s+value\s*=\s*["']([^"']+)/i,
-/value\s*=\s*["']([^"']+)["']\s+name\s*=\s*["']session_id["']/i,
-/session_id["']?\s*:\s*["']([^"']+)/i,
-/<input[^>]*name=["']session_id["'][^>]*value=["']([^"']+)/i,
-/value=["']([^"']+)["'][^>]*name=["']session_id["']/i
-];
-for (let i = 0; i < patterns.length; i++) {
-const match = text.match(patterns[i]);
-if (match && match[1]) {
-const extracted = match[1].trim();
-console.log(`✅ Extracted using pattern ${i+1}:`, extracted);
-return extracted;
+  const patterns = [
+    /name\s*=\s*["']session_id["']\s+value\s*=\s*["']([^"']+)/i,
+    /value\s*=\s*["']([^"']+)["']\s+name\s*=\s*["']session_id["']/i,
+    /session_id["']?\s*:\s*["']([^"']+)/i
+  ];
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match && match[1]) return match[1].trim();
+  }
+  const ids = text.match(/[A-Za-z0-9]{20,}/g);
+  return ids?.[0] || null;
 }
+
+// Fetch ALL students via pagination (up to 10k)
+async function fetchAllStudentsPaginated(sessionId, sesi, semester) {
+  let all = [];
+  let offset = 0;
+  const limit = 1000;
+  const maxTotal = 10000;
+
+  while (all.length < maxTotal) {
+    const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar&session_id=${encodeURIComponent(sessionId)}&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}&limit=${limit}&offset=${offset}`;
+    const res = await fetch(url);
+    const text = await res.text();
+
+    if (!text.trim() || text.trim().startsWith("The most simple ever")) {
+      if (offset === 0) return [];
+      break;
+    }
+
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      if (offset === 0) return [];
+      break;
+    }
+
+    const page = Array.isArray(data) ? data : (data ? [data] : []);
+    if (page.length === 0) break;
+
+    all.push(...page);
+    if (page.length < limit) break;
+
+    offset += limit;
+  }
+  return all;
 }
-// Last resort: look for any value that looks like a session ID
-const potentialIds = text.match(/[A-Za-z0-9]{20,}/g);
-if (potentialIds && potentialIds.length > 0) {
-console.log("⚠️ Trying potential IDs:", potentialIds);
-return potentialIds[0];
-}
-return null;
-}
-// Fetch student data from API
+
+// Main fetch function
 async function fetchStudentData() {
-// Get user session
-const raw = localStorage.getItem("TTMSFC_userSession");
-if (!raw) {
-showError("No session found", "Please log in again.");
-return;
-}
-let session;
-try {
-session = JSON.parse(raw);
-} catch (e) {
-showError("Invalid session", "Session data is corrupted.");
-return;
-}
-if (!session.session_id) {
-showError("Session ID missing", "Invalid session data.");
-return;
-}
-const password = session.session_id;
-const sesi = document.getElementById('sessionSelect').value;
-const semester = document.getElementById('semesterSelect').value;
-const limit = document.getElementById('limitSelect').value;
-// Update debug display
-document.getElementById('debugPassword').textContent = password;
-// Update current values
-currentLimit = parseInt(limit) || 0;
-currentPage = 1;
-currentOffset = 0;
-// Show loading
-showLoading(true);
-hideError();
-//document.getElementById('exportBtn').style.display = 'none';
-try {
-// Step 1: Get real session ID
-const authUrl = `http://web.fc.utm.my/ttms/auth-admin.php?session_id=${encodeURIComponent(password)}`;
-console.log("🔑 [Auth] Fetching real session from:", authUrl);
-document.getElementById('debugAuthUrl').textContent = authUrl;
-const authResponse = await fetch(authUrl);
-if (!authResponse.ok) {
-throw new Error(`Auth failed: HTTP ${authResponse.status} - ${authResponse.statusText}`);
-}
-const authText = await authResponse.text();
-console.log("🔑 [Auth] Response length:", authText.length);
-// Save response for debugging
-window.lastAuthResponse = authText;
-// Extract session ID using the same method as lecturers page
-const realSessionId = extractSessionIdFromResponse(authText);
-if (!realSessionId) {
-// Show debug details
-document.getElementById('errorDetailsContent').textContent =
-`Auth URL: ${authUrl}
-Response (first 2000 chars):
-${authText.substring(0, 2000)}`;
-document.getElementById('errorDetails').style.display = 'block';
-throw new Error("Could not extract session ID from auth response. Click 'Debug Auth' button to investigate.");
-}
-console.log("✅ [Auth] Real session ID extracted:", realSessionId);
-currentSessionId = realSessionId;
-// Update debug displays
-document.getElementById('debugRealSession').textContent = realSessionId;
-document.getElementById('debugRealSession').style.color = 'green';
-document.getElementById('sessionUsedDisplay').textContent = realSessionId;
-document.getElementById('apiStatus').textContent = 'Active';
-document.getElementById('sessionInfo').style.display = 'block';
-// Step 2: Fetch student data
-let dataUrl;
-if (currentLimit > 0) {
-// With pagination
-dataUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar&session_id=${encodeURIComponent(realSessionId)}&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}&limit=${currentLimit}&offset=0`;
-} else {
-// Without pagination (all records)
-dataUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar&session_id=${encodeURIComponent(realSessionId)}&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}`;
-}
-console.log("🔗 [Data] Fetching from:", dataUrl);
-const dataResponse = await fetch(dataUrl);
-if (!dataResponse.ok) {
-throw new Error(`Data fetch failed: HTTP ${dataResponse.status} - ${dataResponse.statusText}`);
-}
-const dataText = await dataResponse.text();
-console.log("🔗 [Data] Response length:", dataText.length);
-if (!dataText.trim()) {
-throw new Error("Empty response from server");
-}
-let data;
-try {
-data = JSON.parse(dataText);
-} catch (e) {
-console.error("❌ JSON Parse Error:", e);
-console.error("❌ Response text:", dataText.substring(0, 500));
-throw new Error(`Invalid JSON response: ${e.message}`);
-}
-if (!Array.isArray(data)) {
-console.log("⚠️ Response is not array:", typeof data, data);
-// Try to handle if it's an object with data property
-if (data && data.data && Array.isArray(data.data)) {
-data = data.data;
-console.log("✅ Using data.data array");
-} else {
-throw new Error(`Expected array but got: ${typeof data}`);
-}
-}
-console.log(`✅ [Data] Received ${data.length} student(s)`);
-// Store data
-currentStudentData = data;
-totalRecords = data.length;
-// Calculate pages
-totalPages = currentLimit > 0 ? Math.ceil(totalRecords / currentLimit) : 1;
-if (totalPages === 0) totalPages = 1;
-// Render data
-renderStudentTable(data);
-updatePaginationInfo();
-renderPaginationControls();
-updateStats(data);
-// Show export button
-//document.getElementById('exportBtn').style.display = 'inline-block';
-// Clear any error details
-document.getElementById('errorDetails').style.display = 'none';
-} catch (error) {
-console.error("🔥 [Error]", error);
-showError("Failed to load students", error.message);
-} finally {
-showLoading(false);
-}
-}
-// Render student table
-function renderStudentTable(data, highlightTerm = '', highlightField = '') {
-const container = document.getElementById('studentTableContainer');
-if (!Array.isArray(data) || data.length === 0) {
-container.innerHTML = `
-<div class="empty-state">
-<i class="fas fa-user-slash"></i>
-<h4>No Students Found</h4>
-<p>No student records found for the selected session/semester.</p>
-<p>Try selecting a different academic session or semester.</p>
-<p><small>The TTMS API might not have student data for this session.</small></p>
-</div>`;
-return;
-}
-// Debug: Show first record structure
-console.log("📊 First student record:", data[0]);
-// Determine available fields
-const firstRecord = data[0];
-const hasProgram = 'program' in firstRecord || 'kod_program' in firstRecord;
-const hasFaculty = 'fakulti' in firstRecord || 'faculty' in firstRecord;
-const hasStatus = 'status' in firstRecord;
-let html = `
-<div style="overflow-x:auto;">
-<table class="w3-table w3-bordered w3-striped">
-<thead>
-<tr>
-<th>#</th>
-<th>Student ID</th>
-<th>Name</th>
-${hasProgram ? '<th>Program</th>' : ''}
-${hasFaculty ? '<th>Faculty</th>' : ''}
-${hasStatus ? '<th>Status</th>' : ''}
-<th>Actions</th>
-</tr>
-</thead>
-<tbody>`;
-data.forEach((student, index) => {
-const globalIndex = currentOffset + index + 1;
-const studentId = student.no_matrik || student.id || student.no_pelajar || student.matric_no || 'N/A';
-const studentName = student.nama || student.name || 'Unknown';
-const program = student.program || student.kod_program || student.course || 'N/A';
-const faculty = student.fakulti || student.faculty || student.department || 'N/A';
-const status = student.status || 'Active';
-const statusClass = status.toLowerCase() === 'active' ? 'status-active' : 'status-inactive';
-// Check if this row should be highlighted
-const shouldHighlight = highlightTerm && (
-(highlightField === 'name' && studentName.toLowerCase().includes(highlightTerm.toLowerCase())) ||
-(highlightField === 'id' && studentId.toString().includes(highlightTerm)) ||
-(highlightField === 'program' && program.toLowerCase().includes(highlightTerm.toLowerCase())) ||
-(highlightField === 'all' && (
-studentName.toLowerCase().includes(highlightTerm.toLowerCase()) ||
-studentId.toString().includes(highlightTerm) ||
-program.toLowerCase().includes(highlightTerm.toLowerCase()) ||
-faculty.toLowerCase().includes(highlightTerm.toLowerCase())
-))
-);
-html += `
-<tr ${shouldHighlight ? 'style="background-color:#fff9c4;"' : ''}>
-<td>${globalIndex}</td>
-<td><strong>${studentId}</strong></td>
-<td>${studentName}</td>
-${hasProgram ? `<td>${program}</td>` : ''}
-${hasFaculty ? `<td>${faculty}</td>` : ''}
-${hasStatus ? `
-<td>
-<span class="status-tag ${statusClass}">
-${status}
-</span>
-</td>` : ''}
-<td>
-<button class="w3-button btn-info action-btn" onclick="viewStudentDetails('${studentId}')">
-<i class="fas fa-eye"></i> View
-</button>
-</td>
-</tr>`;
-});
-html += `</tbody></table></div>`;
-// Add debug info about fields
-html += `
-<div class="w3-tiny w3-text-gray" style="margin-top:12px;">
-<i class="fas fa-info-circle"></i> Showing ${data.length} records. Fields: ${Object.keys(firstRecord).join(', ')}
-</div>`;
-container.innerHTML = html;
-}
-async function fetchAllStudentsForCurrentFilters() {
-  if (!currentSessionId) {
-    alert("No valid session. Please reload students first.");
-    return [];
+  const raw = localStorage.getItem("TTMSFC_userSession");
+  if (!raw) return showError("Session missing", "Please log in again.");
+
+  let session;
+  try {
+    session = JSON.parse(raw);
+  } catch (e) {
+    return showError("Invalid session", "Session corrupted.");
   }
 
-  const sesi = document.getElementById('sessionSelect').value;
-  const semester = document.getElementById('semesterSelect').value;
+  if (!session.session_id) return showError("Session ID missing", "Invalid session.");
 
-  const dataUrl =
-    `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar` +
-    `&session_id=${encodeURIComponent(currentSessionId)}` +
-    `&sesi=${encodeURIComponent(sesi)}` +
-    `&semester=${encodeURIComponent(semester)}`;
-
-  const res = await fetch(dataUrl);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const text = await res.text();
-  if (!text.trim()) return [];
-
-  let data = JSON.parse(text);
-  if (!Array.isArray(data)) {
-    if (data && data.data && Array.isArray(data.data)) data = data.data;
-    else data = [data];
-  }
-  return data;
-}
-
-// Apply search filter
-async function applySearch() {
-  const searchTerm = document.getElementById('searchInput').value.trim();
-  const searchBy = document.getElementById('searchBySelect').value;
-
-  if (!searchTerm) {
-    renderStudentTable(currentStudentData);
-    updateStats(currentStudentData);
-    renderPaginationControls(); // show pagination normally
-    return;
-  }
+  const sessionId = session.session_id;
+  currentSesi = document.getElementById('sessionSelect').value;
+  currentSemester = document.getElementById('semesterSelect').value;
+  currentLimit = parseInt(document.getElementById('limitSelect').value) || 20;
+  currentPage = 1;
 
   showLoading(true);
   hideError();
 
   try {
-    const dataToSearch = (currentLimit > 0)
-      ? await fetchAllStudentsForCurrentFilters()   // search ALL students
-      : currentStudentData;                         // already all
+    // Authenticate to get real session ID
+    const authUrl = `http://web.fc.utm.my/ttms/auth-admin.php?session_id=${encodeURIComponent(sessionId)}`;
+    document.getElementById('debugAuthUrl').textContent = authUrl;
+    const authRes = await fetch(authUrl);
+    const authText = await authRes.text();
+    const realSessionId = extractSessionIdFromResponse(authText);
+    if (!realSessionId) throw new Error("Could not extract real session ID.");
+    currentSessionId = realSessionId;
 
-    const term = searchTerm.toLowerCase();
+    // Update UI
+    document.getElementById('debugRealSession').textContent = realSessionId;
+    document.getElementById('debugRealSession').style.color = 'green';
+    document.getElementById('sessionUsedDisplay').textContent = realSessionId;
+    document.getElementById('apiStatus').textContent = 'Active';
+    document.getElementById('sessionInfo').style.display = 'block';
 
-    const filtered = dataToSearch.filter(student => {
-      const studentId = (student.no_matrik || student.id || student.no_pelajar || student.matric_no || '').toString().toLowerCase();
-      const studentName = (student.nama || student.name || '').toLowerCase();
-      const program = (student.program || student.kod_program || student.course || '').toLowerCase();
-      const faculty = (student.fakulti || student.faculty || student.department || '').toLowerCase();
+    // ✅ Load ALL students once
+    document.querySelector('.loading-text').textContent = 'Loading all students... (up to 10,000)';
+    fullStudentList = await fetchAllStudentsPaginated(realSessionId, currentSesi, currentSemester);
 
-      switch (searchBy) {
-        case 'name': return studentName.includes(term);
-        case 'id': return studentId.includes(term);
-        case 'program': return program.includes(term) || faculty.includes(term);
-        case 'all':
-          return studentName.includes(term) || studentId.includes(term) || program.includes(term) || faculty.includes(term);
-        default:
-          return true;
-      }
-    });
+    // Show first page
+    renderCurrentPage();
+    updateStats(fullStudentList);
+    updatePaginationInfo();
+    renderPaginationControls();
 
-    // Show results
-    renderStudentTable(filtered, searchTerm, searchBy);
-    updateStats(filtered);
-
-    // Optional: hide pagination when showing search results (because it's not “page based” anymore)
-    document.getElementById('paginationControls').innerHTML = '';
-    document.getElementById('paginationInfo').textContent =
-      `Search results: ${filtered.length} record(s) matching "${searchTerm}"`;
-  } catch (err) {
-    console.error("Search all error:", err);
-    showError("Search failed", err.message);
+  } catch (error) {
+    console.error("Fetch error:", error);
+    showError("Load Failed", error.message);
   } finally {
     showLoading(false);
+    document.querySelector('.loading-text').textContent = 'Loading student data...';
   }
 }
 
-// Clear search
+// Render current page from full list
+function renderCurrentPage() {
+  const start = (currentPage - 1) * currentLimit;
+  const end = currentLimit === 0 ? fullStudentList.length : start + currentLimit;
+  const pageData = fullStudentList.slice(start, end);
+  renderStudentTable(pageData);
+}
+
+// Render table
+function renderStudentTable(data) {
+  const container = document.getElementById('studentTableContainer');
+  if (!data || data.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <i class="fas fa-user-slash"></i>
+        <h4>No Students Found</h4>
+        <p>No student records found.</p>
+      </div>`;
+    return;
+  }
+
+  const first = data[0];
+  const hasProgram = first.program || first.kod_program;
+  const hasFaculty = first.fakulti || first.faculty;
+  const hasStatus = 'status' in first;
+
+  let html = `<div style="overflow-x:auto;"><table class="w3-table w3-bordered w3-striped"><thead><tr>
+    <th>#</th>
+    <th>Student ID</th>
+    <th>Name</th>
+    ${hasProgram ? '<th>Program</th>' : ''}
+    ${hasFaculty ? '<th>Faculty</th>' : ''}
+    ${hasStatus ? '<th>Status</th>' : ''}
+    <th>Actions</th>
+  </tr></thead><tbody>`;
+
+  data.forEach((student, idx) => {
+    const globalIndex = (currentPage - 1) * currentLimit + idx + 1;
+    const id = student.no_matrik || student.id || 'N/A';
+    const name = student.nama || student.name || 'Unknown';
+    const program = student.program || student.kod_program || 'N/A';
+    const faculty = student.fakulti || student.faculty || 'N/A';
+    const status = student.status || 'Active';
+    const statusCls = status.toLowerCase() === 'active' ? 'status-active' : 'status-inactive';
+
+    html += `<tr>
+      <td>${globalIndex}</td>
+      <td><strong>${id}</strong></td>
+      <td>${name}</td>
+      ${hasProgram ? `<td>${program}</td>` : ''}
+      ${hasFaculty ? `<td>${faculty}</td>` : ''}
+      ${hasStatus ? `<td><span class="status-tag ${statusCls}">${status}</span></td>` : ''}
+      <td><button class="w3-button btn-info action-btn" onclick="viewStudentDetails('${id}')"><i class="fas fa-eye"></i> View</button></td>
+    </tr>`;
+  });
+
+  html += `</tbody></table></div>`;
+  container.innerHTML = html;
+}
+
+// Search (on full list)
+function applySearch() {
+  const term = document.getElementById('searchInput').value.trim();
+  const by = document.getElementById('searchBySelect').value;
+  if (!term) return clearSearch();
+
+  const t = term.toLowerCase();
+  const filtered = fullStudentList.filter(student => {
+    const id = (student.no_matrik || student.id || '').toString().toLowerCase();
+    const name = (student.nama || student.name || '').toLowerCase();
+    const prog = (student.program || student.kod_program || '').toLowerCase();
+    const fac = (student.fakulti || student.faculty || '').toLowerCase();
+
+    if (by === 'name') return name.includes(t);
+    if (by === 'id') return id.includes(t);
+    if (by === 'program') return prog.includes(t) || fac.includes(t);
+    return name.includes(t) || id.includes(t) || prog.includes(t) || fac.includes(t);
+  });
+
+  // Show all results (ignore pagination limit during search)
+  renderStudentTable(filtered);
+  document.getElementById('paginationInfo').innerHTML = `<i class="fas fa-search"></i> Search results: <strong>${filtered.length}</strong> matching "${term}"`;
+  document.getElementById('paginationControls').innerHTML = '';
+}
+
 function clearSearch() {
-document.getElementById('searchInput').value = '';
-renderStudentTable(currentStudentData);
-updateStats(currentStudentData);
+  document.getElementById('searchInput').value = '';
+  currentPage = 1;
+  renderCurrentPage();
+  updatePaginationInfo();
+  renderPaginationControls();
 }
-// Update pagination info
+
+// Pagination
 function updatePaginationInfo() {
-const infoDiv = document.getElementById('paginationInfo');
-const start = currentOffset + 1;
-const end = Math.min(currentOffset + currentLimit, totalRecords);
-if (currentLimit > 0) {
-infoDiv.innerHTML = `
-<i class="fas fa-info-circle"></i>
-Showing <strong>${start}-${end}</strong> of <strong>${totalRecords}</strong> students
-| Page <strong>${currentPage}</strong> of <strong>${totalPages}</strong>
-`;
-} else {
-infoDiv.innerHTML = `
-<i class="fas fa-info-circle"></i>
-Showing all <strong>${totalRecords}</strong> students
-`;
+  if (currentLimit === 0) {
+    document.getElementById('paginationInfo').innerHTML = `<i class="fas fa-info-circle"></i> Showing all <strong>${fullStudentList.length}</strong> students`;
+    return;
+  }
+  const start = (currentPage - 1) * currentLimit + 1;
+  const end = Math.min(start + currentLimit - 1, fullStudentList.length);
+  document.getElementById('paginationInfo').innerHTML = `<i class="fas fa-info-circle"></i> Showing <strong>${start}–${end}</strong> of <strong>${fullStudentList.length}</strong> | Page <strong>${currentPage}</strong>`;
 }
-}
-// Render pagination controls
+
 function renderPaginationControls() {
-if (currentLimit === 0 || totalPages <= 1) {
-document.getElementById('paginationControls').innerHTML = '';
-return;
+  if (currentLimit === 0 || fullStudentList.length <= currentLimit) {
+    document.getElementById('paginationControls').innerHTML = '';
+    return;
+  }
+
+  const totalPages = Math.ceil(fullStudentList.length / currentLimit);
+  let html = `<div class="w3-bar">
+    <button class="w3-button" onclick="goToPage(${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''}>
+      <i class="fas fa-chevron-left"></i>
+    </button>
+    <span class="w3-bar-item">Page ${currentPage} of ${totalPages}</span>
+    <button class="w3-button" onclick="goToPage(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>
+      <i class="fas fa-chevron-right"></i>
+    </button>
+  </div>`;
+  document.getElementById('paginationControls').innerHTML = html;
 }
-let html = '<div class="w3-bar">';
-// Previous button
-html += `
-<button class="w3-button w3-hover-black ${currentPage === 1 ? 'w3-disabled' : ''}"
-onclick="changePage(${currentPage - 1})">
-<i class="fas fa-chevron-left"></i>
-</button>`;
-// Page numbers
-const maxPagesToShow = 5;
-let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
-let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-if (endPage - startPage + 1 < maxPagesToShow) {
-startPage = Math.max(1, endPage - maxPagesToShow + 1);
-}
-// First page
-if (startPage > 1) {
-html += `<button class="w3-button" onclick="changePage(1)">1</button>`;
-if (startPage > 2) html += `<span class="w3-bar-item">•••</span>`;
-}
-// Page range
-for (let i = startPage; i <= endPage; i++) {
-html += `
-<button class="w3-button ${i === currentPage ? 'btn-primary' : ''}"
-onclick="changePage(${i})">
-${i}
-</button>`;
-}
-// Last page
-if (endPage < totalPages) {
-if (endPage < totalPages - 1) html += `<span class="w3-bar-item">•••</span>`;
-html += `<button class="w3-button" onclick="changePage(${totalPages})">${totalPages}</button>`;
-}
-// Next button
-html += `
-<button class="w3-button w3-hover-black ${currentPage === totalPages ? 'w3-disabled' : ''}"
-onclick="changePage(${currentPage + 1})">
-<i class="fas fa-chevron-right"></i>
-</button>`;
-html += '</div>';
-document.getElementById('paginationControls').innerHTML = html;
-// Add changePage function to window scope
-window.changePage = async function(page) {
-if (page < 1 || page > totalPages || page === currentPage) return;
-currentPage = page;
-currentOffset = (page - 1) * currentLimit;
-// Fetch data for new page
-await fetchPageData(currentOffset);
+
+window.goToPage = function(page) {
+  const totalPages = Math.ceil(fullStudentList.length / currentLimit);
+  if (page < 1 || page > totalPages) return;
+  currentPage = page;
+  renderCurrentPage();
+  updatePaginationInfo();
+  renderPaginationControls();
 };
-}
-// Fetch data for specific page
-async function fetchPageData(offset) {
-if (!currentSessionId) {
-alert("No valid session. Please reload students first.");
-return;
-}
-showLoading(true);
-const sesi = document.getElementById('sessionSelect').value;
-const semester = document.getElementById('semesterSelect').value;
-try {
-const dataUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar&session_id=${encodeURIComponent(currentSessionId)}&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}&limit=${currentLimit}&offset=${offset}`;
-console.log("🔗 [Pagination] Fetching page data:", dataUrl);
-const response = await fetch(dataUrl);
-if (!response.ok) throw new Error(`HTTP ${response.status}`);
-const dataText = await response.text();
-const data = JSON.parse(dataText);
-currentStudentData = data;
-renderStudentTable(data);
-updatePaginationInfo();
-} catch (error) {
-console.error("Page fetch error:", error);
-showError("Failed to load page", error.message);
-} finally {
-showLoading(false);
-}
-}
-// Update statistics
+
+// Stats
 function updateStats(data) {
-const statsDiv = document.getElementById('studentStats');
-if (!data || data.length === 0) {
-statsDiv.style.display = 'none';
-return;
+  const stats = document.getElementById('studentStats');
+  if (!data || data.length === 0) {
+    stats.style.display = 'none';
+    return;
+  }
+  let active = data.filter(s => (s.status || 'Active').toLowerCase() === 'active').length;
+  stats.innerHTML = `<strong><i class="fas fa-chart-bar"></i> Statistics:</strong><br>• Total: <strong>${data.length}</strong><br>• Active: <strong>${active}</strong>`;
+  stats.style.display = 'block';
 }
-// Count by program if available
-const programCounts = {};
-const facultyCounts = {};
-let activeCount = 0;
-data.forEach(student => {
-const program = student.program || student.kod_program || student.course || 'Unknown';
-const faculty = student.fakulti || student.faculty || student.department || 'Unknown';
-const status = (student.status || 'Active').toLowerCase();
-programCounts[program] = (programCounts[program] || 0) + 1;
-facultyCounts[faculty] = (facultyCounts[faculty] || 0) + 1;
-if (status === 'active') activeCount++;
-});
-// Get top programs
-const topPrograms = Object.entries(programCounts)
-.sort((a, b) => b[1] - a[1])
-.slice(0, 3)
-.map(([program, count]) => `${program}: ${count}`)
-.join(', ');
-statsDiv.innerHTML = `
-<strong><i class="fas fa-chart-bar"></i> Statistics:</strong><br>
-• Total Students: <strong>${data.length}</strong><br>
-• Active Students: <strong>${activeCount}</strong><br>
-• Unique Programs: <strong>${Object.keys(programCounts).length}</strong><br>
-${topPrograms ? `• Top Programs: ${topPrograms}` : ''}
-`;
-statsDiv.style.display = 'block';
-}
-// Export data function
-function exportData() {
-if (currentStudentData.length === 0) {
-alert("No data to export!");
-return;
-}
-// Convert to CSV
-const headers = ['Student ID', 'Name', 'Program', 'Faculty', 'Status'];
-const csvRows = [];
-// Add headers
-csvRows.push(headers.join(','));
-// Add data rows
-currentStudentData.forEach(student => {
-const row = [
-student.no_matrik || student.id || student.no_pelajar || student.matric_no || '',
-student.nama || student.name || '',
-student.program || student.kod_program || student.course || '',
-student.fakulti || student.faculty || student.department || '',
-student.status || 'Active'
-].map(field => `"${field}"`);
-csvRows.push(row.join(','));
-});
-const csvContent = csvRows.join('\n');
-const blob = new Blob([csvContent], { type: 'text/csv' });
-const url = window.URL.createObjectURL(blob);
-const a = document.createElement('a');
-const sesi = document.getElementById('sessionSelect').value;
-const semester = document.getElementById('semesterSelect').value;
-a.href = url;
-a.download = `students_${sesi.replace('/', '-')}_sem${semester}_${new Date().toISOString().slice(0,10)}.csv`;
-a.click();
-window.URL.revokeObjectURL(url);
-}
-// View student subjects
+
+// Student details
 window.viewStudentDetails = async function(studentId) {
-if (!currentSessionId) {
-alert("Real session not loaded. Please click 'Load Students' first.");
-return;
-}
-const sesi = document.getElementById('sessionSelect').value;
-const semester = document.getElementById('semesterSelect').value;
-const container = document.getElementById('studentTableContainer');
-container.innerHTML = `
-<button class="back-btn" onclick="window.backToStudentsList()">
-<i class="fas fa-arrow-left"></i> Back to Students
-</button>
-<div class="loading-spinner">
-<i class="fas fa-spinner"></i>
-<p>Loading subjects for student: <strong>${studentId}</strong><br>
-Filtering for: <strong>${sesi}</strong> Semester <strong>${semester}</strong>
-</p>
-</div>`;
-const subjectUrl = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar_subjek&session_id=${encodeURIComponent(currentSessionId)}&no_matrik=${encodeURIComponent(studentId)}`;
-console.log("🔗 [Student Subjects] Fetching ALL subjects (filtering locally for", sesi, "Sem", semester, ")");
-try {
-const response = await fetch(subjectUrl);
-if (!response.ok) throw new Error(`HTTP ${response.status}`);
-const text = await response.text();
-if (!text.trim()) throw new Error("Empty response");
-let subjects = JSON.parse(text);
-if (!Array.isArray(subjects)) {
-if (subjects && Array.isArray(subjects.data)) {
-subjects = subjects.data;
-} else {
-throw new Error("Response is not an array");
-}
-}
-const filtered = subjects.filter(subj => {
-  const subjSesi = String(subj.sesi ?? '').trim();
-  const subjSem  = String(subj.semester ?? '').trim();
+  if (!currentSessionId) {
+    alert("Please load students first.");
+    return;
+  }
+  const container = document.getElementById('studentTableContainer');
+  container.innerHTML = `<button class="back-btn" onclick="backToStudentsList()"><i class="fas fa-arrow-left"></i> Back</button><div class="loading-container"><div class="spinner"></div><div>Loading subjects for ${studentId}...</div></div>`;
 
-  const selectedSesi = String(sesi).trim();
-  const selectedSem  = String(semester).trim();
+  try {
+    const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar_subjek&session_id=${encodeURIComponent(currentSessionId)}&no_matrik=${encodeURIComponent(studentId)}`;
+    const res = await fetch(url);
+    const text = await res.text();
+    if (!text.trim()) throw new Error("No data");
 
-  // compare semester as number to avoid "01" vs "1" issues
-  const semOk = parseInt(subjSem, 10) === parseInt(selectedSem, 10);
-  const sesiOk = subjSesi === selectedSesi;
+    let subjects = JSON.parse(text);
+    subjects = Array.isArray(subjects) ? subjects : (subjects ? [subjects] : []);
+    const filtered = subjects.filter(s => s.sesi === currentSesi && String(s.semester) === String(currentSemester));
 
-  return sesiOk && semOk;
-});
+    if (filtered.length === 0) {
+      container.innerHTML = `<button class="back-btn" onclick="backToStudentsList()">Back</button><div class="empty-state"><i class="fas fa-book"></i><h4>No Subjects</h4><p>No subjects for ${studentId}</p></div>`;
+      return;
+    }
 
-if (filtered.length === 0) {
-container.innerHTML = `
-<button class="back-btn" onclick="window.backToStudentsList()">
-<i class="fas fa-arrow-left"></i> Back to Students
-</button>
-<div class="empty-state">
-<i class="fas fa-book-open"></i>
-<h4>No Subjects Found</h4>
-<p>Student <code>${studentId}</code> has no enrolled subjects in:</p>
-<p><strong>Session:</strong> ${sesi} | <strong>Semester:</strong> ${semester}</p>
-</div>`;
-return;
-}
-let html = `
-<button class="back-btn" onclick="window.backToStudentsList()">
-<i class="fas fa-arrow-left"></i> Back to Students
-</button>
-<div class="card">
-<h4><i class="fas fa-book"></i> Subjects for Student: ${studentId}</h4>
-<p><strong>Session:</strong> ${sesi} | <strong>Semester:</strong> ${semester}</p>
-</div>
-<div style="overflow-x:auto;">
-<table class="w3-table w3-bordered w3-striped">
-<thead>
-<tr>
-<th>#</th>
-<th>Subject Code</th>
-<th>Subject Name</th>
-<th>Section</th>
-</tr>
-</thead>
-<tbody>`;
-filtered.forEach((subj, i) => {
-const statusClass = (subj.status || 'Active').toLowerCase() === 'active' ? 'status-active' : 'status-inactive';
-html += `
-<tr>
-<td>${i + 1}</td>
-<td>${subj.kod_subjek || '—'}</td>
-<td>${subj.nama_subjek || '—'}</td>
-<td>${subj.seksyen || '—'}</td>
-</tr>`;
-});
-html += `</tbody></table></div>`;
-container.innerHTML = html;
-} catch (error) {
-console.error("🔥 [Subject Load Error]:", error);
-container.innerHTML = `
-<button class="back-btn" onclick="window.backToStudentsList()">
-<i class="fas fa-arrow-left"></i> Back to Students
-</button>
-<div class="error-container">
-<h4><i class="fas fa-exclamation-triangle"></i> Error Loading Subjects</h4>
-<p><strong>Student ID:</strong> ${studentId}</p>
-<p><strong>Filter:</strong> ${sesi} Semester ${semester}</p>
-<p><strong>Error:</strong> ${error.message}</p>
-</div>`;
-}
+    let html = `<button class="back-btn" onclick="backToStudentsList()">Back</button><div class="card"><h4>Subjects for ${studentId}</h4><p>${currentSesi} • Sem ${currentSemester}</p></div><table class="w3-table w3-bordered w3-striped"><thead><tr><th>#</th><th>Code</th><th>Name</th><th>Sec</th></tr></thead><tbody>`;
+    filtered.forEach((s, i) => {
+      html += `<tr><td>${i+1}</td><td>${s.kod_subjek || '—'}</td><td>${s.nama_subjek || '—'}</td><td>${s.seksyen || '—'}</td></tr>`;
+    });
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+  } catch (e) {
+    container.innerHTML = `<button class="back-btn" onclick="backToStudentsList()">Back</button><div class="error-container"><h4>Error</h4><p>${e.message}</p></div>`;
+  }
 };
-// Function to go back to student list
+
 window.backToStudentsList = function() {
-if (currentStudentData && currentStudentData.length > 0) {
-renderStudentTable(currentStudentData);
-updatePaginationInfo();
-renderPaginationControls();
-updateStats(currentStudentData);
-document.getElementById('studentStats').style.display = 'block';
-} else {
-fetchStudentData();
-}
+  clearSearch(); // resets to page 1
 };
-// UI helper functions
+
+// UI helpers
 function showLoading(show) {
-document.getElementById('loadingSpinner').style.display = show ? 'flex' : 'none';
-document.getElementById('loadStudentsBtn').disabled = show;
-//document.getElementById('debugAuthBtn').disabled = show;
+  document.getElementById('loadingSpinner').style.display = show ? 'flex' : 'none';
+  document.getElementById('loadStudentsBtn').disabled = show;
 }
-function showError(title, message) {
-document.getElementById('errorTitle').textContent = title;
-document.getElementById('errorMessage').textContent = message;
-document.getElementById('errorContainer').style.display = 'block';
+function showError(title, msg) {
+  document.getElementById('errorTitle').textContent = title;
+  document.getElementById('errorMessage').textContent = msg;
+  document.getElementById('errorContainer').style.display = 'block';
 }
 function hideError() {
-document.getElementById('errorContainer').style.display = 'none';
-document.getElementById('errorDetails').style.display = 'none';
-}}
-  </script>
+  document.getElementById('errorContainer').style.display = 'none';
+}
+</script>
 </body>
 </html>

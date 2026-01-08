@@ -516,7 +516,7 @@
 
     // Set UI
     const fullName = user.full_name || user.login || "Student";
-    const matricNo = user.login || "N/A"; // ✅ Correct field
+    const matricNo = user.login || "N/A";
     const initials = fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || "S";
     
     document.getElementById("userName").textContent = fullName;
@@ -531,40 +531,45 @@
     };
 
     // Auto-mark active nav item
-    const currentPage = "Main.html"; // since this is Main.html
+    const currentPage = "Main.html";
     document.querySelectorAll('.nav-item').forEach(link => {
       if (link.getAttribute('href') === currentPage) {
         link.classList.add('active');
       }
     });
 
-    // Session comparison helper
-    function compareSessions(sesiA, sesiB) {
-      const yearA = parseInt(sesiA.split('/')[0] || 0);
-      const yearB = parseInt(sesiB.split('/')[0] || 0);
-      return yearA - yearB;
+    // Extract credit from subject code (last digit)
+    function getCreditFromCode(code) {
+      if (!code) return 0;
+      const lastChar = code.trim().slice(-1);
+      const credit = parseInt(lastChar, 10);
+      return isNaN(credit) ? 0 : credit;
     }
 
     // Load dashboard data
     async function loadDashboard() {
       let totalSubjects = 0;
-      let totalSessionsPerWeek = 0; // Distinct class sessions
-      let totalHoursPerWeek = 0;    // Total contact hours
+      let totalSessionsCount = 0;
+      let totalHoursPerWeek = 0;
+      let totalCreditHours = 0; // current semester
+      let cumulativeCreditHours = 0; // ✅ ALL TIME
       let currentSession = "—";
       let currentSemester = "—";
 
       try {
         if (matricNo && matricNo !== "N/A") {
+          // 🔹 STEP 1: Load current semester data for sessions/hours
           const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar_subjek&no_matrik=${encodeURIComponent(matricNo)}`;
           const res = await fetch(url);
           const allData = await res.json();
 
           if (Array.isArray(allData) && allData.length > 0) {
+            // Find latest session/semester
             let latestEntry = allData[0];
             for (const entry of allData) {
-              if (compareSessions(entry.sesi, latestEntry.sesi) > 0) {
-                latestEntry = entry;
-              } else if (entry.sesi === latestEntry.sesi && (entry.semester || 0) > (latestEntry.semester || 0)) {
+              const yearA = parseInt(entry.sesi.split('/')[0]);
+              const yearB = parseInt(latestEntry.sesi.split('/')[0]);
+              if (yearA > yearB || (yearA === yearB && entry.semester > latestEntry.semester)) {
                 latestEntry = entry;
               }
             }
@@ -578,7 +583,17 @@
 
             totalSubjects = new Set(currentData.map(s => s.kod_subjek)).size;
 
-            // NEW: Fetch specific schedules to count actual sessions and hours
+            // Current semester credit
+            totalCreditHours = currentData.reduce((sum, subj) => {
+              return sum + getCreditFromCode(subj.kod_subjek);
+            }, 0);
+
+            // 🔹 STEP 2: Calculate CUMULATIVE credit from ALL enrolled subjects
+            cumulativeCreditHours = allData.reduce((sum, subj) => {
+              return sum + getCreditFromCode(subj.kod_subjek);
+            }, 0);
+
+            // Fetch schedules for current semester only
             const timetablePromises = currentData.map(async (subj) => {
               const urlJadual = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=jadual_subjek&sesi=${currentSession}&semester=${currentSemester}&kod_subjek=${subj.kod_subjek}&seksyen=${subj.seksyen}`;
               const resJ = await fetch(urlJadual);
@@ -593,13 +608,11 @@
             const allEntries = schedules.flat();
             totalHoursPerWeek = allEntries.length;
 
-            // Logic to count distinct sessions (merging consecutive hours on the same day)
             const sorted = allEntries.sort((a, b) => a.hari - b.hari || a.masa - b.masa);
             let sessions = 0;
             for (let i = 0; i < sorted.length; i++) {
               sessions++;
               const curr = sorted[i];
-              // Skip consecutive hours for the same subject/day
               while (i + 1 < sorted.length && 
                      sorted[i+1].hari === curr.hari && 
                      sorted[i+1].kod_subjek === curr.kod_subjek && 
@@ -618,8 +631,7 @@
         <div class="alert alert-info">
           <span>💡</span>
           <div>
-            <strong>Welcome!</strong> Stats below reflect <strong>${currentSession} Semester ${currentSemester}</strong>. 
-            You have <strong>${totalHoursPerWeek} total hours</strong> of classes this week.
+            <strong>Welcome!</strong> Stats below reflect <strong>${currentSession} Semester ${currentSemester}</strong>.
           </div>
         </div>
 
@@ -630,7 +642,15 @@
           </div>
           <div class="stat-card">
             <div class="stat-card-value">${totalSessionsCount}</div>
-            <div class="stat-card-label">Total Classes</div>
+            <div class="stat-card-label">Class Sessions</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-value">${totalHoursPerWeek}</div>
+            <div class="stat-card-label">Hours Classes Per Week</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-value">${cumulativeCreditHours}</div>
+            <div class="stat-card-label">Total Credit Hours</div>
           </div>
           <div class="stat-card">
             <div class="stat-card-value">Active</div>
@@ -671,10 +691,6 @@
               <div class="action-icon">👥</div>
               <div class="action-text">Browse Sections</div>
             </a>
-            <div class="action-btn" onclick="alert('Feature coming soon!')">
-              <div class="action-icon">✅</div>
-              <div class="action-text">Attendance</div>
-            </div>
           </div>
         </div>
 
