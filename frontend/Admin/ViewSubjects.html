@@ -1580,8 +1580,15 @@ async function openTimetable(kodSubjek, seksyen) {
   const semester = document.getElementById('semesterSelect').value;
 
   const modal = document.getElementById('timetableModal');
-  document.getElementById('timetableModalTitle').textContent =
-    `Timetable • ${kodSubjek} (Section ${seksyen})`;
+  const subjectInfo = currentSubjectsData.find(
+  s => s.kod_subjek === kodSubjek
+);
+
+const subjectName = subjectInfo?.nama_subjek || 'Unknown Subject';
+
+document.getElementById('timetableModalTitle').textContent =
+  `${kodSubjek} – ${subjectName} (Section ${seksyen})`;
+
   document.getElementById('timetableModalContent').innerHTML =
     `<p>Loading timetable...</p>`;
   modal.style.display = 'block';
