@@ -679,6 +679,38 @@
     </div>
   </div>
 
+  <!-- Subject Analysis Modal -->
+<div id="analysisModal" class="w3-modal">
+  <div class="w3-modal-content w3-card-4" style="max-width:900px; margin:40px auto;">
+    <header class="w3-container w3-teal">
+      <span onclick="closeAnalysisModal()" class="w3-button w3-display-topright">&times;</span>
+      <h3 id="analysisTitle">Subject Analysis</h3>
+    </header>
+
+    <div class="w3-container" style="padding:20px;">
+      <div style="height:320px;">
+        <div id="sectionLegend" style="margin-bottom:10px; font-size:14px;">
+          <div id="sectionSummary"
+     style="margin-bottom:12px; font-size:14px; font-weight:600;">
+</div>
+  <span style="color:#FFC107; font-weight:600;">🟡 Under-enrolled (≤ 20)</span> |
+  <span style="color:#4CAF50; font-weight:600;">🟢 Optimal (21–40)</span> |
+  <span style="color:#F44336; font-weight:600;">🔴 Over-capacity (> 40)</span>
+</div>
+  <canvas id="sectionChart"></canvas>
+</div>
+
+      <div id="lecturerLoadChartContainer"
+     style="margin-top:40px; padding-top:20px; border-top:1px solid #eee;">
+  <canvas id="lecturerLoadChart" style="max-height:300px;"></canvas>
+</div>
+
+<div id="lecturerNameAnalysis" class="info-card" style="margin-top:16px;"></div>
+      <div id="lecturerAnalysis" class="info-card" style="margin-top:16px;"></div>
+    </div>
+  </div>
+</div>
+
   <!-- Timetable Modal -->
 <div id="timetableModal" class="w3-modal">
   <div class="w3-modal-content w3-card-4 w3-animate-zoom" style="max-width:900px; margin:40px auto;">
@@ -738,8 +770,10 @@
       initSubjectsPage();
     });
 
+    let lecturerLoadChart = null;
     let subjectsChart;
-    let totalStudents = 1710;
+    let sectionChart;
+    let totalStudents = 1711;
     let currentRenderedSubjects = [];
     let currentSubjectsData = [];
     let allFaculties = new Set();
@@ -766,7 +800,7 @@ function renderSubjectsBarChart(data) {
 
   // Color coding based on average
   const colors = avgPerSectionValues.map(v => {
-    if (v > 35) return 'rgb(204, 50, 50)';      // red → high
+    if (v > 40) return 'rgb(204, 50, 50)';      // red → high
     else if (v > 20) return 'rgb(45, 201, 55)'; // green → medium
     else return 'rgb(231, 180, 22)';           // light green → low
   });
@@ -788,6 +822,25 @@ function renderSubjectsBarChart(data) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      onClick: async (evt, elements) => {
+        if (!elements.length) return;
+
+        const index = elements[0].index;
+
+        const kodSubjek = subjectsChart.data.labels[index];
+
+        const subject = currentRenderedSubjects.find(
+          s => s.kod_subjek === kodSubjek
+        );
+
+        if (!subject) {
+          console.warn('Subject not found for:', kodSubjek);
+          return;
+        }
+
+        openSubjectAnalysis(subject);
+      },
+
       scales: {
         y: {
           beginAtZero: true,
@@ -804,11 +857,19 @@ function renderSubjectsBarChart(data) {
           enabled: true,
           callbacks: {
             label: function(context) {
-              const index = context.dataIndex;
-              const subj = fsksmSubjects[index];
-              const avg = avgPerSectionValues[index];
-              return `${subj.nama_subjek || 'N/A'}: Avg ${avg} per section`;
-            }
+          const index = context.dataIndex;
+          const subj = fsksmSubjects[index];
+          const avg = avgPerSectionValues[index];
+
+          return [
+            `${subj.nama_subjek || 'N/A'}`,
+            `────────────`,
+            `Avg / Section: ${avg}`,
+            `Total Sections: ${subj.bil_seksyen}`,
+            `Total Students: ${subj.bil_pelajar}`,
+            `Lecturers: ${subj.bil_pensyarah}`
+          ];
+        }
           }
         },
         title: {
@@ -816,7 +877,7 @@ function renderSubjectsBarChart(data) {
           text: 'FSKSM Subjects - Avg Students per Section',
           font: { size: 16, weight: 'bold' }
         }
-      }
+      },
     }
   });
 
@@ -972,9 +1033,9 @@ function renderSubjectsBarChart(data) {
           <th>Credits</th>
           <th>Students</th>
           <th style="text-align:center; line-height:1.2;">
-            Students<br>
+            Proportion of<br>
             <span style="font-size:13px; font-weight:500;margin-top:4px;">
-              Participation (%)
+              FC Students 
             </span>
           </th>
           <th>Avg / Section</th>
@@ -1558,6 +1619,278 @@ function closeTimetableModal() {
   document.getElementById('timetableModal').style.display = 'none';
 }
 
+async function openSubjectAnalysis(subject) {
+  const sesi = document.getElementById('sessionSelect').value;
+  const semester = document.getElementById('semesterSelect').value;
+
+  document.getElementById('analysisTitle').textContent =
+    `Analysis • ${subject.kod_subjek} – ${subject.nama_subjek || 'N/A'}`;
+
+  document.getElementById('analysisModal').style.display = 'block';
+
+  const url =
+    `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi` +
+    `?entity=subjek_seksyen` +
+    `&sesi=${encodeURIComponent(sesi)}` +
+    `&semester=${encodeURIComponent(semester)}` +
+    `&kod_subjek=${encodeURIComponent(subject.kod_subjek)}`;
+
+  const res = await fetch(url);
+  const text = await res.text();
+  const raw = JSON.parse(text);
+
+  // ✅ FIX STARTS HERE
+  let subjectData = null;
+
+  if (Array.isArray(raw)) {
+    subjectData = raw.find(
+      s => s.kod_subjek === subject.kod_subjek
+    );
+  } else if (raw && raw.kod_subjek === subject.kod_subjek) {
+    subjectData = raw;
+  }
+
+  if (!subjectData) {
+    console.warn('Subject not found:', subject.kod_subjek);
+    renderNoSection();
+    return;
+  }
+
+  const sections = (subjectData.seksyen_list || []).sort(
+  (a, b) => Number(a.seksyen) - Number(b.seksyen)
+);
+
+  if (!sections.length) {
+    renderNoSection();
+    return;
+  }
+  // ✅ FIX ENDS HERE
+
+  analyzeLecturerLoad(sections);
+  renderSectionSummary(sections);
+  renderSectionChart(sections);
+  renderLecturerAnalysis(subjectData);
+}
+
+function renderNoSection() {
+  document.getElementById('sectionChartContainer').innerHTML =
+    `<div class="empty-state">No section data available</div>`;
+}
+function getStudentColor(count) {
+  if (count <= 20) return '#FFC107';   // yellow
+  if (count <= 40) return '#4CAF50';   // green
+  return '#F44336';                    // red
+}
+function renderSectionChart(sections) {
+  if (!sections.length) {
+    console.warn('No sections to render');
+    return;
+  }
+
+  const ctx = document.getElementById('sectionChart').getContext('2d');
+
+  // destroy old chart safely
+  if (window.sectionChart instanceof Chart) {
+    window.sectionChart.destroy();
+  }
+
+  const labels = sections.map(s => `Section ${s.seksyen}`);
+  const data = sections.map(s => s.bil_pelajar);
+  const colors = sections.map(s => getStudentColor(s.bil_pelajar));
+
+  window.sectionChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Number of Students',
+        data,
+        backgroundColor: colors
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: 'Number of Students' }
+        }
+      },
+            plugins: {
+        tooltip: {
+          callbacks: {
+            title: (items) => {
+              return items[0].label;
+            },
+            label: (item) => {
+            const section = sections[item.dataIndex];
+            const count = section.bil_pelajar;
+
+            let status = 'Optimal';
+            if (count <= 20) status = 'Under-enrolled';
+            else if (count > 40) status = 'Over-capacity';
+
+            return [
+              `Students: ${count}`,
+              `Lecturer: ${section.pensyarah || 'N/A'}`,
+              `Status: ${status}`
+            ];
+          }
+          }
+        },
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: 'Number of Students'
+          }
+        },
+        x: {
+          title: {
+            display: true,
+            text: 'Section'
+          }
+        }
+      }
+    }
+  });
+}
+function analyzeLecturerLoad(sections) {
+  const lecturerMap = {};
+
+  sections.forEach(s => {
+    const name = s.pensyarah?.trim();
+    if (!name) return;
+
+    if (!lecturerMap[name]) {
+      lecturerMap[name] = {
+        sections: [],
+        totalStudents: 0
+      };
+    }
+
+    lecturerMap[name].sections.push({
+      seksyen: s.seksyen,
+      students: parseInt(s.bil_pelajar) || 0
+    });
+
+    lecturerMap[name].totalStudents += parseInt(s.bil_pelajar) || 0;
+  });
+
+  renderLecturerLoadChart(lecturerMap);
+  renderLecturerNameAnalysis(lecturerMap);
+}
+
+function renderLecturerLoadChart(lecturerMap) {
+  const ctx = document.getElementById('lecturerLoadChart').getContext('2d');
+
+  const labels = Object.keys(lecturerMap);
+  const values = labels.map(l => lecturerMap[l].totalStudents);
+
+  if (lecturerLoadChart) lecturerLoadChart.destroy();
+
+  lecturerLoadChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Total Students Handled',
+        data: values,
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: { beginAtZero: true }
+      },
+      plugins: {
+        title: {
+          display: true,
+          text: 'Lecturer Load by Total Students'
+        },
+        tooltip: {
+          callbacks: {
+            title: (items) => items[0].label,
+            label: (item) => {
+              const lecturer = item.label;
+              const info = lecturerMap[lecturer];
+
+              const lines = info.sections.map(
+                s => `Section ${s.seksyen}: ${s.students} students`
+              );
+
+              lines.push(`Total: ${info.totalStudents} students`);
+              return lines;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+function renderLecturerNameAnalysis(lecturerMap) {
+  let html = `<strong>Lecturer Workload Analysis</strong><div style="margin-top:8px;">`;
+
+  let overloadFound = false;
+
+  Object.entries(lecturerMap).forEach(([name, info]) => {
+    const sectionCount = info.sections.length;     // ✅ FIX
+    const studentCount = info.totalStudents;       // ✅ FIX
+    const overloaded = sectionCount > 2;
+
+    if (overloaded) overloadFound = true;
+
+    html += `
+      <div style="margin-bottom:6px; color:${overloaded ? '#b91c1c' : '#15803d'};">
+        👨‍🏫 <strong>${name}</strong> — 
+        ${sectionCount} sections, 
+        ${studentCount} students
+        ${overloaded ? '⚠️ Overloaded' : '✅ Balanced'}
+      </div>
+    `;
+  });
+
+  if (!overloadFound) {
+    html += `
+      <div style="margin-top:8px; font-weight:600; color:#15803d;">
+        ✅ No lecturer is assigned to more than 2 sections
+      </div>
+    `;
+  }
+
+  html += `</div>`;
+  document.getElementById('lecturerNameAnalysis').innerHTML = html;
+}
+
+function closeAnalysisModal() {
+  document.getElementById('analysisModal').style.display = 'none';
+}
+function renderSectionSummary(sections) {
+  const totalSections = sections.length;
+  const totalStudents = sections.reduce(
+    (sum, s) => sum + (parseInt(s.bil_pelajar) || 0), 0
+  );
+
+  const lecturers = new Set(
+    sections
+      .map(s => s.pensyarah?.trim())
+      .filter(Boolean)
+  );
+
+  document.getElementById('sectionSummary').innerHTML = `
+    📊 ${totalSections} Sections |
+    👨‍🎓 ${totalStudents} Students |
+    👨‍🏫 ${lecturers.size} Lecturers
+  `;
+}
 
   </script>
 </body>
