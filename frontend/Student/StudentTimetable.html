@@ -304,22 +304,29 @@
 
     function displayTimetable(data, sesi, semester) {
       // Extended Time Slots: 08:00 (2) to 22:00 (15)
-      // Mapping: 2=8am, 3=9am ... 14=8pm, 15=9pm-10pm
       const timeSlots = [];
       for(let i=2; i<=15; i++) timeSlots.push(i);
 
       const days = [2,3,4,5,6]; // Mon - Fri
       const dayNames = { 2: "MONDAY", 3: "TUESDAY", 4: "WEDNESDAY", 5: "THURSDAY", 6: "FRIDAY" };
 
+      // --- 1. NEW: Calculate Hours Per Day ---
+      const dailyHours = { 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+      data.forEach(entry => {
+        if (dailyHours[entry.hari] !== undefined) {
+          dailyHours[entry.hari]++; // Assumes 1 entry = 1 hour
+        }
+      });
+
       // Helper to generate "08:00 - 09:00" string
       const getTimeLabel = (slot) => {
-         const startH = slot + 6; // 2+6 = 8
+         const startH = slot + 6; 
          const endH = startH + 1;
          const fmt = (h) => h < 10 ? `0${h}:00` : `${h}:00`;
          return `${fmt(startH)} - ${fmt(endH)}`;
       };
 
-      // Organize Data
+      // Organize Data for Grid
       const grid = {};
       const occupied = {}; 
       
@@ -344,9 +351,17 @@
       // --- HTML GENERATION ---
       let html = `<div class="desktop-timetable"><div class="desktop-grid">`;
       
-      // Header Row
+      // Header Row (Updated to show Daily Hours)
       html += `<div class="corner-cell"></div>`;
-      days.forEach(day => { html += `<div class="day-header-cell">${dayNames[day]}</div>`; });
+      days.forEach(day => { 
+          // Added style="flex-direction: column;" to stack the name and hours
+          html += `<div class="day-header-cell" style="flex-direction: column; line-height: 1.2;">
+                     <span>${dayNames[day]}</span>
+                     <span style="font-size: 11px; font-weight: 400; opacity: 0.8; margin-top: 4px;">
+                       ${dailyHours[day]} Hours
+                     </span>
+                   </div>`; 
+      });
 
       // Body Rows
       for (let i = 0; i < timeSlots.length; i++) {
@@ -385,7 +400,7 @@
                         <div class="class-name">${current.nama_subjek}</div>
                         
                         <div class="class-room" style="font-weight: 900; color: #000; font-size: 11px; margin: 4px 0;">
-                          ${current.ruang?.nama_ruang || current.ruang?.kod_ruang || '—'}
+                          ${current.ruang?.nama_ruang_singkatan || current.ruang?.kod_ruang || '—'}
                         </div>
 
                         <div class="class-lecturer">${current.lecturer_name}</div>
