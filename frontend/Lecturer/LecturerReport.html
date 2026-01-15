@@ -184,12 +184,14 @@
             const key = `${d.kod_subjek || 'Unknown'}::${d.nama_subjek || ''}`;
             agg[key] = (agg[key] || 0) + (parseInt(d.bil_pelajar) || 0);
           });
+          const totalForSession = Object.values(agg).reduce((a, b) => a + b, 0);
+
           const row = [sess];
           subjects.forEach(sub => {
             const val = agg[sub] || 0;
             row.push(val);
             const [code, name] = sub.split('::');
-            row.push(`${sess}\n${code}${name?` - ${name}`:''}\nStudents: ${val}`);
+            row.push(`${sess}\n${code}${name?` - ${name}`:''}\nStudents: ${val}\nSession total: ${totalForSession}`);
           });
           return row;
         });
