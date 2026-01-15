@@ -582,8 +582,10 @@
       window.location.replace("../index.html");
     }
 
-    document.getElementById("navLogout").onclick = function() {
+    document.getElementById("navLogout").onclick = function(e) {
+      e.preventDefault();
       if (confirm("Are you sure you want to logout?")) {
+        localStorage.removeItem("TTMSFC_adminAuth");
         localStorage.removeItem("TTMSFC_userSession");
         window.location.replace("../index.html");
       }
