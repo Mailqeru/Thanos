@@ -470,6 +470,82 @@
 .section-btn:disabled {
   opacity:0.9;
 }
+/* ===== TABLE BASE ===== */
+.timetable-grid {
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  background: white;
+}
+
+/* ===== ALL CELLS ===== */
+.timetable-grid th,
+.timetable-grid td {
+  text-align: center;
+  vertical-align: middle;
+  padding: 6px;
+  font-size: 13px;
+  border: 1px solid #e5e7eb; /* soft grid lines */
+}
+
+/* Cell height */
+.timetable-grid td {
+  height: 64px;
+}
+
+/* ===== STICKY DAY HEADER ===== */
+.timetable-grid thead th {
+  position: sticky;
+  top: 0;
+  background: #004080;
+  color: white;
+  z-index: 4;
+  border-bottom: 2px solid #d1d5db; /* soft separation */
+}
+
+/* ===== STICKY TIME COLUMN ===== */
+.timetable-grid thead th:first-child,
+.timetable-grid tbody td:first-child {
+  position: sticky;
+  left: 0;
+  background: #f9fafb;
+  font-weight: 600;
+  z-index: 5;
+  border-right: 2px solid #d1d5db; /* soft but visible */
+}
+
+/* ===== TOP-LEFT CORNER ===== */
+.timetable-grid thead th:first-child {
+  background: #004080;
+  color: white;
+  z-index: 6;
+}
+
+/* ===== SOFT COLUMN SEPARATION ===== */
+.timetable-grid thead th:not(:first-child),
+.timetable-grid tbody td:not(:first-child) {
+  border-left: 1px solid #e5e7eb;
+}
+
+/* ===== SOFT ROW SEPARATION ===== */
+.timetable-grid tbody tr:not(:last-child) td {
+  border-bottom: 1.5px solid #e5e7eb;
+}
+
+/* ===== TIMETABLE CELL CONTENT ===== */
+.timetable-cell {
+  background: #e0f2fe;
+  border-radius: 6px;
+  padding: 4px;
+  line-height: 1.3;
+  box-shadow: inset 0 0 0 1px #bae6fd; /* soft inner outline */
+}
+
+/* ===== OPTIONAL: SUBTLE ZEBRA ROWS ===== */
+.timetable-grid tbody tr:nth-child(even) {
+  background: #fcfcfd;
+}
 
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -777,6 +853,7 @@
     let currentRenderedSubjects = [];
     let currentSubjectsData = [];
     let allFaculties = new Set();
+    const lecturerCache = {};
 
 function renderSubjectsBarChart(data) {
   const ctx = document.getElementById('subjectsChart').getContext('2d');
@@ -1470,14 +1547,37 @@ function groupTimetable(data) {
 
   return grouped;
 }
+const daysOrder = [2, 3, 4, 5, 6]; // Mon → Fri
+const dayNames = {
+  2: 'Monday',
+  3: 'Tuesday',
+  4: 'Wednesday',
+  5: 'Thursday',
+  6: 'Friday'
+};
+
+const timeSlots = [
+  { key: 2, label: '08:00 - 09:00' },
+  { key: 3, label: '09:00 - 10:00' },
+  { key: 4, label: '10:00 - 11:00' },
+  { key: 5, label: '11:00 - 12:00' },
+  { key: 6, label: '12:00 - 13:00' },
+  { key: 7, label: '13:00 - 14:00' },
+  { key: 8, label: '14:00 - 15:00' },
+  { key: 9, label: '15:00 - 16:00' },
+  { key: 10, label: '16:00 - 17:00' },
+  { key: 11, label: '17:00 - 18:00' }
+];
 
 function renderTimetable(jsonData) {
-    // ===== CHECK IF TIMETABLE INFO EXISTS =====
+
+  // ===== CHECK IF hari & masa EXIST =====
   const hasTimeAndDay = jsonData.some(
     item => item.hari !== undefined && item.masa !== undefined
   );
-    if (!hasTimeAndDay) {
-    // ===== FALLBACK VIEW (NO hari / masa) =====
+
+  // ===== FALLBACK (KEEP OLD BEHAVIOUR) =====
+  if (!hasTimeAndDay) {
     let html = `
       <div class="info-card">
         <strong>Available Timetable Information</strong>
@@ -1503,14 +1603,13 @@ function renderTimetable(jsonData) {
     `;
 
     document.getElementById('timetableModalContent').innerHTML = html;
-    return; // ⛔ STOP here, do not continue to table
+    return; // ⛔ STOP here
   }
 
-  // ===== ORIGINAL LOGIC CONTINUES BELOW =====
+  // ===== GROUP SESSIONS (YOUR ORIGINAL LOGIC) =====
   const grouped = groupTimetable(jsonData);
 
-
-  // ===== ANALYSIS =====
+  // ===== FULL ANALYSIS (UNCHANGED) =====
   let totalHours = 0;
   const daysSet = new Set();
 
@@ -1523,56 +1622,69 @@ function renderTimetable(jsonData) {
   const totalDays = daysSet.size;
   const totalSessions = grouped.length;
 
-  // ===== ANALYSIS BOX =====
-  let analysisHtml = `
+  const analysisHtml = `
     <div class="info-card" style="margin-bottom:16px;">
       <strong>Weekly Timetable Summary</strong>
       <div style="margin-top:6px; font-size:13.5px; line-height:1.6;">
-        <div>🕒 <strong>${totalHours}</strong> teaching hours / week</div>
-        <div>📅 <strong>${totalDays}</strong> teaching days</div>
-        <div>📚 <strong>${totalSessions}</strong> teaching sessions</div>
+        🕒 <strong>${totalHours}</strong> teaching hours / week<br>
+        📅 <strong>${totalDays}</strong> teaching days<br>
+        📚 <strong>${totalSessions}</strong> teaching sessions
       </div>
     </div>
   `;
 
-  // ===== TABLE =====
-  let html = analysisHtml + `
-    <div class="table-wrapper">
-      <table class="w3-table w3-bordered w3-striped">
+  // ===== MAP SLOT DATA =====
+  const slotMap = {};
+  jsonData.forEach(item => {
+    slotMap[`${item.hari}-${item.masa}`] = item;
+  });
+
+  // ===== GRID TABLE =====
+  let tableHtml = `
+    <div class="table-wrapper" style="max-height:420px; overflow:auto;">
+      <table class="w3-table w3-bordered timetable-grid">
         <thead class="w3-teal">
           <tr>
-            <th>Day</th>
-            <th>Time</th>
-            <th>Room</th>
+            <th style="width:130px;">Time</th>
+            ${daysOrder.map(d => `<th>${dayNames[d]}</th>`).join('')}
           </tr>
         </thead>
         <tbody>
   `;
 
-  grouped.forEach(item => {
-    const start = masaMap[item.startMasa].split(" - ")[0];
-    const end = masaMap[item.endMasa].split(" - ")[1];
+  timeSlots.forEach(slot => {
+    tableHtml += `<tr><td><strong>${slot.label}</strong></td>`;
 
-    html += `
-      <tr>
-        <td><strong>${hariMap[item.hari]}</strong></td>
-        <td>${start} – ${end}</td>
+    daysOrder.forEach(day => {
+      const cell = slotMap[`${day}-${slot.key}`];
+
+      tableHtml += `
         <td>
-          <strong>${item.ruang.nama_ruang_singkatan}</strong><br>
-          ${item.ruang.nama_ruang}<br>
-          <span style="color:#6b7280;">${item.ruang.kod_ruang}</span>
+          ${cell ? `
+            <div class="timetable-cell">
+              <strong>${cell.ruang.nama_ruang_singkatan}</strong><br>
+              <span style="font-size:11px;">${cell.ruang.nama_ruang}</span><br>
+              <span style="font-size:10px;color:#6b7280;">
+                ${cell.ruang.kod_ruang}
+              </span>
+            </div>
+          ` : ''}
         </td>
-      </tr>
-    `;
+      `;
+    });
+
+    tableHtml += `</tr>`;
   });
 
-  html += `
+  tableHtml += `
         </tbody>
       </table>
     </div>
   `;
 
-  document.getElementById('timetableModalContent').innerHTML = html;
+  // ===== FINAL RENDER =====
+  document.getElementById('timetableModalContent').innerHTML =
+    analysisHtml + tableHtml;
 }
 
 async function openTimetable(kodSubjek, seksyen) {
@@ -1585,12 +1697,12 @@ async function openTimetable(kodSubjek, seksyen) {
 );
 
 const subjectName = subjectInfo?.nama_subjek || 'Unknown Subject';
-
 document.getElementById('timetableModalTitle').textContent =
   `${kodSubjek} – ${subjectName} (Section ${seksyen})`;
 
-  document.getElementById('timetableModalContent').innerHTML =
-    `<p>Loading timetable...</p>`;
+  document.getElementById('timetableModalContent').innerHTML = `
+  <p>Loading timetable...</p>
+`;
   modal.style.display = 'block';
 
   try {
@@ -1645,6 +1757,7 @@ async function openSubjectAnalysis(subject) {
   const res = await fetch(url);
   const text = await res.text();
   const raw = JSON.parse(text);
+  lecturerCache[subject.kod_subjek] = raw;
 
   // ✅ FIX STARTS HERE
   let subjectData = null;
@@ -1718,12 +1831,29 @@ function renderSectionChart(sections) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      onClick: (evt, elements) => {
+    if (!elements.length) return;
+
+    const index = elements[0].index;
+    const section = sections[index];
+
+    // Uses your EXISTING function
+    openTimetable(
+      document.getElementById('analysisTitle')
+        .textContent
+        .split('•')[1]
+        .split('–')[0]
+        .trim(),   // kod_subjek
+      section.seksyen
+    );
+  },
       scales: {
         y: {
           beginAtZero: true,
           title: { display: true, text: 'Number of Students' }
         }
       },
+      
             plugins: {
         tooltip: {
           callbacks: {
