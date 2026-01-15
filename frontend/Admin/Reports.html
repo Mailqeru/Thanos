@@ -169,7 +169,7 @@
     /* Form Styles */
     .form-row {
       display: grid;
-      grid-template-columns: 1fr 1fr auto;
+      grid-template-columns: 1fr 1fr;
       gap: 16px;
       align-items: end;
     }
@@ -454,38 +454,6 @@
       font-size: 14px;
     }
 
-    /* Debug Panel */
-    .debug-panel {
-      background: #f0f9ff;
-      border: 1px solid #bae6fd;
-      border-left: 4px solid #0284c7;
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 24px;
-      font-size: 13px;
-    }
-
-    .debug-panel strong {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 12px;
-      color: var(--utm-blue);
-      font-size: 14px;
-    }
-
-    #debugLog {
-      font-family: 'Courier New', monospace;
-      white-space: pre-wrap;
-      max-height: 200px;
-      overflow-y: auto;
-      background: white;
-      padding: 12px;
-      border-radius: 6px;
-      font-size: 12px;
-      line-height: 1.4;
-    }
-
     .export-section {
       text-align: center;
       padding: 24px;
@@ -601,25 +569,7 @@
               <option value="3">Special Semester</option>
             </select>
           </div>
-          <div class="form-group">
-            <button class="btn btn-primary" id="loadReportBtn">
-              <i class="fas fa-sync-alt"></i>
-              Generate Report
-            </button>
-          </div>
         </div>
-      </div>
-
-      <!-- Debug Panel -->
-      <div class="debug-panel">
-        <strong>
-          <i class="fas fa-terminal"></i>
-          System Log
-        </strong>
-        <div id="debugLog"></div>
-        <button class="btn btn-secondary" id="showJsonUrls" style="margin-top: 12px; display: none; font-size: 13px; padding: 8px 16px;">
-          <i class="fas fa-link"></i> View API URLs
-        </button>
       </div>
 
       <!-- Loading State -->
@@ -658,7 +608,7 @@
           <div id="topEnrollTable">
             <div class="empty-state">
               <i class="fas fa-users"></i>
-              <p>Click "Generate Report" to load data</p>
+              <p>Loading data...</p>
             </div>
           </div>
         </div>
@@ -680,7 +630,7 @@
           <div id="incompleteSecTable">
             <div class="empty-state">
               <i class="fas fa-list"></i>
-              <p>Click "Generate Report" to load data</p>
+              <p>Loading data...</p>
             </div>
           </div>
         </div>
@@ -736,18 +686,8 @@
     let allLecturers = [], assignments = [], allSections = [];
     let currentSesi = '', currentSemester = '';
 
-    function log(msg) {
-      const logDiv = document.getElementById('debugLog');
-      if (logDiv) {
-        const time = new Date().toISOString().slice(11, 19);
-        logDiv.innerHTML += `[${time}] ${msg}\n`;
-        logDiv.scrollTop = logDiv.scrollHeight;
-      }
-    }
-
     function showLoading(show) {
       document.getElementById('loadingSpinner').style.display = show ? 'block' : 'none';
-      document.getElementById('loadReportBtn').disabled = show;
     }
 
     function showError(title, message) {
@@ -891,28 +831,6 @@
       chart.draw(dataTable, options);
     }
 
-    function showJsonUrls() {
-      const s = encodeURIComponent(currentSesi);
-      const sem = encodeURIComponent(currentSemester);
-      const raw = localStorage.getItem("TTMSFC_userSession");
-      const sessionData = JSON.parse(raw);
-      const sid = encodeURIComponent(sessionData.session_id || sessionData.password || sessionData.id);
-
-      const urls = [
-        `Lecturers: http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pensyarah&session_id=${sid}&sesi=${s}&semester=${sem}`,
-        `Assignments: http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pensyarah_subjek&session_id=${sid}&sesi=${s}&semester=${sem}`,
-        `Sections: http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=subjek_seksyen&sesi=${s}&semester=${sem}`
-      ];
-
-      const logDiv = document.getElementById('debugLog');
-      logDiv.innerHTML += '\n' + urls.join('\n') + '\n';
-      logDiv.scrollTop = logDiv.scrollHeight;
-    }
-
-    function exportReports() {
-      alert("Export functionality is ready to be implemented.");
-    }
-
     async function authenticateUser(sessionId) {
       if (!sessionId) throw new Error("No session ID");
       try {
@@ -938,14 +856,13 @@
       currentSesi = document.getElementById('reportSession').value;
       currentSemester = document.getElementById('reportSemester').value;
       if (!currentSesi || !currentSemester) {
-        showError("Input Missing", "Please select both session and semester.");
+        // Don't show error on init; just skip
         return;
       }
 
       showLoading(true);
       hideError();
       document.getElementById('exportBtn').style.display = 'none';
-      document.getElementById('showJsonUrls').style.display = 'none';
 
       try {
         const raw = localStorage.getItem("TTMSFC_userSession");
@@ -960,8 +877,6 @@
         const s = encodeURIComponent(currentSesi);
         const sem = encodeURIComponent(currentSemester);
 
-        log(`Fetching data for ${currentSesi} Semester ${currentSemester}`);
-        
         const [lectRes, assignRes, sectionsRes] = await Promise.allSettled([
           fetch(`${baseUrl}?entity=pensyarah&session_id=${sid}&sesi=${s}&semester=${sem}`),
           fetch(`${baseUrl}?entity=pensyarah_subjek&session_id=${sid}&sesi=${s}&semester=${sem}`),
@@ -975,14 +890,12 @@
           const res = result.value;
           const text = await res.text();
           if (!res.ok) {
-            log(`${name} HTTP ${res.status}: ${text.substring(0, 200)}`);
             throw new Error(`${name} returned HTTP ${res.status}`);
           }
           if (!text.trim()) return [];
           try {
             return JSON.parse(text);
           } catch (e) {
-            log(`${name} parse error: ${e.message}`);
             throw new Error(`${name} returned invalid JSON`);
           }
         };
@@ -995,11 +908,8 @@
         assignments = Array.isArray(assignmentsData) ? assignmentsData : [];
         allSections = Array.isArray(sectionDetails) ? sectionDetails : [];
 
-        log(`Data loaded: ${allLecturers.length} lecturers, ${assignments.length} assignments, ${allSections.length} subjects`);
-
         const processedSections = processSectionDetails(allSections);
 
-        // ✅✅✅ TOP 10 SEC SUBJECTS — EXCLUDE PRACTICAL & PROFESSIONAL SUBJECTS
         const excludedPhrases = [
           'practical training',
           'initial industry',
@@ -1016,13 +926,11 @@
           .sort((a, b) => b.bil_pelajar - a.bil_pelajar)
           .slice(0, 10);
 
-        // ✅✅✅ INCOMPLETE SEC SECTIONS ONLY
         const incompleteSec = processedSections.filter(sec =>
           sec.kod_subjek?.startsWith('SEC') &&
           (sec.pensyarah === 'TBA' || sec.bil_pelajar === 0)
         );
 
-        // Render stats
         const summaryStats = document.getElementById('summaryStats');
         summaryStats.innerHTML = `
           <div class="stat-card">
@@ -1036,7 +944,6 @@
         `;
         summaryStats.style.display = 'grid';
 
-        // Render tables
         renderTable('topEnrollTable', topEnrollments, [
           { key: 'kod_subjek', label: 'Subject Code' },
           { key: 'nama_subjek', label: 'Subject Name' },
@@ -1045,9 +952,7 @@
           { 
             key: 'bil_pelajar', 
             label: 'Students',
-            render: (val) => {
-              return `<span class="w3-tag">${val}</span>`;
-            }
+            render: (val) => `<span class="w3-tag">${val}</span>`
           }
         ]);
 
@@ -1067,17 +972,13 @@
           }
         ]);
 
-        // Render charts
         drawTopEnrollChart(topEnrollments);
         drawIncompleteSecChart(incompleteSec);
 
-        // Show tools
         document.getElementById('exportBtn').style.display = 'inline-block';
-        document.getElementById('showJsonUrls').style.display = 'inline-block';
 
       } catch (err) {
         console.error(err);
-        log(`Error: ${err.message}`);
         showError("Report Generation Failed", err.message || "An unknown error occurred.");
       } finally {
         showLoading(false);
@@ -1090,17 +991,15 @@
       const currentMonth = now.getMonth(); // 0 = Jan, 11 = Dec
       const currentCalendarYear = now.getFullYear();
 
-      // Determine current academic year (starts in October)
       let academicStartYear;
-      if (currentMonth >= 9) { // Oct–Dec → current year is start
+      if (currentMonth >= 9) {
         academicStartYear = currentCalendarYear;
-      } else { // Jan–Sep → previous year is start
+      } else {
         academicStartYear = currentCalendarYear - 1;
       }
       const currentSession = `${academicStartYear}/${academicStartYear + 1}`;
 
-      // Build session list: current FIRST, then past sessions (most recent first)
-      const sessions = [currentSession]; // current at top
+      const sessions = [currentSession];
       for (let i = 1; i <= 5; i++) {
         const year = academicStartYear - i;
         sessions.push(`${year}/${year + 1}`);
@@ -1112,21 +1011,27 @@
 
       document.getElementById('reportSession').innerHTML = sessionOptions;
 
-      // Semester logic
       let currentSem;
-      if (currentMonth >= 9 || currentMonth <= 1) { // Oct–Feb
+      if (currentMonth >= 9 || currentMonth <= 1) {
         currentSem = "1";
-      } else if (currentMonth >= 2 && currentMonth <= 6) { // Mar–Jul
+      } else if (currentMonth >= 2 && currentMonth <= 6) {
         currentSem = "2";
-      } else { // Aug–Sep
+      } else {
         currentSem = "3";
       }
       document.getElementById('reportSemester').value = currentSem;
 
-      // Event listeners
-      document.getElementById('loadReportBtn').addEventListener('click', generateReports);
-      document.getElementById('exportBtn').addEventListener('click', exportReports);
-      document.getElementById('showJsonUrls').addEventListener('click', showJsonUrls);
+      // Auto-generate on load
+      generateReports();
+
+      // Auto-generate on change
+      document.getElementById('reportSession').addEventListener('change', generateReports);
+      document.getElementById('reportSemester').addEventListener('change', generateReports);
+
+      // Export stub
+      document.getElementById('exportBtn').addEventListener('click', () => {
+        alert("Export functionality is ready to be implemented.");
+      });
     });
   </script>
 </body>

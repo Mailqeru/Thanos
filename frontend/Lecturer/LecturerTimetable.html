@@ -107,7 +107,7 @@
 
     .main-content { padding: 30px; max-width: 1400px; }
 
-    /* Timetable layout (StudentTimetable style) */
+    /* Timetable layout */
     .timetable-container { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
     .timetable-container h3 { color: #003366; margin-bottom: 24px; font-weight: 600; font-size: 24px; text-align: center; }
     .filters { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
@@ -138,14 +138,15 @@
       border: 1px solid #eaeef5;
       margin-bottom: 20px;
       display: grid;
-      grid-template-columns: 120px repeat(9, 1fr);
+      grid-template-columns: 120px repeat(5, 1fr);
+      grid-auto-rows: 80px;
     }
     .day-label {
       background: linear-gradient(135deg, #003366 0%, #002244 100%);
       color: white; font-weight: 700; font-size: 13px;
       text-transform: uppercase; letter-spacing: 0.5px;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      padding: 10px 8px;
+      padding: 12px 8px;
       border-right: 1px solid rgba(255,255,255,0.2);
       border-bottom: 1px solid rgba(255,255,255,0.2);
       gap: 4px;
@@ -165,27 +166,32 @@
       border-bottom: 1px solid rgba(255,255,255,0.2);
     }
     .grid-cell {
-      grid-column: span var(--span, 1);
       padding: 0 !important;
-      min-height: 100px;
+      min-height: 80px;
       border-right: 1px solid #eef2f7;
       border-bottom: 1px solid #eef2f7;
       background: #fafbff;
+      position: relative;
     }
     .grid-cell:last-child { border-right: none; }
     .class-item {
       background: #eef5ff;
       border-left: 5px solid #003366;
-      padding: 8px;
+      padding: 10px;
       font-size: 12px;
       height: 100%;
       width: 100%;
-      display: flex; flex-direction: column; justify-content: center; align-items: center;
-      text-align: center;
+      display: flex; flex-direction: column; justify-content: center; align-items: flex-start;
+      text-align: left;
+      overflow: hidden;
+    }
+    .class-item .class-text {
+      width: 100%;
+      line-height: 1.4;
     }
     .class-code { font-weight: 700; color: #003366; margin-bottom: 4px; }
-    .class-name { color: #333; font-size: 12px; margin-bottom: 2px; }
-    .class-room { color: #555; font-size: 12px; }
+    .class-name { color: #333; font-size: 11px; margin-bottom: 3px; }
+    .class-room { color: #555; font-size: 11px; }
 
     /* Mobile timetable list */
     .mobile-timetable { display: none; }
@@ -318,8 +324,9 @@
       <span class="nav-icon">📅</span><span>My Timetable</span>
     </a>
     <a class="nav-item" href="LecturerEnrollment.html">
-      <span class="nav-icon">👥</span><span>Course Enrollment</span>
+      <span class="nav-icon">👥</span><span>Course Assign</span>
     </a>
+    
     <a class="nav-item" href="LecturerReport.html">
       <span class="nav-icon">📈</span><span>Reports</span>
     </a>
@@ -568,64 +575,91 @@
       const busiestDaysByHours = daySummary.filter(d => d.hours === maxHours && maxHours > 0).map(d => d.day);
       const busiestLabel = busiestDaysByHours.length ? `Highest teaching time day(s): ${busiestDaysByHours.join(', ')}` : 'No classes scheduled';
 
-      // Build merged cells per day (merge consecutive slots for the same subject+section)
-      const dayCellsHtml = (dayId) => {
-        let html = "";
-        const slotValues = slots.map(s => s.slot);
-        for (let i = 0; i < slotValues.length; i++) {
-          const slotNum = slotValues[i];
-          const cellEntries = daySlotMap[dayId][slotNum] || [];
-          if (cellEntries.length > 1) {
-            const items = cellEntries.map(c => `
+      // Desktop grid - Time slots as rows, Days as columns (merge consecutive time slots per day)
+      const slotValues = slots.map(s => s.slot);
+      const dayIdList = days.map(d => d.id);
+
+      // Track slots that are already covered by a spanning cell for each day
+      const skipMap = {};
+      dayIdList.forEach(id => { skipMap[id] = new Set(); });
+
+      let desktopHtml = `<div class="desktop-timetable"><div class="desktop-grid">`;
+
+      // Header row
+      desktopHtml += `<div class="corner-cell" style="grid-column:1;grid-row:1"></div>`;
+      days.forEach((d, idx) => {
+        desktopHtml += `<div class="day-label" style="grid-column:${idx+2};grid-row:1"><div>${d.name}</div></div>`;
+      });
+
+      // Body rows
+      slots.forEach((s, slotIdx) => {
+        const row = slotIdx + 2; // row 2 onwards for time slots
+        // time label column
+        desktopHtml += `<div class="time-label" style="grid-column:1;grid-row:${row}">${s.label}</div>`;
+
+        dayIdList.forEach((dayId, dayIdx) => {
+          if (skipMap[dayId].has(s.slot)) return; // already covered by a span
+
+          const cellEntries = daySlotMap[dayId][s.slot] || [];
+          const dedupMap = new Map();
+          cellEntries.forEach(c => {
+            const key = `${c.kod_subjek || ''}__${c.seksyen || ''}__${c.room || ''}`;
+            if (!dedupMap.has(key)) dedupMap.set(key, c);
+          });
+          const uniqueEntries = Array.from(dedupMap.values());
+
+          if (uniqueEntries.length > 1) {
+            const items = uniqueEntries.map(c => `
               <div class="class-item">
-                <div class="class-code">${c.kod_subjek || '—'} (Sec ${c.seksyen || '-'})</div>
-                <div class="class-name">${c.nama_subjek || '—'}</div>
-                <div class="class-room">Room: ${c.room || '—'}</div>
+                <div class="class-text">
+                  <div class="class-code">${c.kod_subjek || '—'} (Sec ${c.seksyen || '-'})</div>
+                  <div class="class-name">${c.nama_subjek || '—'}</div>
+                  <div class="class-room">Room: ${c.room || '—'}</div>
+                </div>
               </div>
             `).join('');
-            html += `<div class="grid-cell" style="--span:1">${items}</div>`;
-            continue;
+            desktopHtml += `<div class="grid-cell" style="grid-column:${dayIdx+2};grid-row:${row}">${items}</div>`;
+            return;
           }
 
-          if (cellEntries.length === 1) {
-            const c = cellEntries[0];
+          if (uniqueEntries.length === 1) {
+            const c = uniqueEntries[0];
             let spanLen = 1;
-            for (let j = i + 1; j < slotValues.length; j++) {
-              const nextSlot = slotValues[j];
-              const nextEntries = daySlotMap[dayId][nextSlot] || [];
+            // merge vertically across consecutive time slots for the same day
+            for (let nextIdx = slotIdx + 1; nextIdx < slotValues.length; nextIdx++) {
+              const nextSlot = slotValues[nextIdx];
+              const nextRaw = daySlotMap[dayId][nextSlot] || [];
+              const dedupNext = new Map();
+              nextRaw.forEach(n => {
+                const k = `${n.kod_subjek || ''}__${n.seksyen || ''}__${n.room || ''}`;
+                if (!dedupNext.has(k)) dedupNext.set(k, n);
+              });
+              const nextEntries = Array.from(dedupNext.values());
               if (nextEntries.length === 1) {
                 const n = nextEntries[0];
-                const sameClass = (n.kod_subjek === c.kod_subjek) && (n.seksyen === c.seksyen);
+                const sameClass = (n.kod_subjek === c.kod_subjek) && (n.seksyen === c.seksyen) && (n.room === c.room);
                 if (sameClass) {
                   spanLen += 1;
-                  i = j;
+                  skipMap[dayId].add(nextSlot);
                 } else break;
               } else break;
             }
             const itemHtml = `
               <div class="class-item">
-                <div class="class-code">${c.kod_subjek || '—'} (Sec ${c.seksyen || '-'})</div>
-                <div class="class-name">${c.nama_subjek || '—'}</div>
-                <div class="class-room">Room: ${c.room || '—'}</div>
+                <div class="class-text">
+                  <div class="class-code">${c.kod_subjek || '—'} (Sec ${c.seksyen || '-'})</div>
+                  <div class="class-name">${c.nama_subjek || '—'}</div>
+                  <div class="class-room">Room: ${c.room || '—'}</div>
+                </div>
               </div>
             `;
-            html += `<div class="grid-cell" style="--span:${spanLen}">${itemHtml}</div>`;
-            continue;
+            desktopHtml += `<div class="grid-cell" style="grid-column:${dayIdx+2};grid-row:${row} / span ${spanLen}">${itemHtml}</div>`;
+            return;
           }
 
-          html += `<div class="grid-cell" style="--span:1"></div>`;
-        }
-        return html;
-      };
-
-      // Desktop grid
-      let desktopHtml = `<div class="desktop-timetable"><div class="desktop-grid">`;
-      desktopHtml += `<div class="corner-cell"></div>`;
-      slots.forEach(s => desktopHtml += `<div class="time-label">${s.label}</div>`);
-      days.forEach(d => {
-        const dSum = daySummary.find(x => x.dayId === d.id) || { hours: 0 };
-        desktopHtml += `<div class="day-label"><div>${d.name}</div><div class="day-hours">${dSum.hours} hour${dSum.hours===1?'':'s'}</div></div>`;
-        desktopHtml += dayCellsHtml(d.id);
+          // empty cell
+          desktopHtml += `<div class="grid-cell" style="grid-column:${dayIdx+2};grid-row:${row}"></div>`;
+        });
       });
       desktopHtml += `</div></div>`;
 
@@ -639,7 +673,12 @@
         slots.forEach(s => {
           const cell = daySlotMap[d.id][s.slot];
           if (cell.length) {
-            const items = cell.map(c => `
+            const dedup = new Map();
+            cell.forEach(c => {
+              const key = `${c.kod_subjek || ''}__${c.seksyen || ''}__${c.room || ''}`;
+              if (!dedup.has(key)) dedup.set(key, c);
+            });
+            const items = Array.from(dedup.values()).map(c => `
               <div class="class-item-mobile">
                 <div class="class-code-mobile">${c.kod_subjek || '—'} (Sec ${c.seksyen || '-'})</div>
                 <div class="class-lecturer-mobile">📚 ${c.nama_subjek || '—'}</div>

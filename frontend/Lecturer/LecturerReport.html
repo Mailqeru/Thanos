@@ -65,18 +65,12 @@
       padding: 8px 14px; background: #f0f4ff;
       border-radius: 8px; border: 1px solid #dde4f0;
     }
+    .main-content { padding: 30px; max-width: 1600px; margin: 0 auto; }
 
-    /* Expanded main and card width to fit chart */
-    .main-content {
-      padding: 30px;
-      max-width: 1600px;  /* increased */
-      margin: 0 auto;
-    }
     .card {
-      background: white;
-      border-radius: 16px;
+      background: white; border-radius: 16px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-      padding: 30px;            /* increased */
+      padding: 30px;
       margin-bottom: 24px;
       border: 1px solid #e5e7eb;
       width: 100%;
@@ -85,7 +79,6 @@
     .loading { text-align: center; padding: 30px; color: #555; }
     .alert { padding: 14px 16px; border-radius: 10px; background: #fff8e1; color: #c47f00; border: 1px solid #ffe4a3; }
 
-    /* Chart size stays the same */
     #chart_div { width: 100%; height: 420px; }
   </style>
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -103,7 +96,7 @@
     </div>
     <a class="nav-item" href="Lecturer.html"><span class="nav-icon">📊</span><span>Dashboard</span></a>
     <a class="nav-item" href="LecturerTimetable.html"><span class="nav-icon">📅</span><span>My Timetable</span></a>
-    <a class="nav-item" href="LecturerEnrollment.html"><span class="nav-icon">👥</span><span>Course Enrollment</span></a>
+  <a class="nav-item" href="LecturerEnrollment.html"><span class="nav-icon">👥</span><span>Course Assign</span></a>
     <a class="nav-item active" href="LecturerReport.html"><span class="nav-icon">📈</span><span>Reports</span></a>
     <div class="nav-logout">
       <a class="nav-item" id="navLogout"><span class="nav-icon">🚪</span><span>Logout</span></a>
@@ -120,7 +113,7 @@
 
     <main class="main-content">
       <div class="card">
-        <h2>Highest Student Count per Session (by Subject)</h2>
+        <h2>Students per Session (stacked by Subject)</h2>
         <div id="chart_div" class="loading">Loading chart...</div>
         <div id="chart_alert" class="alert" style="display:none;">No data found.</div>
       </div>
@@ -161,30 +154,69 @@
     google.charts.setOnLoadCallback(loadData);
 
     async function loadData() {
-      if (!user.no_pekerja) {
-        showAlert("No staff ID found."); return;
-      }
+      if (!user.no_pekerja) { showAlert("No staff ID found."); return; }
       try {
         const res = await fetch(`${API_BASE}?entity=pensyarah_subjek&no_pekerja=${encodeURIComponent(user.no_pekerja)}`);
         const data = await res.json();
         if (!Array.isArray(data) || data.length === 0) { showAlert("No teaching data found."); return; }
 
-        const bySession = {};
-        data.forEach(item => {
-          const sesi = item.sesi || "Unknown";
-          const students = parseInt(item.bil_pelajar) || 0;
-          if (!bySession[sesi] || students > bySession[sesi].bil_pelajar) {
-            bySession[sesi] = { kod_subjek: item.kod_subjek, nama_subjek: item.nama_subjek, bil_pelajar: students };
-          }
+        // Build set of sessions and subjects
+        const sessions = [...new Set(data.map(d => d.sesi || "Unknown"))]
+          .sort((a,b)=>parseInt((b||"0").split('/')[0]||0) - parseInt((a||"0").split('/')[0]||0));
+        const subjects = [...new Set(data.map(d => `${d.kod_subjek || 'Unknown'}::${d.nama_subjek || ''}`))]
+          .sort();
+
+        // Table columns: Session + per-subject series
+        const dataTable = new google.visualization.DataTable();
+        dataTable.addColumn('string', 'Session');
+        subjects.forEach(sub => {
+          const [code, name] = sub.split('::');
+          dataTable.addColumn('number', `${code} ${name ? '- '+name : ''}`);
+          dataTable.addColumn({type:'string', role:'tooltip'});
         });
 
-        const rows = Object.keys(bySession)
-          .sort((a,b)=>parseInt(b.split('/')[0]) - parseInt(a.split('/')[0]))
-          .map(sesi => [sesi, bySession[sesi].bil_pelajar, bySession[sesi].kod_subjek + " - " + (bySession[sesi].nama_subjek || "")]);
+        // Build rows
+        const rows = sessions.map(sess => {
+          // aggregate per subject for this session
+          const agg = {};
+          subjects.forEach(s => agg[s] = 0);
+          data.filter(d => d.sesi === sess).forEach(d => {
+            const key = `${d.kod_subjek || 'Unknown'}::${d.nama_subjek || ''}`;
+            agg[key] = (agg[key] || 0) + (parseInt(d.bil_pelajar) || 0);
+          });
+          const row = [sess];
+          subjects.forEach(sub => {
+            const val = agg[sub] || 0;
+            row.push(val);
+            const [code, name] = sub.split('::');
+            row.push(`${sess}\n${code}${name?` - ${name}`:''}\nStudents: ${val}`);
+          });
+          return row;
+        });
 
         if (!rows.length) { showAlert("No data to plot."); return; }
+        dataTable.addRows(rows);
 
-        drawChart(rows);
+        const seriesOpts = {};
+        subjects.forEach((_, idx) => { seriesOpts[idx] = { targetAxisIndex: 0 }; });
+
+        const options = {
+          title: 'Total Students per Session (Stacked by Subject)',
+          legend: { position: 'none' },
+          isStacked: true,
+          height: 480,
+          backgroundColor: '#ffffff',
+          chartArea: { left: 80, top: 60, right: 40, bottom: 80 },
+          hAxis: { title: 'Academic Session' },
+          vAxis: { title: 'Students', minValue: 0 },
+          tooltip: { isHtml: false },
+          series: seriesOpts
+        };
+
+        const chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+        chart.draw(dataTable, options);
+        document.getElementById("chart_div").style.display = "block";
+        document.getElementById("chart_alert").style.display = "none";
       } catch (e) {
         console.error(e);
         showAlert("Failed to load data.");
@@ -196,32 +228,6 @@
       const alertEl = document.getElementById("chart_alert");
       alertEl.textContent = msg;
       alertEl.style.display = "block";
-    }
-
-    function drawChart(rows) {
-      document.getElementById("chart_div").style.display = "block";
-      document.getElementById("chart_alert").style.display = "none";
-
-      const dataTable = new google.visualization.DataTable();
-      dataTable.addColumn('string', 'Session');
-      dataTable.addColumn('number', 'Students');
-      dataTable.addColumn({ type: 'string', role: 'tooltip' });
-      dataTable.addRows(rows);
-
-      const options = {
-        title: 'Highest Student Count per Session (Subject with Max Enrollment)',
-        legend: { position: 'none' },
-        height: 420,
-        backgroundColor: '#ffffff',
-        chartArea: { left: 70, top: 60, right: 20, bottom: 60 },
-        colors: ['#003366'],
-        hAxis: { title: 'Academic Session' },
-        vAxis: { title: 'Students', minValue: 0 },
-        tooltip: { isHtml: true }
-      };
-
-      const chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
-      chart.draw(dataTable, options);
     }
   </script>
 </body>
