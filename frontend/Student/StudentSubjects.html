@@ -287,8 +287,6 @@
       color: #003366;
       font-size: 14px;
       border-top: 1px solid #eaeef5;
-      display: flex;
-      justify-content: space-between;
     }
 
     .empty-message {
@@ -397,12 +395,6 @@
 
       .subject-card header h4 {
         font-size: 16px;
-      }
-
-      .subject-summary {
-        flex-direction: column;
-        gap: 6px;
-        align-items: flex-start;
       }
     }
   </style>
@@ -529,7 +521,7 @@
 
     // Set UI
     const fullName = user.full_name || user.login || "Student";
-    const matricNo = user.login || "N/A";
+    const matricNo = user.login || "N/A"; // ✅ use 'login'
     const initials = fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || "S";
     
     document.getElementById("userName").textContent = fullName;
@@ -543,15 +535,7 @@
       }
     };
 
-    // ✅ Extract credit from subject code
-    function getCreditFromCode(code) {
-      if (!code) return 0;
-      const lastChar = code.trim().slice(-1);
-      const credit = parseInt(lastChar, 10);
-      return isNaN(credit) ? 0 : credit;
-    }
-
-    // 👇 SUBJECTS LOGIC
+    // 👇 SUBJECTS LOGIC (from your fragment)
     const contentEl = document.getElementById("subjectsContent");
     const selectEl = document.getElementById("sessionSelect");
 
@@ -613,37 +597,27 @@
       const grouped = groupSubjects(data);
 
       if (!selectedKey) {
-        // Show ALL sessions + cumulative credit
         let html = '';
-        let cumulativeCredits = 0;
         const sortedKeys = Object.keys(grouped).sort().reverse();
         sortedKeys.forEach(key => {
-          const credit = grouped[key].reduce((sum, subj) => sum + getCreditFromCode(subj.kod_subjek), 0);
-          cumulativeCredits += credit;
-          html += buildSubjectCard(key, grouped[key], credit);
+          html += buildSubjectCard(key, grouped[key]);
         });
-        const totalHtml = `<div class="subject-card">
-          <header><h4 style="color:#fff;background:#003366;padding:14px 20px;border-radius:12px 12px 0 0;">Cumulative Summary</h4></header>
-          <div class="subject-summary" style="background:#e8f5e9;color:#003366;">
-            <div>Total Subjects (All Time): ${data.length}</div>
-            <div>Total Credit Hours (All Time): <strong>${cumulativeCredits}</strong></div>
-          </div>
-        </div>`;
-        document.getElementById("subjectsContent").innerHTML = totalHtml + html || `<div class="empty-message">No subjects to display.</div>`;
+        document.getElementById("subjectsContent").innerHTML = html || `<div class="empty-message">No subjects to display.</div>`;
       } else if (grouped[selectedKey]) {
-        const subjects = grouped[selectedKey];
-        const sessionCredit = subjects.reduce((sum, subj) => sum + getCreditFromCode(subj.kod_subjek), 0);
-        document.getElementById("subjectsContent").innerHTML = buildSubjectCard(selectedKey, subjects, sessionCredit);
+        document.getElementById("subjectsContent").innerHTML = buildSubjectCard(selectedKey, grouped[selectedKey]);
       } else {
         document.getElementById("subjectsContent").innerHTML = `<div class="empty-message">No subjects found for this session.</div>`;
       }
     }
 
-    function buildSubjectCard(title, subjects, totalCredit) {
+    function buildSubjectCard(title, subjects) {
+      let totalCredits = 0; // Start count at 0
+
       let html = `<div class="subject-card">`;
       html += `<header><h4>${title}</h4></header>`;
       html += `<div class="table-container">`;
       html += `<table>`;
+      // Added "Credit" to header
       html += `<thead><tr>
                  <th>Course Code</th>
                  <th>Course Name</th>
@@ -653,23 +627,38 @@
       html += `<tbody>`;
 
       subjects.forEach(item => {
-        const credit = getCreditFromCode(item.kod_subjek);
+        const credit = getCredit(item); // Calculate credit
+        totalCredits += credit;         // Add to total
+
         html += `<tr>
                    <td>${item.kod_subjek || '—'}</td>
                    <td>${item.nama_subjek || '—'}</td>
                    <td>${item.seksyen || '—'}</td>
-                   <td><strong>${credit}</strong></td>
+                   <td>${credit}</td>
                  </tr>`;
       });
 
       html += `</tbody></table></div>`;
+      
+      // Updated Summary to show Total Credits
       html += `<div class="subject-summary">
-                 <div>Total Subjects: ${subjects.length}</div>
-                 <div>Total Credit Hours: <strong>${totalCredit}</strong></div>
+                 Total Subjects: ${subjects.length} &nbsp; • &nbsp; 
+                 <strong>Total Credit Hours: ${totalCredits}</strong>
                </div>`;
       html += `</div>`;
       return html;
     }
+
+    // Helper to extract credit from subject code (e.g., SECJ2013 -> 3)
+    function getCredit(item) {
+      if (item.kredit) return parseInt(item.kredit); // If API has it
+      if (item.kod_subjek) {
+        const lastChar = item.kod_subjek.trim().slice(-1); // Get last digit
+        return parseInt(lastChar) || 0;
+      }
+      return 0;
+    }
+
   </script>
 </body>
 </html>

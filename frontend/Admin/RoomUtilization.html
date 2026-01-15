@@ -518,6 +518,9 @@
     <a href="ViewStudents.html" class="w3-bar-item w3-button">
       <i class="fas fa-user-graduate"></i> Students
     </a>
+    <a href="AdminTimetableGenerator.html" class="w3-bar-item w3-button">
+      <i class="fas fa-calendar-alt"></i> Timetable Generator
+    </a>
     <a href="ViewSubjects.html" class="w3-bar-item w3-button">
       <i class="fas fa-book-open"></i> Subjects
     </a>
@@ -761,6 +764,25 @@
         default: return 14;
       }
     }
+      function isValidTeachingSlot(day, masa) {
+    // Mon–Thu (8am–5pm, lunch 1–2 ignored)
+    const weekdaySlots = [2,3,4,5,6,8,9,10];
+
+    // Friday (8am–6pm, lunch 1–3 ignored)
+    const fridaySlots = [2,3,4,5,6,8,9,10,11];
+
+    // Monday = 2, Thursday = 5
+    if (day >= 2 && day <= 5) {
+      return weekdaySlots.includes(masa);
+    }
+
+    // Friday = 6
+    if (day === 6) {
+      return fridaySlots.includes(masa);
+    }
+
+    return false; // Sunday & Saturday ignored
+  }
 
     $(document).ready(function() {
       const sessions = generateAcademicYears();
@@ -898,6 +920,7 @@
         const HOURS_PER_DAY = END_HOUR - START_HOUR; // 16
         const DAYS_PER_WEEK = 7;
         const TOTAL_POSSIBLE_SLOTS = HOURS_PER_DAY * DAYS_PER_WEEK; // 112
+        const CURRENT_WEEK_SLOTS = 40; // Mon–Thu (8) + Fri (8)
 
         let totalPossibleSlotsAllRooms = 0;
 
@@ -933,7 +956,9 @@
 
             const mula = new Date(s.tarikh_mula);
             const tamat = new Date(s.tarikh_tamat);
-
+            if (IS_CURRENT_SEMESTER && !isDateSpecific) {
+              if (!isValidTeachingSlot(day, masa)) return;
+            }
             // DATE-SPECIFIC MODE
             if (isDateSpecific) {
               // Only count if: (1) matches the specific day, (2) date range overlaps
@@ -959,10 +984,8 @@
             usedSlots = uniqueSlots.size;
             totalPossibleSlots = HOURS_PER_DAY; // 16 slots for that specific day
           } else if (IS_CURRENT_SEMESTER) {
-            // ✅ CURRENT semester → CURRENT WEEK only
-            const weeklySlots = uniqueSlots.size;
-            usedSlots = weeklySlots;
-            totalPossibleSlots = TOTAL_POSSIBLE_SLOTS;
+            usedSlots = uniqueSlots.size;
+            totalPossibleSlots = CURRENT_WEEK_SLOTS;
           } else {
             // ✅ PAST semester → FULL semester usage
             const weeklySlots = uniqueSlots.size;
@@ -998,7 +1021,7 @@
         const totalPossibleForSummary = isDateSpecific
           ? HOURS_PER_DAY
           : IS_CURRENT_SEMESTER
-          ? TOTAL_POSSIBLE_SLOTS
+          ? CURRENT_WEEK_SLOTS
           : TOTAL_POSSIBLE_SLOTS * getTeachingWeeks(semester);
 
         const overallUtilization = totalPossibleSlotsAllRooms > 0
