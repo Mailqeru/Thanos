@@ -374,13 +374,6 @@
         display: none;
       }
 
-      .subjects-container,
-      .dashboard-grid,
-      .info-grid,
-      .action-grid {
-        grid-template-columns: 1fr;
-      }
-
       .filter-group select {
         padding: 10px 14px;
         font-size: 14px;
@@ -521,7 +514,7 @@
 
     // Set UI
     const fullName = user.full_name || user.login || "Student";
-    const matricNo = user.login || "N/A"; // ✅ use 'login'
+    const matricNo = user.login || "N/A";
     const initials = fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || "S";
     
     document.getElementById("userName").textContent = fullName;
@@ -535,7 +528,7 @@
       }
     };
 
-    // 👇 SUBJECTS LOGIC (from your fragment)
+    // 👇 SUBJECTS LOGIC — FIXED ORDER
     const contentEl = document.getElementById("subjectsContent");
     const selectEl = document.getElementById("sessionSelect");
 
@@ -549,14 +542,19 @@
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {
           window.studentSubjectsData = data;
-          populateSessionDropdown(data);
+
+          // ✅ FIX: Calculate GRAND TOTAL BEFORE using it
+          window.grandTotalCredit = data.reduce((sum, item) => sum + getCredit(item), 0);
 
           const grouped = groupSubjects(data);
           const sortedKeys = Object.keys(grouped).sort().reverse();
-          if (sortedKeys.length > 0) {
-            selectEl.value = sortedKeys[0];
-            showSelectedSubjects();
-          }
+
+          populateSessionDropdown(sortedKeys);
+
+          // Default to current (latest) semester
+          const currentSemester = sortedKeys[0];
+          selectEl.value = currentSemester;
+          showSelectedSubjects(); // Now has access to grandTotalCredit
         } else {
           selectEl.innerHTML = "<option>No sessions available</option>";
           contentEl.innerHTML = `<div class="empty-message">No subjects found.</div>`;
@@ -578,58 +576,56 @@
       return grouped;
     }
 
-    function populateSessionDropdown(data) {
-      const grouped = groupSubjects(data);
-      const select = document.getElementById("sessionSelect");
+    function populateSessionDropdown(sortedKeys) {
       let options = '<option value="">-- All Sessions --</option>';
-
-      const sortedKeys = Object.keys(grouped).sort().reverse();
       sortedKeys.forEach(key => {
         options += `<option value="${key}">${key}</option>`;
       });
-
-      select.innerHTML = options;
+      selectEl.innerHTML = options;
     }
 
     function showSelectedSubjects() {
       const selectedKey = document.getElementById("sessionSelect").value;
       const data = window.studentSubjectsData || [];
       const grouped = groupSubjects(data);
+      const grandTotal = window.grandTotalCredit || 0;
+
+      let html = `
+        <div class="alert alert-info" style="margin-top: -12px; margin-bottom: 24px;">
+          📌 <strong>Total Credit Hours (All Semesters):</strong> ${grandTotal}
+        </div>
+      `;
 
       if (!selectedKey) {
-        let html = '';
         const sortedKeys = Object.keys(grouped).sort().reverse();
         sortedKeys.forEach(key => {
           html += buildSubjectCard(key, grouped[key]);
         });
-        document.getElementById("subjectsContent").innerHTML = html || `<div class="empty-message">No subjects to display.</div>`;
+        contentEl.innerHTML = html || `<div class="empty-message">No subjects to display.</div>`;
       } else if (grouped[selectedKey]) {
-        document.getElementById("subjectsContent").innerHTML = buildSubjectCard(selectedKey, grouped[selectedKey]);
+        html += buildSubjectCard(selectedKey, grouped[selectedKey]);
+        contentEl.innerHTML = html;
       } else {
-        document.getElementById("subjectsContent").innerHTML = `<div class="empty-message">No subjects found for this session.</div>`;
+        contentEl.innerHTML = `
+          <div class="alert alert-info" style="margin-top: -12px; margin-bottom: 24px;">
+            📌 <strong>Total Credit Hours (All Semesters):</strong> ${grandTotal}
+          </div>
+          <div class="empty-message">No subjects found for this session.</div>
+        `;
       }
     }
 
     function buildSubjectCard(title, subjects) {
-      let totalCredits = 0; // Start count at 0
-
+      let totalCredits = 0;
       let html = `<div class="subject-card">`;
       html += `<header><h4>${title}</h4></header>`;
-      html += `<div class="table-container">`;
-      html += `<table>`;
-      // Added "Credit" to header
-      html += `<thead><tr>
-                 <th>Course Code</th>
-                 <th>Course Name</th>
-                 <th>Section</th>
-                 <th>Credit</th>
-               </tr></thead>`;
+      html += `<div class="table-container"><table>`;
+      html += `<thead><tr><th>Course Code</th><th>Course Name</th><th>Section</th><th>Credit</th></tr></thead>`;
       html += `<tbody>`;
 
       subjects.forEach(item => {
-        const credit = getCredit(item); // Calculate credit
-        totalCredits += credit;         // Add to total
-
+        const credit = getCredit(item);
+        totalCredits += credit;
         html += `<tr>
                    <td>${item.kod_subjek || '—'}</td>
                    <td>${item.nama_subjek || '—'}</td>
@@ -639,8 +635,6 @@
       });
 
       html += `</tbody></table></div>`;
-      
-      // Updated Summary to show Total Credits
       html += `<div class="subject-summary">
                  Total Subjects: ${subjects.length} &nbsp; • &nbsp; 
                  <strong>Total Credit Hours: ${totalCredits}</strong>
@@ -649,11 +643,10 @@
       return html;
     }
 
-    // Helper to extract credit from subject code (e.g., SECJ2013 -> 3)
     function getCredit(item) {
-      if (item.kredit) return parseInt(item.kredit); // If API has it
+      if (item.kredit) return parseInt(item.kredit);
       if (item.kod_subjek) {
-        const lastChar = item.kod_subjek.trim().slice(-1); // Get last digit
+        const lastChar = item.kod_subjek.trim().slice(-1);
         return parseInt(lastChar) || 0;
       }
       return 0;
