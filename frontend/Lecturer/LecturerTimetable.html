@@ -95,7 +95,7 @@
     }
     .menu-toggle {
       display: none; background: none; border: none; font-size: 24px; color: var(--utm-blue);
-      cursor: pointer; padding: 8px; margin-right: 15px; border-radius: 8px; transition: background 0.2s;
+      cursor: button; padding: 8px; margin-right: 15px; border-radius: 8px; transition: background 0.2s;
     }
     .menu-toggle:hover { background: #f0f4ff; }
     .header-title { font-size: 22px; font-weight: 600; color: var(--utm-blue); }
@@ -444,12 +444,14 @@
     // API base
     const API_BASE = "http://web.fc.utm.my/ttms/web_man_webservice_json.cgi";
 
+    // Note: TTMS uses 1 = Sunday, 2 = Monday, 3 = Tuesday, 4 = Wednesday, 5 = Thursday, 6 = Friday
     const days = [
-      { id: 1, name: "Monday" },
-      { id: 2, name: "Tuesday" },
-      { id: 3, name: "Wednesday" },
-      { id: 4, name: "Thursday" },
-      { id: 5, name: "Friday" }
+      // { id: 1, name: "Sunday" }, // include if you want to display Sunday
+      { id: 2, name: "Monday" },
+      { id: 3, name: "Tuesday" },
+      { id: 4, name: "Wednesday" },
+      { id: 5, name: "Thursday" },
+      { id: 6, name: "Friday" }
     ];
     const slots = [
       { slot: 2, label: "08:00 - 09:00" },
@@ -508,7 +510,7 @@
         }
 
         const timetablePromises = currentSubs.map(async subj => {
-          const jadRes = await fetch(`${API_BASE}?entity=jadual_subjek&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}&kod_subjek=${encodeURIComponent(subj.kod_subjek)}&seksyen=${encodeURIComponent(subj.seksyen)}`);
+          const jadRes = await fetch(`${API_BASE}?entity=jadual_subjek&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}&kod_subjek=${encodeURIComponent(subj.kod_subjek)}&seksy[...]`);
           const jad = await jadRes.json();
           const list = Array.isArray(jad) ? jad : [];
           return list
