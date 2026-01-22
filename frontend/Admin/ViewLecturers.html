@@ -115,6 +115,17 @@
       font-weight: 700;
     }
 
+    /* ===== MOBILE HAMBURGER ===== */
+    .mobile-hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 24px;
+      padding: 12px;
+      cursor: pointer;
+    }
+
     /* Main Content */
     .w3-main {
       background-color: var(--light-bg);
@@ -229,6 +240,11 @@
       color: white;
     }
 
+    .btn-info {
+      background: #3b82f6;
+      color: white;
+    }
+
     .btn:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
@@ -251,7 +267,7 @@
       border-radius: 8px;
       margin: 16px 0;
       font-size: 14px;
-      display: none !important; /*hide the div*/
+      display: none !important;
     }
 
     /* Table */
@@ -268,6 +284,7 @@
       background: white;
       margin: 0;
       font-size: 14px;
+      min-width: 600px; /* ensures horizontal scroll on mobile */
     }
 
     table.w3-table thead tr {
@@ -328,7 +345,7 @@
       background: #f0f9ff;
       border-left: 4px solid var(--utm-blue);
       color: var(--utm-blue);
-      display: none !important; /*hide the div*/
+      display: none !important;
     }
 
     /* Loading & Error */
@@ -402,43 +419,91 @@
       gap: 6px;
     }
 
-    @media (max-width: 768px) {
+    .tag {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 12px;
+      border: 1px solid var(--border-color);
+      background: white;
+    }
+    .tag.hot {
+      border-color: #fecaca;
+      background: #fff1f2;
+      color: #991b1b;
+    }
+    .tag.zero {
+      border-color: #bfdbfe;
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+
+    /* ===== MOBILE OVERRIDES ===== */
+    @media (max-width: 992px) {
+      .w3-sidebar {
+        display: none;
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        width: 240px !important;
+      }
+
+      .w3-main {
+        margin-left: 0;
+      }
+
+      .mobile-hamburger {
+        display: block;
+      }
+
+      .header-title {
+        font-size: 22px;
+      }
+
       .content-wrapper {
+        padding: 20px 16px;
+      }
+
+      .card {
         padding: 20px;
       }
-      .form-row {
-        grid-template-columns: 1fr;
-      }
+
       .btn {
         width: 100%;
         justify-content: center;
+        margin-bottom: 8px;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .refresh-info {
+        font-size: 12px;
+      }
+
+      .stats-card, .debug-card, .info-panel {
+        padding: 14px;
+        font-size: 13px;
+      }
+
+      table.w3-table {
+        font-size: 13px;
+      }
+
+      table.w3-table th,
+      table.w3-table td {
+        padding: 10px 8px;
       }
     }
-	
-	.tag {
-	  display: inline-block;
-	  padding: 6px 10px;
-	  border-radius: 999px;
-	  font-weight: 700;
-	  font-size: 12px;
-	  border: 1px solid var(--border-color);
-	  background: white;
-	}
-	.tag.hot {
-	  border-color: #fecaca;
-	  background: #fff1f2;
-	  color: #991b1b;
-	}
-	.tag.zero {
-	  border-color: #bfdbfe;
-	  background: #eff6ff;
-	  color: #1d4ed8;
-	}
   </style>
 </head>
 <body>
+
   <!-- Sidebar -->
-  <div class="w3-sidebar w3-bar-block w3-collapse w3-card" style="width:260px;" id="mySidebar">
+  <div class="w3-sidebar w3-bar-block w3-card" id="mySidebar">
     <div class="sidebar-header">
       <div class="sidebar-logo">
         <i class="fas fa-graduation-cap"></i>
@@ -447,25 +512,25 @@
       <p class="sidebar-subtitle">Timetable Management System</p>
     </div>
     
-    <a href="Admin.html" class="w3-bar-item w3-button">
+    <a href="Admin.html" class="w3-bar-item w3-button sidebar-link">
       <i class="fas fa-home"></i> Dashboard
     </a>
-    <a href="ViewLecturers.html" class="w3-bar-item w3-button active">
+    <a href="ViewLecturers.html" class="w3-bar-item w3-button active sidebar-link">
       <i class="fas fa-chalkboard-teacher"></i> Lecturers
     </a>
-    <a href="ViewStudents.html" class="w3-bar-item w3-button">
+    <a href="ViewStudents.html" class="w3-bar-item w3-button sidebar-link">
       <i class="fas fa-user-graduate"></i> Students
     </a>
-    <a href="AdminTimetableGenerator.html" class="w3-bar-item w3-button">
+    <a href="AdminTimetableGenerator.html" class="w3-bar-item w3-button sidebar-link">
       <i class="fas fa-calendar-alt"></i> Academic Workload Monitoring & Scheduling System
     </a>
-    <a href="ViewSubjects.html" class="w3-bar-item w3-button">
+    <a href="ViewSubjects.html" class="w3-bar-item w3-button sidebar-link">
       <i class="fas fa-book-open"></i> Subjects
     </a>
-    <a href="RoomUtilization.html" class="w3-bar-item w3-button">
+    <a href="RoomUtilization.html" class="w3-bar-item w3-button sidebar-link">
       <i class="fas fa-door-open"></i> Room Utilization
     </a>
-    <a href="Reports.html" class="w3-bar-item w3-button">
+    <a href="Reports.html" class="w3-bar-item w3-button sidebar-link">
       <i class="fas fa-chart-bar"></i> Reports
     </a>
     <a href="#" class="w3-bar-item w3-button" id="navLogout" style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
@@ -474,9 +539,9 @@
   </div>
 
   <!-- Main Content -->
-  <div class="w3-main" style="margin-left:260px">
+  <div class="w3-main">
     <div class="w3-teal">
-      <button class="w3-button w3-teal w3-xlarge w3-hide-large" onclick="w3_open()" style="padding: 16px;">&#9776;</button>
+      <button class="mobile-hamburger" onclick="toggleSidebar()">&#9776;</button>
       <div class="w3-container">
         <div class="header-content">
           <h1 class="header-title">View Lecturers</h1>
@@ -542,17 +607,16 @@
           <button class="btn btn-secondary" id="clearSearchBtn">
             <i class="fas fa-times"></i> Clear Search
           </button>
-		  <button class="btn btn-info" id="showWorkloadBtn">
-			<i class="fas fa-chart-line"></i> Show Workload Table
-		  </button>
+          <button class="btn btn-info" id="showWorkloadBtn">
+            <i class="fas fa-chart-line"></i> Show Workload Table
+          </button>
         </div>
         <div class="refresh-info">
           <i class="fas fa-info-circle"></i> Data auto-refreshes every 25 minutes
         </div>
       </div>
 
-      
-      <!-- Auth Info -->
+      <!-- Hidden debug panels -->
       <div class="card debug-card">
         <h4><i class="fas fa-key"></i> Your Login Info</h4>
         <p><strong>Account:</strong> <span id="loginDisplay">...</span></p>
@@ -563,8 +627,7 @@
         <h4><i class="fas fa-shield-alt"></i> Real Session ID Used for Data</h4>
         <p><strong>Session ID:</strong> <span id="sessionUsedDisplay">Loading...</span></p>
       </div>
-      
-      
+
       <!-- Loading -->
       <div id="loadingSpinner" class="card" style="display:none;">
         <div class="loading-container">
@@ -589,31 +652,56 @@
           <p>Click "Load Lecturers" to begin</p>
         </div>
       </div>
-	  
-	  <!-- Workload Panel -->
-		<div id="workloadPanel" class="card" style="display:none;">
-		  <div class="card-header">
-			<i class="fas fa-chart-line"></i>
-			<h3>Lecturer Workload (Analytics)</h3>
-		  </div>
-		  <p class="w3-small" style="color: var(--text-secondary); margin-top:0;">
-			Ranking by Students / Subjects / Sections (TTMS: <code>bil_pelajar</code>, <code>bil_subjek</code>, <code>bil_seksyen</code>)
-		  </p>
-		  <span class="tag hot"><i class="fas fa-fire"></i> Student > 120</span>
-		  <div class="table-wrapper" id="workloadTableWrap"></div>
-		</div>
-		
+      
+      <!-- Workload Panel -->
+      <div id="workloadPanel" class="card" style="display:none;">
+        <div class="card-header">
+          <i class="fas fa-chart-line"></i>
+          <h3>Lecturer Workload (Analytics)</h3>
+        </div>
+        <p class="w3-small" style="color: var(--text-secondary); margin-top:0;">
+          Ranking by Students / Subjects / Sections (TTMS: <code>bil_pelajar</code>, <code>bil_subjek</code>, <code>bil_seksyen</code>)
+        </p>
+        <span class="tag hot"><i class="fas fa-fire"></i> Student > 120</span>
+        <div class="table-wrapper" id="workloadTableWrap"></div>
+      </div>
     </div>
   </div>
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script>
-    // Sidebar
+    // ===== MOBILE SIDEBAR TOGGLE =====
+    function toggleSidebar() {
+      const sidebar = document.getElementById("mySidebar");
+      if (sidebar.style.display === "block") {
+        sidebar.style.display = "none";
+      } else {
+        sidebar.style.display = "block";
+      }
+    }
+
+    // Auto-close sidebar on link click (mobile)
+    document.querySelectorAll('.sidebar-link').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth <= 992) {
+          document.getElementById("mySidebar").style.display = "none";
+        }
+      });
+    });
+
+    // Handle resize
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 992) {
+        document.getElementById("mySidebar").style.display = "block";
+      }
+    });
+
+    // Legacy support
     function w3_open() {
       document.getElementById("mySidebar").style.display = "block";
     }
 
-    // Auth
+    // ===== REST OF YOUR ORIGINAL LOGIC (UNCHANGED) =====
     const rawSession = localStorage.getItem("TTMSFC_userSession");
     if (!rawSession) {
       alert("Please log in first.");
@@ -644,22 +732,21 @@
       }
     };
 
-    // ===== LECTURER LOGIC =====
     let autoRefreshInterval = null;
     let currentLecturerData = [];
-	let currentDisplayedLecturerData = [];
+    let currentDisplayedLecturerData = [];
     let currentSessionId = null;
     let currentSesi = '';
     let currentSemester = '';
-	const month = new Date().getMonth() + 1;
+    const month = new Date().getMonth() + 1;
 
     function generateAcademicYears() {
       const currentYear = new Date().getFullYear();
       const years = [];
-	  const latestStartYear = (month >= 2 && month <= 7) ? currentYear : (currentYear - 1);
-	  for (let i = latestStartYear ; i >= latestStartYear - 5; i--) {
-		years.push(`${i}/${i + 1}`);
-	  }
+      const latestStartYear = (month >= 2 && month <= 7) ? currentYear : (currentYear - 1);
+      for (let i = latestStartYear; i >= latestStartYear - 5; i--) {
+        years.push(`${i}/${i + 1}`);
+      }
       return years;
     }
 
@@ -756,132 +843,122 @@
     }
 
     function initLecturersPageWithFilters(sesi, semester) {
-	  initLecturersPage();
+      initLecturersPage();
 
-	  setTimeout(() => {
-		if (sesi) document.getElementById("sessionSelect").value = sesi;
-		if (semester) document.getElementById("semesterSelect").value = semester;
+      setTimeout(() => {
+        if (sesi) document.getElementById("sessionSelect").value = sesi;
+        if (semester) document.getElementById("semesterSelect").value = semester;
+        document.getElementById("loadLecturersBtn").click();
+      }, 150);
+    }
 
-		document.getElementById("loadLecturersBtn").click();
-	  }, 150);
-	}
+    function escapeHtml(s) {
+      return (s ?? "").toString()
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
 
-	
-	function escapeHtml(s) {
-	  return (s ?? "").toString()
-		.replaceAll("&","&amp;").replaceAll("<","&lt;")
-		.replaceAll(">","&gt;")
-		.replaceAll('"',"&quot;")
-		.replaceAll("'","&#039;");
-	}
+    function normalizeLecturer(r) {
+      const name = r.nama || "—";
+      const staffId = String(r.no_pekerja ?? "—");
+      const subjects = Number(r.bil_subjek || 0);
+      const sections = Number(r.bil_seksyen || 0);
+      const students = Number(r.bil_pelajar || 0);
+      const avg = sections > 0 ? (students / sections) : 0;
+      return { name, staffId, subjects, sections, students, avg };
+    }
 
-	function normalizeLecturer(r) {
-	  const name = r.nama || "—";
-	  const staffId = String(r.no_pekerja ?? "—");
-	  const subjects = Number(r.bil_subjek || 0);
-	  const sections = Number(r.bil_seksyen || 0);
-	  const students = Number(r.bil_pelajar || 0);
+    function renderWorkloadTableFromCurrentData() {
+      if (!Array.isArray(currentLecturerData) || currentLecturerData.length === 0) {
+        alert("Please load lecturers first.");
+        return;
+      }
 
-	  const avg = sections > 0 ? (students / sections) : 0;
-	  return { name, staffId, subjects, sections, students, avg };
-	}
+      const base = (Array.isArray(currentDisplayedLecturerData) && currentDisplayedLecturerData.length) 
+        ? currentDisplayedLecturerData : currentLecturerData;
+      
+      const rows = base.map(normalizeLecturer);
 
+      const term = (document.getElementById("searchInput")?.value || "").trim().toLowerCase();
+      const searchBy = document.getElementById("searchBySelect")?.value || "name";
 
-	function renderWorkloadTableFromCurrentData() {
-	  if (!Array.isArray(currentLecturerData) || currentLecturerData.length === 0) {
-		alert("Please load lecturers first.");
-		return;
-	  }
+      const filtered = term
+        ? rows.filter(r => {
+            const nameOk = r.name.toLowerCase().includes(term);
+            const idOk = String(r.staffId ?? "").toLowerCase().includes(term);
+            if (searchBy === "name") return nameOk;
+            if (searchBy === "staffId") return idOk;
+            return nameOk || idOk;
+          })
+        : rows;
 
-	  const base = (Array.isArray(currentDisplayedLecturerData) && currentDisplayedLecturerData.length) 
-	  ? currentDisplayedLecturerData : currentLecturerData;
-	  
-	  const rows = base.map(normalizeLecturer);
+      const sorted = [...filtered].sort((a,b) => b.students - a.students);
+      const overloadThreshold = 120;
 
+      const html = `
+        <table class="w3-table w3-striped w3-bordered">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Lecturer</th>
+              <th>Staff ID</th>
+              <th>Students</th>
+              <th>Subjects</th>
+              <th>Sections</th>
+              <th>Avg Students / Sections</th>
+              <th>Flag</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${sorted.map((r, i) => {
+              const flag = r.students === 0
+                ? `<span class="tag zero"><i class="fas fa-user-slash"></i> 0 </span>`
+                : (r.students >= overloadThreshold
+                  ? `<span class="tag hot"><i class="fas fa-fire"></i> </span>`
+                  : `<span class="tag"><i class="fas fa-check"></i> OK</span>`);
+              return `
+                <tr>
+                  <td>${i + 1}</td>
+                  <td><b>${escapeHtml(r.name)}</b></td>
+                  <td>${escapeHtml(r.staffId)}</td>
+                  <td><b>${r.students}</b></td>
+                  <td>${r.subjects}</td>
+                  <td>${r.sections}</td>
+                  <td>${r.avg.toFixed(1)}</td>
+                  <td>${flag}</td>
+                </tr>
+              `;
+            }).join("")}
+          </tbody>
+        </table>
+      `;
 
-	  // If you want workload table to follow your search filter, apply it here:
-	  const term = (document.getElementById("searchInput")?.value || "").trim().toLowerCase();
-	  const searchBy = document.getElementById("searchBySelect")?.value || "name";
+      document.getElementById("workloadTableWrap").innerHTML =
+        sorted.length ? html : `<div class="empty-state"><p>No data to analyze.</p></div>`;
 
-	  const filtered = term
-		? rows.filter(r => {
-			const nameOk = r.name.toLowerCase().includes(term);
-			const idOk = String(r.staffId ?? "").toLowerCase().includes(term);
-			if (searchBy === "name") return nameOk;
-			if (searchBy === "staffId") return idOk;
-			return nameOk || idOk; // both
-		  })
-		: rows;
-
-	  // Sort by students (descending)
-	  const sorted = [...filtered].sort((a,b) => b.students - a.students);
-
-	  const overloadThreshold = 120; // change if you want
-
-	  const html = `
-		<table class="w3-table w3-striped w3-bordered">
-		  <thead>
-			<tr>
-			  <th>#</th>
-			  <th>Lecturer</th>
-			  <th>Staff ID</th>
-			  <th>Students</th>
-			  <th>Subjects</th>
-			  <th>Sections</th>
-			  <th>Avg Students / Sections</th>
-			  <th>Flag</th>
-			</tr>
-		  </thead>
-		  <tbody>
-			${sorted.map((r, i) => {
-			  const flag =r.students === 0
-				? `<span class="tag zero"><i class="fas fa-user-slash"></i> 0 </span>`
-				:(r.students >= overloadThreshold
-					?`<span class="tag hot"><i class="fas fa-fire"></i> </span>`
-					: `<span class="tag"><i class="fas fa-check"></i> OK</span>`);
-			  return `
-				<tr>
-				  <td>${i + 1}</td>
-				  <td><b>${escapeHtml(r.name)}</b></td>
-				  <td>${escapeHtml(r.staffId)}</td>
-				  <td><b>${r.students}</b></td>
-				  <td>${r.subjects}</td>
-				  <td>${r.sections}</td>
-				  <td>${r.avg.toFixed(1)}</td>
-				  <td>${flag}</td>
-				</tr>
-			  `;
-			}).join("")}
-		  </tbody>
-		</table>
-	  `;
-
-	  document.getElementById("workloadTableWrap").innerHTML =
-		sorted.length ? html : `<div class="empty-state"><p>No data to analyze.</p></div>`;
-
-	  // show panel
-	  document.getElementById("workloadPanel").style.display = "block";
-	  document.getElementById("workloadPanel").scrollIntoView({ behavior: "smooth", block: "start" });
-	}
-
+      document.getElementById("workloadPanel").style.display = "block";
+      document.getElementById("workloadPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
 
     function initLecturersPage() {
       clearAutoRefresh();
-	  const month = new Date().getMonth() + 1;
+      const month = new Date().getMonth() + 1;
       const academicYears = generateAcademicYears();
       const currentYear = new Date().getFullYear();
-      const defaultSession = (month >= 2 && month <=7) ? `${currentYear}/${currentYear + 1}` : `${currentYear - 1}/${currentYear}`  ;
+      const defaultSession = (month >= 2 && month <=7) ? `${currentYear}/${currentYear + 1}` : `${currentYear - 1}/${currentYear}`;
 
       document.getElementById("sessionSelect").innerHTML = academicYears.map(year => 
         `<option value="${year}" ${year === defaultSession ? 'selected' : ''}>${year}</option>`
       ).join('');
-	  
-	  
-	  document.getElementById("semesterSelect").value = (month >= 2 && month <=7) ? "2" : "1";
+      
+      document.getElementById("semesterSelect").value = (month >= 2 && month <=7) ? "2" : "1";
       document.getElementById("loadLecturersBtn").onclick = fetchLecturerData;
       document.getElementById("applySearchBtn").onclick = applySearch;
       document.getElementById("clearSearchBtn").onclick = clearSearch;
-	  document.getElementById("showWorkloadBtn").onclick = renderWorkloadTableFromCurrentData;
+      document.getElementById("showWorkloadBtn").onclick = renderWorkloadTableFromCurrentData;
 
       document.getElementById("searchInput").addEventListener('keypress', e => { if (e.key === 'Enter') applySearch(); });
 
@@ -931,11 +1008,10 @@
             if (!Array.isArray(data)) data = [data];
             currentLecturerData = data;
             renderLecturerTable(data);
-			currentDisplayedLecturerData = data;
-			// If workload panel is open, refresh it too
-			if (document.getElementById("workloadPanel").style.display !== "none") {
-			  renderWorkloadTableFromCurrentData();
-			}
+            currentDisplayedLecturerData = data;
+            if (document.getElementById("workloadPanel").style.display !== "none") {
+              renderWorkloadTableFromCurrentData();
+            }
             clearAutoRefresh();
             autoRefreshInterval = setInterval(fetchLecturerData, 25 * 60 * 1000);
           })
@@ -997,14 +1073,14 @@
         const searchBy = document.getElementById("searchBySelect").value;
         if (!currentLecturerData.length) { alert("Please load lecturers first!"); return; }
         const filteredData = filterLecturers(currentLecturerData, searchTerm, searchBy);
-		currentDisplayedLecturerData = filteredData;
+        currentDisplayedLecturerData = filteredData;
         renderLecturerTable(filteredData, searchTerm, searchBy);
       }
 
       function clearSearch() {
         document.getElementById("searchInput").value = '';
         if (currentLecturerData.length) renderLecturerTable(currentLecturerData);
-		currentDisplayedLecturerData = currentLecturerData;
+        currentDisplayedLecturerData = currentLecturerData;
       }
     }
 
@@ -1015,14 +1091,10 @@
       }
     }
 
-    // Initialize
-    //initLecturersPage();
-    //Auto click the btn
     window.addEventListener("DOMContentLoaded", () => {
       initLecturersPage();
-      document.getElementById("loadLecturersBtn").click(); // auto-load lecturers
+      document.getElementById("loadLecturersBtn").click();
     });
-
   </script>
 </body>
 </html>

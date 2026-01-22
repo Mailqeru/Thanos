@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <meta name="refresh" content="900" />
   <title>TTMS - Lecturer Report</title>
   <style>
@@ -52,7 +52,25 @@
     .nav-icon { margin-right: 12px; font-size: 18px; width: 24px; text-align: center; }
     .nav-logout { margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 20px; }
 
-    .main-wrapper { margin-left: var(--sidebar-width); min-height: 100vh; }
+    /* ===== MOBILE HAMBURGER ===== */
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 24px;
+      color: var(--utm-blue);
+      cursor: pointer;
+      padding: 8px;
+      margin-right: 15px;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+
+    .menu-toggle:hover {
+      background: #f0f4ff;
+    }
+
+    .main-wrapper { margin-left: var(--sidebar-width); min-height: 100vh; transition: margin-left 0.3s ease; }
     .top-header {
       position: sticky; top: 0; height: var(--header-height);
       background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.08);
@@ -79,11 +97,93 @@
     .loading { text-align: center; padding: 30px; color: #555; }
     .alert { padding: 14px 16px; border-radius: 10px; background: #fff8e1; color: #c47f00; border: 1px solid #ffe4a3; }
 
-    #chart_div { width: 100%; height: 420px; }
+    #chart_div { width: 100%; height: 420px; min-height: 300px; }
+
+    /* Overlay for mobile */
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 999;
+    }
+
+    .overlay.active {
+      display: block;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 968px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-wrapper {
+        margin-left: 0;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+
+      .top-header {
+        padding: 0 20px;
+      }
+
+      .main-content {
+        padding: 20px;
+      }
+
+      .header-time {
+        display: none;
+      }
+
+      .card {
+        padding: 20px;
+      }
+
+      .card h2 {
+        font-size: 18px;
+      }
+
+      #chart_div {
+        height: 350px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header-title {
+        font-size: 18px;
+      }
+
+      .user-name {
+        font-size: 14px;
+      }
+
+      .nav-item {
+        padding: 12px 16px;
+        font-size: 14px;
+      }
+
+      #chart_div {
+        height: 300px;
+      }
+    }
   </style>
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 </head>
 <body>
+
+  <!-- Overlay -->
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
   <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <div class="sidebar-title"><span>🎓</span><span>TTMS</span></div>
@@ -96,7 +196,7 @@
     </div>
     <a class="nav-item" href="Lecturer.html"><span class="nav-icon">📊</span><span>Dashboard</span></a>
     <a class="nav-item" href="LecturerTimetable.html"><span class="nav-icon">📅</span><span>My Timetable</span></a>
-  <a class="nav-item" href="LecturerEnrollment.html"><span class="nav-icon">👥</span><span>Course Assign</span></a>
+    <a class="nav-item" href="LecturerEnrollment.html"><span class="nav-icon">👥</span><span>Course Assign</span></a>
     <a class="nav-item active" href="LecturerReport.html"><span class="nav-icon">📈</span><span>Reports</span></a>
     <div class="nav-logout">
       <a class="nav-item" id="navLogout"><span class="nav-icon">🚪</span><span>Logout</span></a>
@@ -105,6 +205,7 @@
 
   <div class="main-wrapper">
     <header class="top-header">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
       <h1 class="header-title">Reports</h1>
       <div class="header-actions">
         <div class="header-time" id="currentTime">--:--</div>
@@ -121,6 +222,34 @@
   </div>
 
   <script>
+    // Sidebar Toggle
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('overlay');
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('active');
+    }
+
+    function closeSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('overlay');
+      sidebar.classList.remove('open');
+      overlay.classList.remove('active');
+    }
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(event) {
+      const sidebar = document.getElementById('sidebar');
+      const menuToggle = document.querySelector('.menu-toggle');
+      if (window.innerWidth <= 968 && sidebar.classList.contains('open')) {
+        const isClickInsideSidebar = sidebar.contains(event.target);
+        const isClickOnMenuToggle = menuToggle && menuToggle.contains(event.target);
+        if (!isClickInsideSidebar && !isClickOnMenuToggle) {
+          closeSidebar();
+        }
+      }
+    });
+
     function updateTime() {
       const now = new Date();
       document.getElementById('currentTime').textContent =

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <meta name="refresh" content="900" />
   <title>TTMS - Lecturer Dashboard</title>
   <style>
@@ -357,6 +357,8 @@
       text-decoration: none;
       color: var(--utm-blue);
       display: block;
+      /* Ensure minimum touch target size */
+      min-height: 80px;
     }
 
     .action-btn:hover {
@@ -475,6 +477,15 @@
       .stat-card-value {
         font-size: 28px;
       }
+
+      /* Ensure cards have enough padding on mobile */
+      .stat-card {
+        padding: 20px;
+      }
+
+      .info-panel, .quick-actions {
+        padding: 20px;
+      }
     }
 
     @media (max-width: 480px) {
@@ -488,6 +499,32 @@
 
       .sidebar-title {
         font-size: 20px;
+      }
+
+      .user-name {
+        font-size: 14px;
+      }
+
+      .user-role {
+        font-size: 12px;
+      }
+
+      .nav-item {
+        padding: 12px 20px;
+        font-size: 14px;
+      }
+
+      .action-btn {
+        padding: 16px;
+        min-height: 70px;
+      }
+
+      .action-btn-icon {
+        font-size: 28px;
+      }
+
+      .action-btn-text {
+        font-size: 14px;
       }
     }
   </style>
@@ -654,6 +691,19 @@
       sidebar.classList.remove('open');
       overlay.classList.remove('active');
     }
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(event) {
+      const sidebar = document.getElementById('sidebar');
+      const menuToggle = document.querySelector('.menu-toggle');
+      if (window.innerWidth <= 968 && sidebar.classList.contains('open')) {
+        const isClickInsideSidebar = sidebar.contains(event.target);
+        const isClickOnMenuToggle = menuToggle && menuToggle.contains(event.target);
+        if (!isClickInsideSidebar && !isClickOnMenuToggle) {
+          closeSidebar();
+        }
+      }
+    });
 
     // Update Time
     function updateTime() {

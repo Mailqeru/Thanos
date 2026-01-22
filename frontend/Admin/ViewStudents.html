@@ -100,6 +100,18 @@ color: white;
 font-size: 28px;
 font-weight: 700;
 }
+
+/* ===== MOBILE HAMBURGER ===== */
+.mobile-hamburger {
+  display: none;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  padding: 12px;
+  cursor: pointer;
+}
+
 /* Main Content */
 .w3-main {
 background-color: var(--light-bg);
@@ -222,7 +234,7 @@ border-radius: 8px;
 margin: 16px 0;
 font-size: 14px;
 color: #2c3e50;
-display: none !important; /*hide the div*/
+display: none !important;
 }
 /* Table */
 .table-wrapper {
@@ -237,6 +249,7 @@ border-collapse: collapse;
 background: white;
 margin: 0;
 font-size: 14px;
+min-width: 600px; /* ensures horizontal scroll */
 }
 table.w3-table thead tr {
 background: linear-gradient(135deg, var(--utm-blue) 0%, #004080 100%);
@@ -379,36 +392,83 @@ max-height: 300px;
 font-size: 13px;
 font-family: monospace;
 }
-/* Responsive */
-@media (max-width: 768px) {
-.content-wrapper {
-padding: 20px;
-}
-.form-row {
-grid-template-columns: 1fr;
-}
-.btn-group {
-flex-direction: column;
-}
-.btn {
-width: 100%;
-justify-content: center;
-}
-.pagination-info {
-flex-direction: column;
-align-items: flex-start;
-gap: 8px;
-}
-.card-header {
-flex-direction: column;
-align-items: flex-start;
-}
+
+/* ===== MOBILE OVERRIDES ===== */
+@media (max-width: 992px) {
+  .w3-sidebar {
+    display: none;
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: 240px !important;
+  }
+
+  .w3-main {
+    margin-left: 0;
+  }
+
+  .mobile-hamburger {
+    display: block;
+  }
+
+  .header-title {
+    font-size: 22px;
+  }
+
+  .content-wrapper {
+    padding: 20px 16px;
+  }
+
+  .card {
+    padding: 20px;
+  }
+
+  .btn {
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+
+  .btn-group {
+    flex-direction: column;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .pagination-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  table.w3-table {
+    font-size: 13px;
+  }
+
+  table.w3-table th,
+  table.w3-table td {
+    padding: 10px 8px;
+  }
+
+  .action-btn {
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+  }
 }
 </style>
 </head>
 <body>
+
 <!-- Sidebar -->
-<div class="w3-sidebar w3-bar-block w3-collapse w3-card" style="width:260px;" id="mySidebar">
+<div class="w3-sidebar w3-bar-block w3-card" id="mySidebar">
 <div class="sidebar-header">
 <div class="sidebar-logo">
 <i class="fas fa-graduation-cap"></i>
@@ -416,41 +476,43 @@ align-items: flex-start;
 <h2 class="sidebar-title">TTMS</h2>
 <p class="sidebar-subtitle">Timetable Management System</p>
 </div>
-<a href="Admin.html" class="w3-bar-item w3-button">
+<a href="Admin.html" class="w3-bar-item w3-button sidebar-link">
 <i class="fas fa-home"></i> Dashboard
 </a>
-<a href="ViewLecturers.html" class="w3-bar-item w3-button">
+<a href="ViewLecturers.html" class="w3-bar-item w3-button sidebar-link">
 <i class="fas fa-chalkboard-teacher"></i> Lecturers
 </a>
-<a href="ViewStudents.html" class="w3-bar-item w3-button active">
+<a href="ViewStudents.html" class="w3-bar-item w3-button active sidebar-link">
 <i class="fas fa-user-graduate"></i> Students
 </a>
-<a href="AdminTimetableGenerator.html" class="w3-bar-item w3-button">
-      <i class="fas fa-calendar-alt"></i> Academic Workload Monitoring & Scheduling System
-    </a>
-<a href="ViewSubjects.html" class="w3-bar-item w3-button">
+<a href="AdminTimetableGenerator.html" class="w3-bar-item w3-button sidebar-link">
+<i class="fas fa-calendar-alt"></i> Academic Workload Monitoring & Scheduling System
+</a>
+<a href="ViewSubjects.html" class="w3-bar-item w3-button sidebar-link">
 <i class="fas fa-book-open"></i> Subjects
 </a>
-<a href="RoomUtilization.html" class="w3-bar-item w3-button">
+<a href="RoomUtilization.html" class="w3-bar-item w3-button sidebar-link">
 <i class="fas fa-door-open"></i> Room Utilization
 </a>
-<a href="Reports.html" class="w3-bar-item w3-button">
+<a href="Reports.html" class="w3-bar-item w3-button sidebar-link">
 <i class="fas fa-chart-bar"></i> Reports
 </a>
 <a href="#" class="w3-bar-item w3-button" id="navLogout" style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
 <i class="fas fa-sign-out-alt"></i> Logout
 </a>
 </div>
+
 <!-- Main Content -->
-<div class="w3-main" style="margin-left:260px">
+<div class="w3-main">
 <div class="w3-teal">
-<button class="w3-button w3-teal w3-xlarge w3-hide-large" onclick="w3_open()" style="padding: 16px;">&#9776;</button>
+<button class="mobile-hamburger" onclick="toggleSidebar()">&#9776;</button>
 <div class="w3-container">
 <div class="header-content">
 <h1 class="header-title">View Students</h1>
 </div>
 </div>
 </div>
+
 <div class="content-wrapper">
 <!-- Description Card -->
 <div class="card">
@@ -460,6 +522,7 @@ align-items: flex-start;
 </div>
 <p>Browse and search students by session, semester, and apply pagination limits.</p>
 </div>
+
 <!-- Debug Info -->
 <div class="card debug-card">
 <strong><i class="fas fa-bug"></i> Session Information</strong><br>
@@ -467,6 +530,7 @@ align-items: flex-start;
 • Extracted Real Session ID: <span id="debugRealSession">Not extracted yet</span><br>
 • Auth URL: <span id="debugAuthUrl">Not generated</span>
 </div>
+
 <!-- Filters -->
 <div class="card">
 <div class="form-row">
@@ -530,6 +594,7 @@ align-items: flex-start;
 <i class="fas fa-times"></i> Clear
 </button>
 </div>
+
 <!-- Pagination Info -->
 <div class="w3-row" style="margin-top: 20px;">
 <div class="w3-col s12 m6">
@@ -542,12 +607,14 @@ Page info will appear here
 </div>
 </div>
 </div>
+
 <!-- Session Info -->
 <div id="sessionInfo" class="card debug-card" style="display:none;">
 <strong><i class="fas fa-key"></i> Session Details</strong><br>
 • Real Session ID: <code id="sessionUsedDisplay">Not loaded yet</code><br>
 • API Status: <span id="apiStatus">Inactive</span>
 </div>
+
 <!-- Loading -->
 <div id="loadingSpinner" class="card" style="display:none;">
 <div class="loading-container">
@@ -555,6 +622,7 @@ Page info will appear here
 <div class="loading-text">Loading all student data... This may take a moment.</div>
 </div>
 </div>
+
 <!-- Error -->
 <div id="errorContainer" class="error-container" style="display:none;">
 <h4>
@@ -563,8 +631,10 @@ Page info will appear here
 </h4>
 <p id="errorMessage"></p>
 </div>
+
 <!-- Stats -->
 <div id="studentStats" class="stats-card" style="display:none;"></div>
+
 <!-- Table -->
 <div id="studentTableContainer" class="card">
 <div class="empty-state">
@@ -575,17 +645,41 @@ Page info will appear here
 </div>
 </div>
 </div>
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script>
-// Sidebar toggle
+// ===== MOBILE SIDEBAR TOGGLE =====
+function toggleSidebar() {
+  const sidebar = document.getElementById("mySidebar");
+  if (sidebar.style.display === "block") {
+    sidebar.style.display = "none";
+  } else {
+    sidebar.style.display = "block";
+  }
+}
+
+// Auto-close sidebar on link click (mobile)
+document.querySelectorAll('.sidebar-link').forEach(link => {
+  link.addEventListener('click', () => {
+    if (window.innerWidth <= 992) {
+      document.getElementById("mySidebar").style.display = "none";
+    }
+  });
+});
+
+// Handle resize
+window.addEventListener('resize', () => {
+  if (window.innerWidth > 992) {
+    document.getElementById("mySidebar").style.display = "block";
+  }
+});
+
+// Legacy support
 function w3_open() {
   document.getElementById("mySidebar").style.display = "block";
 }
-function w3_close() {
-  document.getElementById("mySidebar").style.display = "none";
-}
 
-// Auth validation
+// ===== REST OF YOUR ORIGINAL LOGIC (UNCHANGED) =====
 const rawSession = localStorage.getItem("TTMSFC_userSession");
 if (!rawSession) {
   alert("Please log in first.");
@@ -603,15 +697,13 @@ if (user.inferredRole !== "admin") {
   window.location.replace("../index.html");
 }
 
-// Global state
 let currentSessionId = null;
-let fullStudentList = []; // ✅ All students in memory
+let fullStudentList = [];
 let currentSesi = '';
 let currentSemester = '';
 let currentPage = 1;
 let currentLimit = 20;
 
-// Logout
 document.getElementById("navLogout").onclick = function() {
   if (confirm("Logout now?")) {
     localStorage.removeItem("TTMSFC_userSession");
@@ -620,14 +712,12 @@ document.getElementById("navLogout").onclick = function() {
   }
 };
 
-// Initialize UI
 $(document).ready(function() {
   initStudentsPage();
-  document.getElementById("loadStudentsBtn").click(); // auto-click
+  document.getElementById("loadStudentsBtn").click();
 });
 
 function initStudentsPage() {
-  // Session debug
   if (rawSession) {
     try {
       const session = JSON.parse(rawSession);
@@ -637,7 +727,6 @@ function initStudentsPage() {
     }
   }
 
-  // Academic years
   const month = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
   const latestStartYear = (month >= 2 && month <= 7) ? currentYear : (currentYear - 1);
@@ -652,7 +741,6 @@ function initStudentsPage() {
   ).join('');
   document.getElementById("semesterSelect").value = (month >= 2 && month <= 7) ? "2" : "1";
 
-  // Event listeners
   document.getElementById('loadStudentsBtn').onclick = fetchStudentData;
   document.getElementById('applySearchBtn').onclick = applySearch;
   document.getElementById('clearSearchBtn').onclick = clearSearch;
@@ -661,7 +749,6 @@ function initStudentsPage() {
   });
 }
 
-// Extract session ID from auth HTML
 function extractSessionIdFromResponse(text) {
   const patterns = [
     /name\s*=\s*["']session_id["']\s+value\s*=\s*["']([^"']+)/i,
@@ -676,7 +763,6 @@ function extractSessionIdFromResponse(text) {
   return ids?.[0] || null;
 }
 
-// Fetch ALL students via pagination (up to 10k)
 async function fetchAllStudentsPaginated(sessionId, sesi, semester) {
   let all = [];
   let offset = 0;
@@ -712,7 +798,6 @@ async function fetchAllStudentsPaginated(sessionId, sesi, semester) {
   return all;
 }
 
-// Main fetch function
 async function fetchStudentData() {
   const raw = localStorage.getItem("TTMSFC_userSession");
   if (!raw) return showError("Session missing", "Please log in again.");
@@ -736,7 +821,6 @@ async function fetchStudentData() {
   hideError();
 
   try {
-    // Authenticate to get real session ID
     const authUrl = `http://web.fc.utm.my/ttms/auth-admin.php?session_id=${encodeURIComponent(sessionId)}`;
     document.getElementById('debugAuthUrl').textContent = authUrl;
     const authRes = await fetch(authUrl);
@@ -745,18 +829,15 @@ async function fetchStudentData() {
     if (!realSessionId) throw new Error("Could not extract real session ID.");
     currentSessionId = realSessionId;
 
-    // Update UI
     document.getElementById('debugRealSession').textContent = realSessionId;
     document.getElementById('debugRealSession').style.color = 'green';
     document.getElementById('sessionUsedDisplay').textContent = realSessionId;
     document.getElementById('apiStatus').textContent = 'Active';
     document.getElementById('sessionInfo').style.display = 'block';
 
-    // ✅ Load ALL students once
     document.querySelector('.loading-text').textContent = 'Loading all students... (up to 10,000)';
     fullStudentList = await fetchAllStudentsPaginated(realSessionId, currentSesi, currentSemester);
 
-    // Show first page
     renderCurrentPage();
     updateStats(fullStudentList);
     updatePaginationInfo();
@@ -771,7 +852,6 @@ async function fetchStudentData() {
   }
 }
 
-// Render current page from full list
 function renderCurrentPage() {
   const start = (currentPage - 1) * currentLimit;
   const end = currentLimit === 0 ? fullStudentList.length : start + currentLimit;
@@ -779,7 +859,6 @@ function renderCurrentPage() {
   renderStudentTable(pageData);
 }
 
-// Render table
 function renderStudentTable(data) {
   const container = document.getElementById('studentTableContainer');
   if (!data || data.length === 0) {
@@ -797,7 +876,7 @@ function renderStudentTable(data) {
   const hasFaculty = first.fakulti || first.faculty;
   const hasStatus = 'status' in first;
 
-  let html = `<div style="overflow-x:auto;"><table class="w3-table w3-bordered w3-striped"><thead><tr>
+  let html = `<div class="table-wrapper"><table class="w3-table w3-bordered w3-striped"><thead><tr>
     <th>#</th>
     <th>Student ID</th>
     <th>Name</th>
@@ -831,7 +910,6 @@ function renderStudentTable(data) {
   container.innerHTML = html;
 }
 
-// Search (on full list)
 function applySearch() {
   const term = document.getElementById('searchInput').value.trim();
   const by = document.getElementById('searchBySelect').value;
@@ -850,7 +928,6 @@ function applySearch() {
     return name.includes(t) || id.includes(t) || prog.includes(t) || fac.includes(t);
   });
 
-  // Show all results (ignore pagination limit during search)
   renderStudentTable(filtered);
   document.getElementById('paginationInfo').innerHTML = `<i class="fas fa-search"></i> Search results: <strong>${filtered.length}</strong> matching "${term}"`;
   document.getElementById('paginationControls').innerHTML = '';
@@ -864,7 +941,6 @@ function clearSearch() {
   renderPaginationControls();
 }
 
-// Pagination
 function updatePaginationInfo() {
   if (currentLimit === 0) {
     document.getElementById('paginationInfo').innerHTML = `<i class="fas fa-info-circle"></i> Showing all <strong>${fullStudentList.length}</strong> students`;
@@ -903,7 +979,6 @@ window.goToPage = function(page) {
   renderPaginationControls();
 };
 
-// Stats
 function updateStats(data) {
   const stats = document.getElementById('studentStats');
   if (!data || data.length === 0) {
@@ -915,7 +990,6 @@ function updateStats(data) {
   stats.style.display = 'block';
 }
 
-// Student details
 window.viewStudentDetails = async function(studentId) {
   if (!currentSessionId) {
     alert("Please load students first.");
@@ -939,11 +1013,11 @@ window.viewStudentDetails = async function(studentId) {
       return;
     }
 
-    let html = `<button class="back-btn" onclick="backToStudentsList()">Back</button><div class="card"><h4>Subjects for ${studentId}</h4><p>${currentSesi} • Sem ${currentSemester}</p></div><table class="w3-table w3-bordered w3-striped"><thead><tr><th>#</th><th>Code</th><th>Name</th><th>Sec</th></tr></thead><tbody>`;
+    let html = `<button class="back-btn" onclick="backToStudentsList()">Back</button><div class="card"><h4>Subjects for ${studentId}</h4><p>${currentSesi} • Sem ${currentSemester}</p></div><div class="table-wrapper"><table class="w3-table w3-bordered w3-striped"><thead><tr><th>#</th><th>Code</th><th>Name</th><th>Sec</th></tr></thead><tbody>`;
     filtered.forEach((s, i) => {
       html += `<tr><td>${i+1}</td><td>${s.kod_subjek || '—'}</td><td>${s.nama_subjek || '—'}</td><td>${s.seksyen || '—'}</td></tr>`;
     });
-    html += `</tbody></table>`;
+    html += `</tbody></table></div>`;
     container.innerHTML = html;
   } catch (e) {
     container.innerHTML = `<button class="back-btn" onclick="backToStudentsList()">Back</button><div class="error-container"><h4>Error</h4><p>${e.message}</p></div>`;
@@ -951,10 +1025,9 @@ window.viewStudentDetails = async function(studentId) {
 };
 
 window.backToStudentsList = function() {
-  clearSearch(); // resets to page 1
+  clearSearch();
 };
 
-// UI helpers
 function showLoading(show) {
   document.getElementById('loadingSpinner').style.display = show ? 'flex' : 'none';
   document.getElementById('loadStudentsBtn').disabled = show;

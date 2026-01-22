@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <meta name="refresh" content="900" />
   <title>TTMS - Course Assign</title>
   <style>
@@ -317,6 +317,8 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
+      /* Ensure minimum touch target size */
+      min-height: 44px;
     }
 
     .btn-primary {
@@ -473,6 +475,7 @@
       width: 100%;
       border-collapse: collapse;
       background: white;
+      min-width: 600px; /* ensures horizontal scroll on mobile */
     }
 
     thead th {
@@ -613,6 +616,22 @@
       margin-right: 6px;
     }
 
+    /* Overlay for mobile */
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 999;
+    }
+
+    .overlay.active {
+      display: block;
+    }
+
     /* Mobile Responsive */
     @media (max-width: 768px) {
       .sidebar {
@@ -703,6 +722,12 @@
         flex-direction: column;
         align-items: flex-start;
       }
+
+      /* Ensure modal fits on small screens */
+      .modal {
+        width: 95vw;
+        max-height: 90vh;
+      }
     }
 
     @media (max-width: 480px) {
@@ -716,6 +741,24 @@
 
       .summary-card-value {
         font-size: 28px;
+      }
+
+      .btn {
+        padding: 10px 20px;
+        font-size: 14px;
+      }
+
+      .session-card {
+        padding: 16px;
+      }
+
+      .session-title {
+        font-size: 16px;
+      }
+
+      .stat-item {
+        padding: 4px 8px;
+        font-size: 12px;
       }
     }
   </style>
@@ -772,7 +815,7 @@
   <div class="main-wrapper">
     <header class="top-header">
       <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
-  <h1 class="header-title">Course Assign</h1>
+      <h1 class="header-title">Course Assign</h1>
       <div class="header-actions">
         <div class="header-time" id="currentTime">--:--</div>
       </div>
@@ -867,6 +910,19 @@
       sidebar.classList.remove('open');
       overlay.classList.remove('active');
     }
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(event) {
+      const sidebar = document.getElementById('sidebar');
+      const menuToggle = document.querySelector('.menu-toggle');
+      if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
+        const isClickInsideSidebar = sidebar.contains(event.target);
+        const isClickOnMenuToggle = menuToggle && menuToggle.contains(event.target);
+        if (!isClickInsideSidebar && !isClickOnMenuToggle) {
+          closeSidebar();
+        }
+      }
+    });
 
     // Update Time
     function updateTime() {
