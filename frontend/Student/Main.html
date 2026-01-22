@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <meta name="refresh" content="900">
   <title>TTMS - Student Dashboard</title>
   <style>
@@ -316,6 +316,8 @@
       color: var(--utm-blue);
       text-decoration: none;
       display: block;
+      /* Ensure minimum touch target size */
+      min-height: 80px;
     }
 
     .action-btn:hover {
@@ -402,6 +404,45 @@
       .info-grid,
       .action-grid {
         grid-template-columns: 1fr;
+      }
+
+      .stat-card-value {
+        font-size: 24px;
+      }
+
+      .action-btn {
+        min-height: 70px;
+        padding: 14px;
+      }
+
+      .action-icon {
+        font-size: 24px;
+      }
+
+      .action-text {
+        font-size: 13px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header-title {
+        font-size: 18px;
+      }
+
+      .sidebar-title {
+        font-size: 18px;
+      }
+
+      .user-name {
+        font-size: 14px;
+      }
+
+      .stat-card-label {
+        font-size: 12px;
+      }
+
+      .info-label, .info-value {
+        font-size: 13px;
       }
     }
   </style>
@@ -490,6 +531,19 @@
       document.getElementById('sidebar').classList.remove('open');
       document.getElementById('overlay').classList.remove('active');
     }
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(event) {
+      const sidebar = document.getElementById('sidebar');
+      const menuToggle = document.querySelector('.menu-toggle');
+      if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
+        const isClickInsideSidebar = sidebar.contains(event.target);
+        const isClickOnMenuToggle = menuToggle && menuToggle.contains(event.target);
+        if (!isClickInsideSidebar && !isClickOnMenuToggle) {
+          closeSidebar();
+        }
+      }
+    });
 
     // Auth & Role Check
     const session = localStorage.getItem("TTMSFC_userSession");

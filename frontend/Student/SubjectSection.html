@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <meta name="refresh" content="900">
   <title>TTMS - Subject Sections</title>
   <style>
@@ -237,10 +237,12 @@
       background: white;
       color: #333;
       appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23003366' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+      background-image: url("image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23003366' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 16px center;
       padding-right: 40px;
+      /* Ensure minimum touch target size */
+      min-height: 48px;
     }
 
     .search-container {
@@ -254,6 +256,8 @@
       border: 1px solid #d1d5db;
       border-radius: 8px;
       font-size: 16px;
+      /* Ensure minimum touch target size */
+      min-height: 48px;
     }
 
     .info-note {
@@ -404,6 +408,11 @@
         padding-right: 36px;
       }
 
+      .search-container input {
+        padding: 10px 14px;
+        font-size: 14px;
+      }
+
       .pagination {
         flex-direction: column;
         gap: 8px;
@@ -423,7 +432,8 @@
         font-size: 16px;
       }
 
-      .filter-group select {
+      .filter-group select,
+      .search-container input {
         padding: 8px 12px;
         font-size: 14px;
       }
@@ -431,6 +441,10 @@
       .subject-card th,
       .subject-card td {
         padding: 8px;
+        font-size: 12px;
+      }
+
+      .schedule-entry {
         font-size: 12px;
       }
     }
@@ -610,6 +624,19 @@
     document.getElementById('sidebar').classList.remove('open');
     document.getElementById('overlay').classList.remove('active');
   }
+
+  // Close sidebar when clicking outside on mobile
+  document.addEventListener('click', function(event) {
+    const sidebar = document.getElementById('sidebar');
+    const menuToggle = document.querySelector('.menu-toggle');
+    if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
+      const isClickInsideSidebar = sidebar.contains(event.target);
+      const isClickOnMenuToggle = menuToggle && menuToggle.contains(event.target);
+      if (!isClickInsideSidebar && !isClickOnMenuToggle) {
+        closeSidebar();
+      }
+    }
+  });
 
   // Auth & Role Check
   const session = localStorage.getItem("TTMSFC_userSession");

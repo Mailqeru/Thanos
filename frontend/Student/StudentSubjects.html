@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <meta name="refresh" content="900">
   <title>TTMS - My Subjects</title>
   <style>
@@ -228,10 +228,12 @@
       background-color: white;
       color: #333;
       appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23003366' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+      background-image: url("image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23003366' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 16px center;
       padding-right: 40px;
+      /* Ensure minimum touch target size */
+      min-height: 48px;
     }
 
     .subject-card {
@@ -378,6 +380,7 @@
         padding: 10px 14px;
         font-size: 14px;
         padding-right: 36px;
+        min-height: 44px;
       }
 
       .subject-card th,
@@ -388,6 +391,35 @@
 
       .subject-card header h4 {
         font-size: 16px;
+      }
+
+      .subjects-container h3 {
+        font-size: 20px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header-title {
+        font-size: 18px;
+      }
+
+      .sidebar-title {
+        font-size: 18px;
+      }
+
+      .user-name {
+        font-size: 14px;
+      }
+
+      .subject-card th,
+      .subject-card td {
+        padding: 8px;
+        font-size: 12px;
+      }
+
+      .subject-summary {
+        font-size: 13px;
+        padding: 12px 16px;
       }
     }
   </style>
@@ -489,6 +521,19 @@
       document.getElementById('sidebar').classList.remove('open');
       document.getElementById('overlay').classList.remove('active');
     }
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(event) {
+      const sidebar = document.getElementById('sidebar');
+      const menuToggle = document.querySelector('.menu-toggle');
+      if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
+        const isClickInsideSidebar = sidebar.contains(event.target);
+        const isClickOnMenuToggle = menuToggle && menuToggle.contains(event.target);
+        if (!isClickInsideSidebar && !isClickOnMenuToggle) {
+          closeSidebar();
+        }
+      }
+    });
 
     // Auth & Role Check
     const session = localStorage.getItem("TTMSFC_userSession");

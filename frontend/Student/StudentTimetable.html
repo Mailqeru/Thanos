@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <meta name="refresh" content="900">
   <title>TTMS - My Timetable</title>
   <style>
@@ -84,6 +84,67 @@
     .overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); z-index: 999; }
     .overlay.active { display: block; }
 
+    /* ===== COMPACT TIMETABLE GRID ===== */
+    .timetable-container { max-width: 1200px; margin: 0 auto; }
+    .timetable-container h3 { color: #003366; margin-bottom: 20px; font-weight: 600; font-size: 24px; text-align: center; }
+
+    .desktop-grid {
+      background: white; border-radius: 12px; overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06); border: 1px solid #eaeef5;
+      margin-bottom: 20px; display: grid;
+      grid-template-columns: 100px repeat(5, 1fr);
+      min-width: 600px; /* ensures horizontal scroll */
+    }
+
+    .corner-cell { 
+      background: #003366; 
+      border-right: 1px solid rgba(255,255,255,0.2); 
+    }
+    
+    .day-header-cell {
+      background: #003366; color: white; font-weight: 700; font-size: 12px;
+      text-transform: uppercase; display: flex; align-items: center; justify-content: center;
+      padding: 10px 5px; border-right: 1px solid rgba(255,255,255,0.2);
+      line-height: 1.2;
+    }
+
+    .time-sidebar-cell {
+      background: #f8f9fa; color: #003366; font-weight: 700; font-size: 10px;
+      display: flex; align-items: center; justify-content: center;
+      border-bottom: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0;
+      padding: 8px; min-height: 50px; text-align: center; white-space: nowrap;
+    }
+
+    .grid-cell { 
+      border-right: 1px solid #eee; border-bottom: 1px solid #eee; 
+      display: flex; flex-direction: column; 
+      min-height: 50px;
+    }
+    
+    .grid-cell.empty { background: #fff; }
+    
+    .class-item {
+      background: #eef5ff; border-left: 4px solid #003366; padding: 6px;
+      height: 100%; width: 100%; display: flex; flex-direction: column;
+      justify-content: center; text-align: center;
+      line-height: 1.2;
+    }
+    
+    .class-code { font-weight: 700; color: #003366; font-size: 11px; margin-bottom: 2px; }
+    .class-name { font-size: 10px; color: #555; margin-bottom: 2px; }
+    .class-room, .class-lecturer { color: #666; font-size: 9px; }
+
+    .summary-bar {
+      background: #eef5ff; border-left: 6px solid #003366;
+      padding: 15px 20px; border-radius: 8px;
+      display: flex; align-items: center; gap: 15px;
+      color: #003366; font-size: 14px;
+    }
+    
+    .summary-bar strong { font-weight: 700; font-size: 15px; }
+
+    .mobile-timetable { display: none !important; }
+    
     /* Mobile */
     @media (max-width: 768px) {
       .sidebar { transform: translateX(-100%); }
@@ -93,65 +154,31 @@
       .main-content { padding: 20px 16px; }
       .top-header { padding: 0 16px; }
       .header-time { display: none; }
-    }
-
-    /* ===== TIMETABLE STYLES (VERTICAL LAYOUT) ===== */
-    .timetable-container { max-width: 1200px; margin: 0 auto; }
-    .timetable-container h3 { color: #003366; margin-bottom: 20px; font-weight: 600; font-size: 24px; text-align: center; }
-
-    /* GRID SETUP: 1 Time Column + 5 Day Columns */
-    .desktop-grid {
-      background: white; border-radius: 12px; overflow: hidden;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.06); border: 1px solid #eaeef5;
-      margin-bottom: 20px; display: grid;
-      /* INCREASED first column width to fit "08:00 - 09:00" */
-      grid-template-columns: 120px repeat(5, 1fr); 
-    }
-
-    /* HEADERS (Top Row - Days) */
-    .corner-cell { background: #003366; border-right: 1px solid rgba(255,255,255,0.2); }
-    .day-header-cell {
-      background: #003366; color: white; font-weight: 700; font-size: 14px;
-      text-transform: uppercase; display: flex; align-items: center; justify-content: center;
-      padding: 15px 5px; border-right: 1px solid rgba(255,255,255,0.2);
-    }
-
-    /* SIDEBAR (Left Column - Time) */
-    .time-sidebar-cell {
-      background: #f8f9fa; color: #003366; font-weight: 700; font-size: 11px; /* Smaller font for range */
-      display: flex; align-items: center; justify-content: center;
-      border-bottom: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0;
-      padding: 10px; min-height: 80px; text-align: center; white-space: nowrap;
-    }
-
-    /* CLASS CELLS */
-    .grid-cell { border-right: 1px solid #eee; border-bottom: 1px solid #eee; display: flex; flex-direction: column; }
-    .grid-cell.empty { background: #fff; }
-    .class-item {
-      background: #eef5ff; border-left: 5px solid #003366; padding: 8px;
-      height: 100%; width: 100%; display: flex; flex-direction: column;
-      justify-content: center; text-align: center;
-    }
-    .class-code { font-weight: 700; color: #003366; font-size: 12px; margin-bottom: 2px; }
-    .class-name { font-size: 11px; color: #555; margin-bottom: 2px; line-height: 1.2; }
-    .class-room, .class-lecturer { color: #666; font-size: 10px; font-style: italic; }
-
-    /* SUMMARY BAR */
-    .summary-bar {
-      background: #eef5ff; border-left: 6px solid #003366;
-      padding: 15px 20px; border-radius: 8px;
-      display: flex; align-items: center; gap: 15px;
-      color: #003366; font-size: 14px;
-    }
-    .summary-bar strong { font-weight: 700; font-size: 15px; }
-
-    /* Hide Mobile Stuff */
-    .mobile-timetable { display: none !important; }
-    
-    @media (max-width: 768px) {
-      .desktop-grid { display: none; }
-      .timetable-container { padding: 10px; }
-      /* Fallback message for mobile if needed, or implement mobile view */
+      
+      /* Further shrink timetable on very small screens */
+      .desktop-grid {
+        grid-template-columns: 80px repeat(5, 1fr);
+        font-size: 12px;
+      }
+      
+      .day-header-cell {
+        font-size: 11px;
+        padding: 8px 4px;
+      }
+      
+      .time-sidebar-cell {
+        font-size: 9px;
+        padding: 6px;
+        min-height: 45px;
+      }
+      
+      .class-item {
+        padding: 4px;
+      }
+      
+      .class-code { font-size: 10px; }
+      .class-name { font-size: 9px; }
+      .class-room, .class-lecturer { font-size: 8px; }
     }
   </style>
 </head>
@@ -205,8 +232,28 @@
     }
     updateTime(); setInterval(updateTime, 60000);
 
-    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('active'); }
-    function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('active'); }
+    function toggleSidebar() { 
+      document.getElementById('sidebar').classList.toggle('open'); 
+      document.getElementById('overlay').classList.toggle('active'); 
+    }
+    
+    function closeSidebar() { 
+      document.getElementById('sidebar').classList.remove('open'); 
+      document.getElementById('overlay').classList.remove('active'); 
+    }
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(event) {
+      const sidebar = document.getElementById('sidebar');
+      const menuToggle = document.querySelector('.menu-toggle');
+      if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
+        const isClickInsideSidebar = sidebar.contains(event.target);
+        const isClickOnMenuToggle = menuToggle && menuToggle.contains(event.target);
+        if (!isClickInsideSidebar && !isClickOnMenuToggle) {
+          closeSidebar();
+        }
+      }
+    });
 
     // Auth Check
     const session = localStorage.getItem("TTMSFC_userSession");
@@ -308,7 +355,7 @@
       for(let i=2; i<=15; i++) timeSlots.push(i);
 
       const days = [2,3,4,5,6]; // Mon - Fri
-      const dayNames = { 2: "MONDAY", 3: "TUESDAY", 4: "WEDNESDAY", 5: "THURSDAY", 6: "FRIDAY" };
+      const dayNames = { 2: "MON", 3: "TUE", 4: "WED", 5: "THU", 6: "FRI" };
 
       // --- 1. NEW: Calculate Hours Per Day ---
       const dailyHours = { 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
@@ -349,16 +396,15 @@
       const totalWeeklyHours = data.length;
 
       // --- HTML GENERATION ---
-      let html = `<div class="desktop-timetable"><div class="desktop-grid">`;
+      let html = `<div style="overflow-x: auto;"><div class="desktop-grid">`;
       
       // Header Row (Updated to show Daily Hours)
       html += `<div class="corner-cell"></div>`;
       days.forEach(day => { 
-          // Added style="flex-direction: column;" to stack the name and hours
-          html += `<div class="day-header-cell" style="flex-direction: column; line-height: 1.2;">
+          html += `<div class="day-header-cell">
                      <span>${dayNames[day]}</span>
-                     <span style="font-size: 11px; font-weight: 400; opacity: 0.8; margin-top: 4px;">
-                       ${dailyHours[day]} Hours
+                     <span style="font-size: 10px; font-weight: 400; opacity: 0.8; margin-top: 2px;">
+                       ${dailyHours[day]}h
                      </span>
                    </div>`; 
       });
@@ -399,7 +445,7 @@
                         <div class="class-code">${current.kod_subjek}</div>
                         <div class="class-name">${current.nama_subjek}</div>
                         
-                        <div class="class-room" style="font-weight: 900; color: #000; font-size: 11px; margin: 4px 0;">
+                        <div class="class-room" style="font-weight: 900; color: #000; font-size: 10px; margin: 3px 0;">
                           ${current.ruang?.nama_ruang_singkatan || current.ruang?.kod_ruang || '—'}
                         </div>
 
