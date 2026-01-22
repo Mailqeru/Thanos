@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <meta name="refresh" content="900">
   <title>TTMS - My Subjects</title>
   <style>
@@ -228,10 +228,12 @@
       background-color: white;
       color: #333;
       appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23003366' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+      background-image: url("image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23003366' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 16px center;
       padding-right: 40px;
+      /* Ensure minimum touch target size */
+      min-height: 48px;
     }
 
     .subject-card {
@@ -374,17 +376,11 @@
         display: none;
       }
 
-      .subjects-container,
-      .dashboard-grid,
-      .info-grid,
-      .action-grid {
-        grid-template-columns: 1fr;
-      }
-
       .filter-group select {
         padding: 10px 14px;
         font-size: 14px;
         padding-right: 36px;
+        min-height: 44px;
       }
 
       .subject-card th,
@@ -395,6 +391,35 @@
 
       .subject-card header h4 {
         font-size: 16px;
+      }
+
+      .subjects-container h3 {
+        font-size: 20px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header-title {
+        font-size: 18px;
+      }
+
+      .sidebar-title {
+        font-size: 18px;
+      }
+
+      .user-name {
+        font-size: 14px;
+      }
+
+      .subject-card th,
+      .subject-card td {
+        padding: 8px;
+        font-size: 12px;
+      }
+
+      .subject-summary {
+        font-size: 13px;
+        padding: 12px 16px;
       }
     }
   </style>
@@ -497,6 +522,19 @@
       document.getElementById('overlay').classList.remove('active');
     }
 
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(event) {
+      const sidebar = document.getElementById('sidebar');
+      const menuToggle = document.querySelector('.menu-toggle');
+      if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
+        const isClickInsideSidebar = sidebar.contains(event.target);
+        const isClickOnMenuToggle = menuToggle && menuToggle.contains(event.target);
+        if (!isClickInsideSidebar && !isClickOnMenuToggle) {
+          closeSidebar();
+        }
+      }
+    });
+
     // Auth & Role Check
     const session = localStorage.getItem("TTMSFC_userSession");
     if (!session) {
@@ -521,7 +559,7 @@
 
     // Set UI
     const fullName = user.full_name || user.login || "Student";
-    const matricNo = user.login || "N/A"; // ✅ use 'login'
+    const matricNo = user.login || "N/A";
     const initials = fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || "S";
     
     document.getElementById("userName").textContent = fullName;
@@ -535,7 +573,7 @@
       }
     };
 
-    // 👇 SUBJECTS LOGIC (from your fragment)
+    // 👇 SUBJECTS LOGIC — FIXED ORDER
     const contentEl = document.getElementById("subjectsContent");
     const selectEl = document.getElementById("sessionSelect");
 
@@ -549,14 +587,19 @@
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {
           window.studentSubjectsData = data;
-          populateSessionDropdown(data);
+
+          // ✅ FIX: Calculate GRAND TOTAL BEFORE using it
+          window.grandTotalCredit = data.reduce((sum, item) => sum + getCredit(item), 0);
 
           const grouped = groupSubjects(data);
           const sortedKeys = Object.keys(grouped).sort().reverse();
-          if (sortedKeys.length > 0) {
-            selectEl.value = sortedKeys[0];
-            showSelectedSubjects();
-          }
+
+          populateSessionDropdown(sortedKeys);
+
+          // Default to current (latest) semester
+          const currentSemester = sortedKeys[0];
+          selectEl.value = currentSemester;
+          showSelectedSubjects(); // Now has access to grandTotalCredit
         } else {
           selectEl.innerHTML = "<option>No sessions available</option>";
           contentEl.innerHTML = `<div class="empty-message">No subjects found.</div>`;
@@ -578,63 +621,82 @@
       return grouped;
     }
 
-    function populateSessionDropdown(data) {
-      const grouped = groupSubjects(data);
-      const select = document.getElementById("sessionSelect");
+    function populateSessionDropdown(sortedKeys) {
       let options = '<option value="">-- All Sessions --</option>';
-
-      const sortedKeys = Object.keys(grouped).sort().reverse();
       sortedKeys.forEach(key => {
         options += `<option value="${key}">${key}</option>`;
       });
-
-      select.innerHTML = options;
+      selectEl.innerHTML = options;
     }
 
     function showSelectedSubjects() {
       const selectedKey = document.getElementById("sessionSelect").value;
       const data = window.studentSubjectsData || [];
       const grouped = groupSubjects(data);
+      const grandTotal = window.grandTotalCredit || 0;
+
+      let html = `
+        <div class="alert alert-info" style="margin-top: -12px; margin-bottom: 24px;">
+          📌 <strong>Total Credit Hours (All Semesters):</strong> ${grandTotal}
+        </div>
+      `;
 
       if (!selectedKey) {
-        let html = '';
         const sortedKeys = Object.keys(grouped).sort().reverse();
         sortedKeys.forEach(key => {
           html += buildSubjectCard(key, grouped[key]);
         });
-        document.getElementById("subjectsContent").innerHTML = html || `<div class="empty-message">No subjects to display.</div>`;
+        contentEl.innerHTML = html || `<div class="empty-message">No subjects to display.</div>`;
       } else if (grouped[selectedKey]) {
-        document.getElementById("subjectsContent").innerHTML = buildSubjectCard(selectedKey, grouped[selectedKey]);
+        html += buildSubjectCard(selectedKey, grouped[selectedKey]);
+        contentEl.innerHTML = html;
       } else {
-        document.getElementById("subjectsContent").innerHTML = `<div class="empty-message">No subjects found for this session.</div>`;
+        contentEl.innerHTML = `
+          <div class="alert alert-info" style="margin-top: -12px; margin-bottom: 24px;">
+            📌 <strong>Total Credit Hours (All Semesters):</strong> ${grandTotal}
+          </div>
+          <div class="empty-message">No subjects found for this session.</div>
+        `;
       }
     }
 
     function buildSubjectCard(title, subjects) {
+      let totalCredits = 0;
       let html = `<div class="subject-card">`;
       html += `<header><h4>${title}</h4></header>`;
-      html += `<div class="table-container">`;
-      html += `<table>`;
-      html += `<thead><tr>
-                 <th>Course Code</th>
-                 <th>Course Name</th>
-                 <th>Section</th>
-               </tr></thead>`;
+      html += `<div class="table-container"><table>`;
+      html += `<thead><tr><th>Course Code</th><th>Course Name</th><th>Section</th><th>Credit</th></tr></thead>`;
       html += `<tbody>`;
 
       subjects.forEach(item => {
+        const credit = getCredit(item);
+        totalCredits += credit;
         html += `<tr>
                    <td>${item.kod_subjek || '—'}</td>
                    <td>${item.nama_subjek || '—'}</td>
                    <td>${item.seksyen || '—'}</td>
+                   <td>${credit}</td>
                  </tr>`;
       });
 
       html += `</tbody></table></div>`;
-      html += `<div class="subject-summary">Total Subjects: ${subjects.length}</div>`;
+      html += `<div class="subject-summary">
+                 Total Subjects: ${subjects.length} &nbsp; • &nbsp; 
+                 <strong>Total Credit Hours: ${totalCredits}</strong>
+               </div>`;
       html += `</div>`;
       return html;
     }
+
+    function getCredit(item) {
+      if (item.kredit) return parseInt(item.kredit);
+      if (item.kod_subjek) {
+        const lastChar = item.kod_subjek.trim().slice(-1);
+        return parseInt(lastChar) || 0;
+      }
+      return 0;
+    }
+
   </script>
 </body>
 </html>

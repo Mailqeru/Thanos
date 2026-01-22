@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="refresh" content="900" />
+  <title>TTMS - Lecturer Report</title>
+  <style>
+    :root {
+      --utm-blue: #003366;
+      --utm-blue-dark: #002244;
+      --utm-gold: #C9A85C;
+      --utm-gold-light: #e6c98a;
+      --light-bg: #f8f9fc;
+      --sidebar-width: 280px;
+      --header-height: 70px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--light-bg);
+      color: #333;
+      overflow-x: hidden;
+    }
+    .sidebar {
+      position: fixed; top: 0; left: 0;
+      width: var(--sidebar-width); height: 100vh;
+      background: linear-gradient(180deg, var(--utm-blue) 0%, var(--utm-blue-dark) 100%);
+      box-shadow: 4px 0 15px rgba(0, 0, 0, 0.15);
+      z-index: 1000; overflow-y: auto;
+    }
+    .sidebar-header { padding: 30px 25px; border-bottom: 1px solid rgba(255,255,255,0.15); }
+    .sidebar-title { color: white; font-size: 24px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+    .sidebar-subtitle { color: rgba(255,255,255,0.85); font-size: 14px; }
+    .sidebar-user { padding: 20px 25px 15px; border-bottom: 1px solid rgba(255,255,255,0.15); }
+    .user-avatar {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--utm-gold) 0%, #8B6F3E 100%);
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: 700; margin-bottom: 12px; font-size: 18px;
+    }
+    .user-name { color: white; font-size: 16px; font-weight: 600; margin-bottom: 4px; line-height: 1.25; }
+    .user-role { color: rgba(255,255,255,0.85); font-size: 13px; }
+    .nav-item {
+      display: flex; align-items: center; padding: 14px 20px;
+      color: rgba(255,255,255,0.9); text-decoration: none;
+      border-left: 4px solid transparent; transition: all 0.3s ease;
+      font-size: 15px; font-weight: 500;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.15); border-left-color: var(--utm-gold); color: white; }
+    .nav-item.active { background: rgba(255,255,255,0.25); border-left-color: var(--utm-gold); color: white; font-weight: 600; }
+    .nav-icon { margin-right: 12px; font-size: 18px; width: 24px; text-align: center; }
+    .nav-logout { margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 20px; }
+
+    /* ===== MOBILE HAMBURGER ===== */
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 24px;
+      color: var(--utm-blue);
+      cursor: pointer;
+      padding: 8px;
+      margin-right: 15px;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+
+    .menu-toggle:hover {
+      background: #f0f4ff;
+    }
+
+    .main-wrapper { margin-left: var(--sidebar-width); min-height: 100vh; transition: margin-left 0.3s ease; }
+    .top-header {
+      position: sticky; top: 0; height: var(--header-height);
+      background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      display: flex; align-items: center; padding: 0 25px; z-index: 100;
+    }
+    .header-title { font-size: 22px; font-weight: 600; color: var(--utm-blue); }
+    .header-actions { margin-left: auto; display: flex; gap: 12px; align-items: center; }
+    .header-time {
+      font-size: 14px; color: #555;
+      padding: 8px 14px; background: #f0f4ff;
+      border-radius: 8px; border: 1px solid #dde4f0;
+    }
+    .main-content { padding: 30px; max-width: 1600px; margin: 0 auto; }
+
+    .card {
+      background: white; border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      padding: 30px;
+      margin-bottom: 24px;
+      border: 1px solid #e5e7eb;
+      width: 100%;
+    }
+    .card h2 { margin-bottom: 16px; color: var(--utm-blue); font-size: 20px; }
+    .loading { text-align: center; padding: 30px; color: #555; }
+    .alert { padding: 14px 16px; border-radius: 10px; background: #fff8e1; color: #c47f00; border: 1px solid #ffe4a3; }
+
+    #chart_div { width: 100%; height: 420px; min-height: 300px; }
+
+    /* Overlay for mobile */
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 999;
+    }
+
+    .overlay.active {
+      display: block;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 968px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-wrapper {
+        margin-left: 0;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+
+      .top-header {
+        padding: 0 20px;
+      }
+
+      .main-content {
+        padding: 20px;
+      }
+
+      .header-time {
+        display: none;
+      }
+
+      .card {
+        padding: 20px;
+      }
+
+      .card h2 {
+        font-size: 18px;
+      }
+
+      #chart_div {
+        height: 350px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header-title {
+        font-size: 18px;
+      }
+
+      .user-name {
+        font-size: 14px;
+      }
+
+      .nav-item {
+        padding: 12px 16px;
+        font-size: 14px;
+      }
+
+      #chart_div {
+        height: 300px;
+      }
+    }
+  </style>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+</head>
+<body>
+
+  <!-- Overlay -->
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title"><span>🎓</span><span>TTMS</span></div>
+      <div class="sidebar-subtitle">Lecturer Portal</div>
+    </div>
+    <div class="sidebar-user">
+      <div class="user-avatar" id="userAvatar">L</div>
+      <div class="user-name" id="userName">Loading...</div>
+      <div class="user-role">Lecturer</div>
+    </div>
+    <a class="nav-item" href="Lecturer.html"><span class="nav-icon">📊</span><span>Dashboard</span></a>
+    <a class="nav-item" href="LecturerTimetable.html"><span class="nav-icon">📅</span><span>My Timetable</span></a>
+    <a class="nav-item" href="LecturerEnrollment.html"><span class="nav-icon">👥</span><span>Course Assign</span></a>
+    <a class="nav-item active" href="LecturerReport.html"><span class="nav-icon">📈</span><span>Reports</span></a>
+    <div class="nav-logout">
+      <a class="nav-item" id="navLogout"><span class="nav-icon">🚪</span><span>Logout</span></a>
+    </div>
+  </div>
+
+  <div class="main-wrapper">
+    <header class="top-header">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <h1 class="header-title">Reports</h1>
+      <div class="header-actions">
+        <div class="header-time" id="currentTime">--:--</div>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <div class="card">
+        <h2>Students per Session (stacked by Subject)</h2>
+        <div id="chart_div" class="loading">Loading chart...</div>
+        <div id="chart_alert" class="alert" style="display:none;">No data found.</div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Sidebar Toggle
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('overlay');
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('active');
+    }
+
+    function closeSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('overlay');
+      sidebar.classList.remove('open');
+      overlay.classList.remove('active');
+    }
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(event) {
+      const sidebar = document.getElementById('sidebar');
+      const menuToggle = document.querySelector('.menu-toggle');
+      if (window.innerWidth <= 968 && sidebar.classList.contains('open')) {
+        const isClickInsideSidebar = sidebar.contains(event.target);
+        const isClickOnMenuToggle = menuToggle && menuToggle.contains(event.target);
+        if (!isClickInsideSidebar && !isClickOnMenuToggle) {
+          closeSidebar();
+        }
+      }
+    });
+
+    function updateTime() {
+      const now = new Date();
+      document.getElementById('currentTime').textContent =
+        now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    }
+    updateTime(); setInterval(updateTime, 60000);
+
+    const sessionStr = localStorage.getItem("TTMSFC_userSession");
+    if (!sessionStr) { alert("Please log in first."); window.location.replace("../index.html"); }
+    let user;
+    try {
+      user = JSON.parse(sessionStr);
+      if ((user.inferredRole || "").toLowerCase() !== "lecturer") {
+        alert("Access denied: Lecturer only.");
+        localStorage.removeItem("TTMSFC_userSession");
+        window.location.replace("../index.html");
+      }
+    } catch {
+      alert("Invalid session."); localStorage.removeItem("TTMSFC_userSession"); window.location.replace("../index.html");
+    }
+    const userName = user.full_name || user.login || "Lecturer";
+    const initials = (userName.split(' ').map(n=>n[0]).join('').substring(0,2) || "L").toUpperCase();
+    document.getElementById("userName").textContent = userName;
+    document.getElementById("userAvatar").textContent = initials;
+    document.getElementById("navLogout").onclick = () => {
+      if (confirm("Logout?")) { localStorage.removeItem("TTMSFC_userSession"); window.location.replace("../index.html"); }
+    };
+
+    const API_BASE = "http://web.fc.utm.my/ttms/web_man_webservice_json.cgi";
+    google.charts.load('current', { packages: ['corechart'] });
+    google.charts.setOnLoadCallback(loadData);
+
+    async function loadData() {
+      if (!user.no_pekerja) { showAlert("No staff ID found."); return; }
+      try {
+        const res = await fetch(`${API_BASE}?entity=pensyarah_subjek&no_pekerja=${encodeURIComponent(user.no_pekerja)}`);
+        const data = await res.json();
+        if (!Array.isArray(data) || data.length === 0) { showAlert("No teaching data found."); return; }
+
+        // Build set of sessions and subjects
+        const sessions = [...new Set(data.map(d => d.sesi || "Unknown"))]
+          .sort((a,b)=>parseInt((b||"0").split('/')[0]||0) - parseInt((a||"0").split('/')[0]||0));
+        const subjects = [...new Set(data.map(d => `${d.kod_subjek || 'Unknown'}::${d.nama_subjek || ''}`))]
+          .sort();
+
+        // Table columns: Session + per-subject series
+        const dataTable = new google.visualization.DataTable();
+        dataTable.addColumn('string', 'Session');
+        subjects.forEach(sub => {
+          const [code, name] = sub.split('::');
+          dataTable.addColumn('number', `${code} ${name ? '- '+name : ''}`);
+          dataTable.addColumn({type:'string', role:'tooltip'});
+        });
+
+        // Build rows
+        const rows = sessions.map(sess => {
+          // aggregate per subject for this session
+          const agg = {};
+          subjects.forEach(s => agg[s] = 0);
+          data.filter(d => d.sesi === sess).forEach(d => {
+            const key = `${d.kod_subjek || 'Unknown'}::${d.nama_subjek || ''}`;
+            agg[key] = (agg[key] || 0) + (parseInt(d.bil_pelajar) || 0);
+          });
+          const totalForSession = Object.values(agg).reduce((a, b) => a + b, 0);
+
+          const row = [sess];
+          subjects.forEach(sub => {
+            const val = agg[sub] || 0;
+            row.push(val);
+            const [code, name] = sub.split('::');
+            row.push(`${sess}\n${code}${name?` - ${name}`:''}\nStudents: ${val}\nSession total: ${totalForSession}`);
+          });
+          return row;
+        });
+
+        if (!rows.length) { showAlert("No data to plot."); return; }
+        dataTable.addRows(rows);
+
+        const seriesOpts = {};
+        subjects.forEach((_, idx) => { seriesOpts[idx] = { targetAxisIndex: 0 }; });
+
+        const options = {
+          title: 'Total Students per Session (Stacked by Subject)',
+          legend: { position: 'none' },
+          isStacked: true,
+          height: 480,
+          backgroundColor: '#ffffff',
+          chartArea: { left: 80, top: 60, right: 40, bottom: 80 },
+          hAxis: { title: 'Academic Session' },
+          vAxis: { title: 'Students', minValue: 0 },
+          tooltip: { isHtml: false },
+          series: seriesOpts
+        };
+
+        const chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+        chart.draw(dataTable, options);
+        document.getElementById("chart_div").style.display = "block";
+        document.getElementById("chart_alert").style.display = "none";
+      } catch (e) {
+        console.error(e);
+        showAlert("Failed to load data.");
+      }
+    }
+
+    function showAlert(msg) {
+      document.getElementById("chart_div").style.display = "none";
+      const alertEl = document.getElementById("chart_alert");
+      alertEl.textContent = msg;
+      alertEl.style.display = "block";
+    }
+  </script>
+</body>
+</html>

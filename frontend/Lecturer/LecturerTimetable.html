@@ -1,991 +1,1794 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="refresh" content="900" />
-  <title>TTMS - My Teaching Schedule</title>
-  <style>
-    :root {
-      --utm-blue: #003366;
-      --utm-blue-dark: #002244;
-      --utm-gold: #C9A85C;
-      --light-bg: #f8f9fc;
-      --input-border: #d1d5db;
-      --error-red: #d32f2f;
-      --success-green: #2e7d32;
-      --warning-orange: #ed6c02;
-      --info-blue: #1565c0;
-      --dark: #1f2937;
-      --light: #f3f4f6;
-      --white: #ffffff;
-      --sidebar-width: 280px;
-      --header-height: 70px;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      background: var(--light-bg);
-      color: #333;
-      overflow-x: hidden;
-    }
-
-    /* Sidebar */
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: var(--sidebar-width);
-      height: 100vh;
-      background: linear-gradient(180deg, var(--utm-blue) 0%, var(--utm-blue-dark) 100%);
-      box-shadow: 4px 0 15px rgba(0, 0, 0, 0.15);
-      z-index: 1000;
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      overflow-y: auto;
-    }
-
-    .sidebar-header {
-      padding: 30px 25px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-      background: rgba(0, 0, 0, 0.15);
-    }
-
-    .sidebar-title {
-      color: white;
-      font-size: 24px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .sidebar-subtitle {
-      color: rgba(255, 255, 255, 0.85);
-      font-size: 14px;
-      font-weight: 400;
-    }
-
-    .sidebar-user {
-      padding: 20px 25px;
-      background: rgba(255, 255, 255, 0.15);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-    }
-
-    .user-avatar {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--utm-gold) 0%, #8B6F3E 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      font-weight: 700;
-      color: white;
-      margin-bottom: 12px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    }
-
-    .user-name {
-      color: white;
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    .user-role {
-      color: rgba(255, 255, 255, 0.8);
-      font-size: 13px;
-    }
-
-    .sidebar-nav {
-      padding: 20px 0;
-    }
-
-    .nav-item {
-      display: flex;
-      align-items: center;
-      padding: 14px 25px;
-      color: rgba(255, 255, 255, 0.9);
-      text-decoration: none;
-      transition: all 0.3s ease;
-      border-left: 4px solid transparent;
-      font-size: 15px;
-      font-weight: 500;
-    }
-
-    .nav-item:hover {
-      background: rgba(255, 255, 255, 0.2);
-      border-left-color: var(--utm-gold);
-      color: white;
-    }
-
-    .nav-item.active {
-      background: rgba(255, 255, 255, 0.25);
-      border-left-color: var(--utm-gold);
-      color: white;
-      font-weight: 600;
-    }
-
-    .nav-icon {
-      margin-right: 12px;
-      font-size: 20px;
-      width: 24px;
-      text-align: center;
-      color: rgba(255, 255, 255, 0.9);
-    }
-
-    .nav-logout {
-      margin-top: 20px;
-      border-top: 1px solid rgba(255, 255, 255, 0.15);
-      padding-top: 20px;
-    }
-
-    /* Main Content */
-    .main-wrapper {
-      margin-left: var(--sidebar-width);
-      min-height: 100vh;
-      transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .top-header {
-      position: sticky;
-      top: 0;
-      height: var(--header-height);
-      background: white;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      display: flex;
-      align-items: center;
-      padding: 0 30px;
-      z-index: 100;
-      border-bottom: 1px solid #e5e7eb;
-    }
-
-    .menu-toggle {
-      display: none;
-      background: none;
-      border: none;
-      font-size: 24px;
-      color: var(--utm-blue);
-      cursor: pointer;
-      padding: 8px;
-      margin-right: 15px;
-      border-radius: 8px;
-      transition: background 0.2s;
-    }
-
-    .menu-toggle:hover {
-      background: #f0f4ff;
-    }
-
-    .header-title {
-      font-size: 24px;
-      font-weight: 600;
-      color: var(--utm-blue);
-    }
-
-    .header-actions {
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .header-time {
-      font-size: 14px;
-      color: #555;
-      padding: 8px 16px;
-      background: #f0f4ff;
-      border-radius: 8px;
-      border: 1px solid #dde4f0;
-    }
-
-    .main-content {
-      padding: 30px;
-      max-width: 1400px;
-    }
-
-    /* ===== TIMETABLE-SPECIFIC STYLES (YOUR CSS) ===== */
-    .timetable-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 16px;
-    }
-
-    .header {
-      background: white;
-      border-radius: 20px;
-      padding: 30px;
-      margin-bottom: 20px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.12);
-    }
-
-    .header h1 {
-      font-size: 28px;
-      color: #003366; /* UTM blue */
-      margin-bottom: 8px;
-    }
-
-    .header p {
-      color: #666;
-      font-size: 14px;
-    }
-
-    .controls-card {
-      background: white;
-      border-radius: 20px;
-      padding: 25px;
-      margin-bottom: 20px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.12);
-    }
-
-    .controls-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-      margin-bottom: 20px;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .form-group label {
-      font-size: 13px;
-      font-weight: 600;
-      color: #555;
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .form-group select {
-      padding: 12px 15px;
-      border: 2px solid #e0e0e0;
-      border-radius: 12px;
-      font-size: 15px;
-      background: white;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      appearance: none;
-      background-image: url("image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23003366' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 15px center;
-      padding-right: 40px;
-    }
-
-    .form-group select:focus {
-      outline: none;
-      border-color: #003366; /* UTM blue */
-      box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.15);
-    }
-
-    .load-btn {
-      background: linear-gradient(135deg, #003366 0%, #002244 100%); /* UTM blue gradient */
-      color: white;
-      border: none;
-      padding: 15px 30px;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      width: 100%;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      box-shadow: 0 4px 15px rgba(0, 51, 102, 0.3);
-    }
-
-    .load-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0, 51, 102, 0.4);
-    }
-
-    .load-btn:active {
-      transform: translateY(0);
-    }
-
-    .content-card {
-      background: white;
-      border-radius: 20px;
-      padding: 25px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.12);
-      min-height: 200px;
-    }
-
-    .alert {
-      padding: 20px;
-      border-radius: 12px;
-      margin: 20px 0;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 14px;
-      line-height: 1.6;
-    }
-
-    .alert-error {
-      background: #ffebee;
-      color: #c62828;
-      border-left: 4px solid #c62828;
-    }
-
-    .alert-warning {
-      background: #fff8e1;
-      color: #ed6c02;
-      border-left: 4px solid #ed6c02;
-    }
-
-    .alert-success {
-      background: #e8f5e9;
-      color: #2e7d32;
-      border-left: 4px solid #2e7d32;
-    }
-
-    .alert-info {
-      background: #e3f2fd;
-      color: #003366; /* UTM blue */
-      border-left: 4px solid #1565c0;
-    }
-
-    .loading {
-      text-align: center;
-      padding: 40px;
-      color: #666;
-    }
-
-    .spinner {
-      border: 3px solid #f3f3f3;
-      border-top: 3px solid #003366; /* UTM blue */
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 15px;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .timetable-header {
-      margin-bottom: 25px;
-      padding-bottom: 15px;
-      border-bottom: 2px solid #f0f0f0;
-    }
-
-    .timetable-header h2 {
-      color: #003366; /* UTM blue */
-      font-size: 22px;
-      margin-bottom: 5px;
-    }
-
-    .timetable-header p {
-      color: #666;
-      font-size: 14px;
-    }
-
-    .table-container {
-      overflow-x: auto;
-      margin-bottom: 20px;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-    }
-
-    thead th {
-      background: linear-gradient(135deg, #003366 0%, #002244 100%); /* UTM blue */
-      color: white;
-      padding: 15px 12px;
-      text-align: left;
-      font-weight: 600;
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      white-space: nowrap;
-    }
-
-    tbody tr {
-      border-bottom: 1px solid #f0f0f0;
-      transition: background 0.2s ease;
-    }
-
-    tbody tr:hover {
-      background: #f8fbff;
-    }
-
-    tbody td {
-      padding: 15px 12px;
-      font-size: 14px;
-      color: #555;
-    }
-
-    .subject-code {
-      font-weight: 600;
-      color: #003366; /* UTM blue */
-    }
-
-    .section-badge {
-      display: inline-block;
-      padding: 4px 10px;
-      background: #e3f2fd;
-      color: #1565c0;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    .day-badge {
-      display: inline-block;
-      padding: 4px 10px;
-      background: #f0f4ff;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 500;
-      color: #003366;
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-      margin-top: 25px;
-    }
-
-    .stat-card {
-      background: linear-gradient(135deg, #003366 0%, #002244 100%); /* UTM blue */
-      color: white;
-      padding: 20px;
-      border-radius: 12px;
-      text-align: center;
-    }
-
-    .stat-card h3 {
-      font-size: 32px;
-      margin-bottom: 5px;
-    }
-
-    .stat-card p {
-      font-size: 13px;
-      opacity: 0.9;
-    }
-
-    /* Mobile Responsive */
-    @media (max-width: 768px) {
-      .sidebar {
-        transform: translateX(-100%);
-      }
-
-      .sidebar.open {
-        transform: translateX(0);
-      }
-
-      .main-wrapper {
-        margin-left: 0;
-      }
-
-      .menu-toggle {
-        display: block;
-      }
-
-      .top-header {
-        padding: 0 20px;
-      }
-
-      .main-content {
-        padding: 20px;
-      }
-
-      .header-time {
-        display: none;
-      }
-
-      .timetable-container {
-        padding: 0 12px;
-      }
-
-      .header {
-        padding: 20px;
-      }
-
-      .header h1 {
-        font-size: 22px;
-      }
-
-      .controls-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .controls-card, .content-card {
-        padding: 20px;
-      }
-
-      table {
-        font-size: 13px;
-      }
-
-      thead th, tbody td {
-        padding: 10px 8px;
-      }
-
-      .timetable-header h2 {
-        font-size: 18px;
-      }
-
-      .table-container {
-        -webkit-overflow-scrolling: touch;
-      }
-
-      thead th {
-        font-size: 11px;
-        padding: 12px 8px;
-      }
-
-      .stats {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .header h1 {
-        font-size: 20px;
-      }
-
-      tbody td {
-        font-size: 12px;
-      }
-
-      .load-btn {
-        padding: 14px 25px;
-        font-size: 15px;
-      }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>TTMS - View Subjects</title>
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+--utm-blue: #003366;
+--utm-gold: #C9A85C;
+--light-bg: #f5f7fa;
+--card-bg: #ffffff;
+--border-color: #e5e7eb;
+--text-primary: #1f2937;
+--text-secondary: #6b7280;
+--success: #10b981;
+--warning: #f59e0b;
+--error: #ef4444;
+--shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+--shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+--shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+* {
+box-sizing: border-box;
+}
+body {
+margin: 0;
+font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+background-color: var(--light-bg);
+color: var(--text-primary);
+line-height: 1.6;
+}
+/* Sidebar */
+.w3-sidebar {
+background: linear-gradient(180deg, var(--utm-blue) 0%, #002244 100%) !important;
+box-shadow: 2px 0 12px rgba(0,0,0,0.15);
+z-index: 1000;
+}
+.sidebar-header {
+padding: 24px 20px;
+border-bottom: 1px solid rgba(255,255,255,0.1);
+text-align: center;
+}
+.sidebar-logo {
+font-size: 28px;
+color: var(--utm-gold);
+margin-bottom: 8px;
+}
+.sidebar-title {
+color: white;
+font-size: 16px;
+font-weight: 600;
+margin: 0;
+letter-spacing: 0.5px;
+}
+.sidebar-subtitle {
+color: rgba(255,255,255,0.7);
+font-size: 12px;
+margin: 4px 0 0;
+}
+.w3-sidebar .w3-bar-item {
+color: rgba(255,255,255,0.9) !important;
+border-bottom: none;
+padding: 16px 20px;
+transition: all 0.3s ease;
+font-weight: 500;
+position: relative;
+}
+.w3-sidebar .w3-bar-item:hover {
+background-color: rgba(201, 168, 92, 0.15) !important;
+color: white !important;
+padding-left: 28px;
+}
+.w3-sidebar .w3-bar-item.active {
+background-color: var(--utm-gold) !important;
+color: var(--utm-blue) !important;
+font-weight: 600;
+}
+.w3-sidebar .w3-bar-item i {
+margin-right: 12px;
+width: 20px;
+text-align: center;
+}
+/* Header */
+.w3-teal {
+background: linear-gradient(135deg, var(--utm-blue) 0%, #004080 100%) !important;
+box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.header-content {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 20px 0;
+}
+.header-title {
+margin: 0;
+color: white;
+font-size: 28px;
+font-weight: 700;
+}
+/* Main Content */
+.w3-main {
+background-color: var(--light-bg);
+min-height: 100vh;
+transition: margin-left 0.3s;
+}
+.content-wrapper {
+padding: 32px;
+max-width: 1400px;
+}
+/* Cards */
+.card {
+background: var(--card-bg);
+border-radius: 12px;
+padding: 24px;
+margin-bottom: 24px;
+box-shadow: var(--shadow-md);
+border: 1px solid var(--border-color);
+}
+.card-header {
+display: flex;
+align-items: center;
+gap: 12px;
+margin-bottom: 16px;
+padding-bottom: 16px;
+border-bottom: 2px solid var(--border-color);
+}
+.card-header i {
+font-size: 24px;
+color: var(--utm-blue);
+}
+.card-header h3 {
+margin: 0;
+font-size: 20px;
+font-weight: 600;
+color: var(--text-primary);
+}
+/* Info Boxes */
+.info-card {
+background: #f5f7fa;
+border: 1px solid #e5e7eb;
+padding: 14px 16px;
+border-radius: 6px;
+margin-bottom: 20px;
+font-size: 14px;
+}
+.info-card code {
+background: #e6f0ff;
+padding: 2px 6px;
+border-radius: 4px;
+font-family: monospace;
+}
+.summary-card {
+background: #e8f5e9;
+border-left: 4px solid var(--success);
+padding: 16px;
+border-radius: 8px;
+margin-top: 24px;
+font-size: 14px;
+}
+/* Form Controls */
+.form-row {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+gap: 16px;
+align-items: end;
+}
+.form-group {
+display: flex;
+flex-direction: column;
+}
+.form-group label {
+display: flex;
+align-items: center;
+gap: 8px;
+font-weight: 600;
+font-size: 14px;
+margin-bottom: 8px;
+color: var(--text-primary);
+}
+.form-group label i {
+color: var(--utm-blue);
+}
+.w3-input, .w3-select {
+width: 100%;
+border: 1px solid var(--border-color);
+border-radius: 8px;
+padding: 12px;
+font-size: 14px;
+background: white;
+transition: border-color 0.2s;
+}
+.w3-input:focus, .w3-select:focus {
+outline: none;
+border-color: var(--utm-blue);
+}
+.btn {
+padding: 12px 24px;
+border-radius: 8px;
+border: none;
+font-size: 14px;
+font-weight: 600;
+cursor: pointer;
+transition: all 0.2s;
+display: inline-flex;
+align-items: center;
+gap: 8px;
+white-space: nowrap;
+}
+.btn-primary { background: linear-gradient(135deg, var(--utm-blue) 0%, #004080 100%); color: white; }
+.btn-success { background: var(--success); color: white; }
+.btn-secondary { background: #6c757d; color: white; }
+.btn-info { background: #0ea5e9; color: white; }
+.btn:hover {
+transform: translateY(-2px);
+box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.btn:disabled {
+opacity: 0.6;
+cursor: not-allowed;
+}
+.btn-group {
+display: flex;
+flex-wrap: wrap;
+gap: 12px;
+margin-top: 16px;
+}
+.auto-load-label {
+display: flex;
+align-items: center;
+gap: 6px;
+font-size: 13px;
+color: var(--text-secondary);
+}
+/* Stats & Info */
+.stats-info {
+font-size: 14px;
+color: var(--text-secondary);
+display: flex;
+align-items: center;
+gap: 8px;
+margin: 16px 0;
+}
+/* Table */
+.table-wrapper {
+overflow-x: auto;
+margin: 20px 0;
+border-radius: 8px;
+border: 1px solid var(--border-color);
+}
+table.w3-table {
+width: 100%;
+border-collapse: collapse;
+background: white;
+margin: 0;
+font-size: 14px;
+}
+table.w3-table thead tr {
+background: linear-gradient(135deg, var(--utm-blue) 0%, #004080 100%);
+color: white;
+}
+table.w3-table th {
+padding: 14px 12px;
+text-align: left;
+font-weight: 600;
+font-size: 13px;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+}
+table.w3-table td {
+padding: 12px;
+border-bottom: 1px solid var(--border-color);
+}
+table.w3-table tbody tr:hover {
+background-color: #f8f9fa;
+cursor: pointer;
+}
+.action-btn {
+padding: 6px 12px !important;
+font-size: 12px !important;
+}
+/* Empty State */
+.empty-state {
+text-align: center;
+padding: 48px 24px;
+color: var(--text-secondary);
+background: #fafafa;
+border-radius: 12px;
+margin: 24px 0;
+}
+.empty-state i {
+font-size: 48px;
+color: var(--utm-blue);
+margin-bottom: 16px;
+}
+/* Loading & Error */
+.loading-container {
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+padding: 48px;
+gap: 16px;
+}
+.spinner {
+width: 48px;
+height: 48px;
+border: 4px solid var(--border-color);
+border-top-color: var(--utm-blue);
+border-radius: 50%;
+animation: spin 1s linear infinite;
+}
+@keyframes spin {
+to { transform: rotate(360deg); }
+}
+.loading-text {
+font-size: 16px;
+color: var(--text-secondary);
+font-weight: 500;
+}
+.error-container {
+background: #fef2f2;
+border: 1px solid #fecaca;
+border-left: 4px solid var(--error);
+border-radius: 12px;
+padding: 20px;
+margin-bottom: 24px;
+}
+.error-container h4 {
+display: flex;
+align-items: center;
+gap: 8px;
+margin: 0 0 8px 0;
+color: #991b1b;
+font-size: 16px;
+}
+.error-container p {
+margin: 0;
+color: #991b1b;
+font-size: 14px;
+}
+/* Modal */
+.w3-modal-content {
+max-height: 90vh;
+overflow-y: auto;
+border-radius: 12px;
+box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+.w3-modal-content .w3-container header {
+background: linear-gradient(135deg, var(--utm-blue) 0%, #004080 100%) !important;
+border-radius: 12px 12px 0 0 !important;
+}
+/* Percentage stacked bar */
+.Percent-cell {
+min-width: 140px;
+}
+.percent-bar {
+display: flex;
+width: 80px;
+height: 10px;
+background: #e5e7eb;
+border-radius: 6px;
+overflow: hidden;
+margin-top: 6px;
+}
+.percent-joined {
+background: #3b82f6;
+height: 100%;
+min-width: 3px;
+}
+.percent-not-joined {
+background: #d1d5db;
+height: 100%;
+}
+
+/* ===== MOBILE-OPTIMIZED TIMETABLE GRID ===== */
+.timetable-grid {
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  background: white;
+  min-width: 600px; /* ensures horizontal scroll */
+}
+
+.timetable-grid th,
+.timetable-grid td {
+  text-align: center;
+  vertical-align: middle;
+  padding: 4px;
+  font-size: 11px;
+  border: 1px solid #e5e7eb;
+}
+
+.timetable-grid td {
+  height: 50px;
+  min-width: 80px;
+}
+
+.timetable-grid thead th {
+  position: sticky;
+  top: 0;
+  background: #004080;
+  color: white;
+  z-index: 4;
+  border-bottom: 2px solid #d1d5db;
+}
+
+.timetable-grid thead th:first-child,
+.timetable-grid tbody td:first-child {
+  position: sticky;
+  left: 0;
+  background: #f9fafb;
+  font-weight: 600;
+  z-index: 5;
+  border-right: 2px solid #d1d5db;
+}
+
+.timetable-grid thead th:first-child {
+  background: #004080;
+  color: white;
+  z-index: 6;
+}
+
+.timetable-cell {
+  background: #e0f2fe;
+  border-radius: 4px;
+  padding: 3px;
+  line-height: 1.2;
+  box-shadow: inset 0 0 0 1px #bae6fd;
+  font-size: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .timetable-grid th,
+  .timetable-grid td {
+    padding: 3px;
+    font-size: 10px;
+  }
+
+  .timetable-grid td {
+    height: 45px;
+  }
+
+  .timetable-cell {
+    font-size: 9px;
+    padding: 2px;
+  }
+}
+
+@media (max-width: 768px) {
+.content-wrapper {
+padding: 20px;
+}
+.form-row {
+grid-template-columns: 1fr;
+}
+.btn-group {
+flex-direction: column;
+}
+.btn {
+width: 100%;
+justify-content: center;
+}
+.stats-info {
+flex-direction: column;
+align-items: flex-start;
+}
+}
+#subjectsChart {
+width: 100%;
+height: 400px;
+}
+.section-btn {
+padding:6px 12px;
+border-radius:14px;
+background:rgba(13,148,136,0.12);
+color:#0f766e;
+font-size:12px;
+font-weight:500;
+border:1px dashed rgba(13,148,136,0.4);
+cursor:not-allowed;
+}
+.section-btn:disabled {
+opacity:0.9;
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-
-  <!-- Overlay -->
-  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
-
-  <!-- Sidebar -->
-  <nav class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-      <div class="sidebar-title">
-        <span>🎓</span>
-        <span>TTMS</span>
-      </div>
-      <div class="sidebar-subtitle">Lecturer Portal</div>
-    </div>
-
-    <div class="sidebar-user">
-      <div class="user-avatar" id="userAvatar">L</div>
-      <div class="user-name" id="userName">Loading...</div>
-      <div class="user-role">Lecturer</div>
-    </div>
-
-    <div class="sidebar-nav">
-      <a class="nav-item" href="Lecturer.html">
-        <span class="nav-icon">📊</span>
-        <span>Dashboard</span>
-      </a>
-      <a class="nav-item active" href="LecturerTimetable.html">
-        <span class="nav-icon">📅</span>
-        <span>My Timetable</span>
-      </a>
-      <a class="nav-item" href="LecturerEnrollment.html">
-        <span class="nav-icon">👥</span>
-        <span>Course Enrollment</span>
-      </a>
-      
-      <div class="nav-logout">
-        <a class="nav-item" id="navLogout">
-          <span class="nav-icon">🚪</span>
-          <span>Logout</span>
-        </a>
-      </div>
-    </div>
-  </nav>
-
-  <!-- Main Content -->
-  <div class="main-wrapper">
-    <header class="top-header">
-      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
-      <h1 class="header-title">My Teaching Schedule</h1>
-      <div class="header-actions">
-        <div class="header-time" id="currentTime">--:--</div>
-      </div>
-    </header>
-
-    <main class="main-content">
-      <div class="timetable-container">
-        <div class="header">
-          <h1>📚 My Teaching Schedule</h1>
-          <p>View and manage your teaching timetable</p>
-        </div>
-
-        <div class="controls-card">
-          <div class="controls-grid">
-            <div class="form-group">
-              <label>Academic Session</label>
-              <select id="sessionSelect">
-                <option value="2021/2022">2021/2022</option>
-                <option value="2022/2023">2022/2023</option>
-                <option value="2023/2024">2023/2024</option>
-                <option value="2024/2025" selected>2024/2025</option>
-                <option value="2025/2026">2025/2026</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label>Semester</label>
-              <select id="semesterSelect">
-                <option value="1" selected>Semester 1</option>
-                <option value="2">Semester 2</option>
-              </select>
-            </div>
-          </div>
-
-          <button class="load-btn" id="loadTimetableBtn">
-            🔍 Load Timetable
-          </button>
-        </div>
-
-        <div class="content-card">
-          <div id="timetableContent">
-            <div class="alert alert-info">
-              <span>ℹ️</span>
-              <div>
-                <strong>Welcome!</strong> Select an academic session and semester above, then click "Load Timetable" to view your teaching schedule.
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </main>
-  </div>
-
-  <script>
-    // Sidebar Toggle
-    function toggleSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      const overlay = document.getElementById('overlay');
-      sidebar.classList.toggle('open');
-      overlay.classList.toggle('active');
-    }
-
-    function closeSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      const overlay = document.getElementById('overlay');
-      sidebar.classList.remove('open');
-      overlay.classList.remove('active');
-    }
-
-    // Update Time
-    function updateTime() {
-      const now = new Date();
-      const timeStr = now.toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        hour12: true 
-      });
-      document.getElementById('currentTime').textContent = timeStr;
-    }
-    updateTime();
-    setInterval(updateTime, 60000);
-
-    // Session Check
-    const session = localStorage.getItem("TTMSFC_userSession");
-    if (!session) {
-      alert("Please log in first.");
-      window.location.replace("../index.html");
-    }
-
-    let user;
-    try {
-      user = JSON.parse(session);
-      const role = user.inferredRole || "unknown";
-      if (role !== "lecturer") {
-        alert("Access denied: Lecturer access only.");
-        localStorage.removeItem("TTMSFC_userSession");
-        window.location.replace("../index.html");
-      }
-    } catch (e) {
-      alert("Invalid session. Please log in again.");
-      localStorage.removeItem("TTMSFC_userSession");
-      window.location.replace("../index.html");
-    }
-
-    // Set UI
-    const userName = user.full_name || user.login || "Lecturer";
-    const initials = userName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-    
-    document.getElementById("userName").textContent = userName;
-    document.getElementById("userAvatar").textContent = initials;
-
-    // Logout
-    document.getElementById("navLogout").onclick = function() {
-      if (confirm("Are you sure you want to logout?")) {
-        localStorage.removeItem("TTMSFC_userSession");
-        window.location.replace("../index.html");
-      }
-    };
-
-    // ===== YOUR TIMETABLE LOGIC =====
-    (function() {
-      console.log("📅 Lecturer Timetable (UTM Branded) loaded");
-
-      document.getElementById('loadTimetableBtn').addEventListener('click', loadTimetable);
-
-      async function loadTimetable() {
-        const sessionStr = localStorage.getItem("TTMSFC_userSession");
-        if (!sessionStr) {
-          document.getElementById("timetableContent").innerHTML = `
-            <div class="alert alert-error">
-              <span>❌</span>
-              <div>
-                <strong>Session Expired</strong><br>
-                Please log in again.
-              </div>
-            </div>
-          `;
-          return;
-        }
-
-        let user;
-        try {
-          user = JSON.parse(sessionStr);
-        } catch (e) {
-          document.getElementById("timetableContent").innerHTML = `
-            <div class="alert alert-error">
-              <span>❌</span>
-              <div>
-                <strong>Invalid Session</strong><br>
-                Please log in again.
-              </div>
-            </div>
-          `;
-          return;
-        }
-
-        const noPekerja = user.no_pekerja;
-        if (!noPekerja || noPekerja === "NOT SET") {
-          document.getElementById("timetableContent").innerHTML = `
-            <div class="alert alert-error">
-              <span>❌</span>
-              <div>
-                <strong>Profile Incomplete</strong><br>
-                Staff ID (no_pekerja) is missing.
-              </div>
-            </div>
-          `;
-          return;
-        }
-
-        const sesi = document.getElementById("sessionSelect").value;
-        const semester = document.getElementById("semesterSelect").value;
-
-        document.getElementById("timetableContent").innerHTML = `
-          <div class="loading">
-            <div class="spinner"></div>
-            <p>Loading your teaching timetable...</p>
-          </div>
-        `;
-
-        try {
-          const urlPensyarah = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pensyarah_subjek&no_pekerja=${noPekerja}`;
-          const resPensyarah = await fetch(urlPensyarah);
-          const dataPensyarah = await resPensyarah.json();
-
-          if (!Array.isArray(dataPensyarah) || dataPensyarah.length === 0) {
-            document.getElementById("timetableContent").innerHTML = `
-              <div class="alert alert-warning">
-                <span>⚠️</span>
-                <div>
-                  <strong>No Assignments Found</strong><br>
-                  You are not teaching any subjects.
-                </div>
-              </div>
-            `;
-            return;
-          }
-
-          const currentSubjects = dataPensyarah.filter(subj =>
-            subj.sesi === sesi && subj.semester == semester
-          );
-
-          if (currentSubjects.length === 0) {
-            document.getElementById("timetableContent").innerHTML = `
-              <div class="alert alert-warning">
-                <span>⚠️</span>
-                <div>
-                  <strong>No Teaching Assignments</strong><br>
-                  No classes found for <strong>${sesi} Semester ${semester}</strong>.
-                </div>
-              </div>
-            `;
-            return;
-          }
-
-          const timetablePromises = currentSubjects.map(async (subj) => {
-            const urlJadual = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=jadual_subjek&sesi=${sesi}&semester=${semester}&kod_subjek=${subj.kod_subjek}&seksyen=${subj.seksyen}`;
-            const res = await fetch(urlJadual);
-            const data = await res.json();
-
-            const validEntries = (Array.isArray(data) ? data : [])
-              .filter(entry => 
-                entry.hari && parseInt(entry.hari) >= 1 && parseInt(entry.hari) <= 5 &&
-                entry.masa && !isNaN(entry.masa)
-              );
-
-            return validEntries.map(entry => ({
-              ...entry,
-              kod_subjek: subj.kod_subjek,
-              nama_subjek: subj.nama_subjek,
-              seksyen: subj.seksyen,
-              bil_pelajar: subj.bil_pelajar
-            }));
-          });
-
-          const timetableArrays = await Promise.all(timetablePromises);
-          const allEntries = timetableArrays.flat();
-
-          if (allEntries.length === 0) {
-            document.getElementById("timetableContent").innerHTML = `
-              <div class="alert alert-warning">
-                <span>⚠️</span>
-                <div>
-                  <strong>No Scheduled Classes</strong><br>
-                  No timetable entries found for ${sesi} Semester ${semester}.
-                </div>
-              </div>
-            `;
-            return;
-          }
-
-          displayTimetable(allEntries, sesi, semester);
-
-        } catch (err) {
-          console.error("Timetable error:", err);
-          document.getElementById("timetableContent").innerHTML = `
-            <div class="alert alert-error">
-              <span>❌</span>
-              <div>
-                <strong>Failed to Load Timetable</strong><br>
-                ${err.message || 'Network or server error.'}
-                <small style="opacity: 0.8; margin-top: 8px; display: block;">💡 Tip: This works best on UTM network</small>
-              </div>
-            </div>
-          `;
-        }
-      }
-
-      function displayTimetable(data, sesi, semester) {
-        const hariMap = {
-          1: "Monday",
-          2: "Tuesday",
-          3: "Wednesday",
-          4: "Thursday",
-          5: "Friday"
-        };
-
-        const masaMap = {
-          2: "08:00 - 09:00",
-          3: "09:00 - 10:00",
-          4: "10:00 - 11:00",
-          5: "11:00 - 12:00",
-          6: "12:00 - 13:00",
-          7: "13:00 - 14:00",
-          8: "14:00 - 15:00",
-          9: "15:00 - 16:00",
-          10: "16:00 - 17:00"
-        };
-
-        data.sort((a, b) => {
-          const dayDiff = parseInt(a.hari) - parseInt(b.hari);
-          if (dayDiff !== 0) return dayDiff;
-          return parseInt(a.masa) - parseInt(b.masa);
-        });
-
-        const uniqueSubjects = new Set(data.map(d => d.kod_subjek)).size;
-        const totalStudents = data.reduce((sum, d) => sum + (parseInt(d.bil_pelajar) || 0), 0);
-
-        let html = `
-          <div class="timetable-header">
-            <h2>📅 ${sesi} - Semester ${semester}</h2>
-            <p>Your complete teaching schedule</p>
-          </div>
-
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Subject Code</th>
-                  <th>Subject Name</th>
-                  <th>Section</th>
-                  <th>Day</th>
-                  <th>Time</th>
-                  <th>Room</th>
-                  <th>Students</th>
-                </tr>
-              </thead>
-              <tbody>
-        `;
-
-        data.forEach(item => {
-          const day = hariMap[parseInt(item.hari)] || `Day ${item.hari}`;
-          const time = masaMap[parseInt(item.masa)] || `Slot ${item.masa}`;
-          const room = item.ruang?.nama_ruang_singkatan || item.ruang?.kod_ruang || '—';
-          const students = item.bil_pelajar || '—';
-
-          html += `
-            <tr>
-              <td><span class="subject-code">${item.kod_subjek || '—'}</span></td>
-              <td>${item.nama_subjek || '—'}</td>
-              <td><span class="section-badge">${item.seksyen || '—'}</span></td>
-              <td><span class="day-badge">${day}</span></td>
-              <td>${time}</td>
-              <td>${room}</td>
-              <td>${students}</td>
-            </tr>
-          `;
-        });
-
-        html += `
-              </tbody>
-            </table>
-          </div>
-
-          <div class="stats">
-            <div class="stat-card">
-              <h3>${data.length}</h3>
-              <p>Teaching Slots</p>
-            </div>
-            <div class="stat-card">
-              <h3>${uniqueSubjects}</h3>
-              <p>Unique Subjects</p>
-            </div>
-            <div class="stat-card">
-              <h3>${totalStudents}</h3>
-              <p>Total Students</p>
-            </div>
-          </div>
-        `;
-
-        document.getElementById("timetableContent").innerHTML = html;
-      }
-    })();
-  </script>
+<!-- Sidebar -->
+<div class="w3-sidebar w3-bar-block w3-collapse w3-card" style="width:260px;" id="mySidebar">
+<div class="sidebar-header">
+<div class="sidebar-logo">
+<i class="fas fa-graduation-cap"></i>
+</div>
+<h2 class="sidebar-title">TTMS</h2>
+<p class="sidebar-subtitle">Timetable Management System</p>
+</div>
+<a href="Admin.html" class="w3-bar-item w3-button">
+<i class="fas fa-home"></i> Dashboard
+</a>
+<a href="ViewLecturers.html" class="w3-bar-item w3-button">
+<i class="fas fa-chalkboard-teacher"></i> Lecturers
+</a>
+<a href="ViewStudents.html" class="w3-bar-item w3-button">
+<i class="fas fa-user-graduate"></i> Students
+</a>
+<a href="AdminTimetableGenerator.html" class="w3-bar-item w3-button">
+<i class="fas fa-calendar-alt"></i> Academic Workload Monitoring & Scheduling System
+</a>
+<a href="ViewSubjects.html" class="w3-bar-item w3-button active">
+<i class="fas fa-book-open"></i> Subjects
+</a>
+<a href="RoomUtilization.html" class="w3-bar-item w3-button">
+<i class="fas fa-door-open"></i> Room Utilization
+</a>
+<a href="Reports.html" class="w3-bar-item w3-button">
+<i class="fas fa-chart-bar"></i> Reports
+</a>
+<a href="#" class="w3-bar-item w3-button" id="navLogout" style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+<i class="fas fa-sign-out-alt"></i> Logout
+</a>
+</div>
+<!-- Main Content -->
+<div class="w3-main" style="margin-left:260px">
+<div class="w3-teal">
+<button class="w3-button w3-teal w3-xlarge w3-hide-large" onclick="w3_open()" style="padding: 16px;">&#9776;</button>
+<div class="w3-container">
+<div class="header-content">
+<h1 class="header-title">View Subjects</h1>
+</div>
+</div>
+</div>
+<div class="content-wrapper">
+<!-- Description Card -->
+<div class="card">
+<div class="card-header">
+<i class="fas fa-book-open"></i>
+<h3>View Subjects</h3>
+</div>
+<p>Browse subjects by academic session and semester. Search and filter by course code, name, or program.</p>
+</div>
+<!-- Filters -->
+<div class="card">
+<div class="form-row">
+<div class="form-group">
+<label for="sessionSelect">
+<i class="fas fa-calendar-alt"></i> Academic Session
+</label>
+<select class="w3-select" id="sessionSelect"></select>
+</div>
+<div class="form-group">
+<label for="semesterSelect">
+<i class="fas fa-book"></i> Semester
+</label>
+<select class="w3-select" id="semesterSelect">
+<option value="1" selected>Semester 1</option>
+<option value="2">Semester 2</option>
+<option value="3">Special Semester</option>
+</select>
+</div>
+<div class="form-group">
+<label for="facultyFilter">
+<i class="fas fa-university"></i> Filter by Faculty
+</label>
+<select class="w3-select" id="facultyFilter">
+<option value="all">All</option>
+<option value="fsksm">FSKSM </option>
+<option value="other">Other</option>
+</select>
+</div>
+</div>
+<div class="form-row">
+<div class="form-group" style="flex: 2;">
+<label for="searchInput">
+<i class="fas fa-search"></i> Search Subjects
+</label>
+<input type="text" class="w3-input" id="searchInput" placeholder="Search by course code, name, or program...">
+</div>
+<div class="form-group">
+<label for="searchBySelect">
+<i class="fas fa-filter"></i> Search By
+</label>
+<select class="w3-select" id="searchBySelect">
+<option value="all">All Fields</option>
+<option value="code">Course Code</option>
+<option value="name">Subject Name</option>
+</select>
+</div>
+</div>
+<div class="btn-group">
+<button type="button" class="btn btn-primary" id="loadSubjectsBtn">
+<i class="fas fa-sync-alt"></i> Load Subjects
+</button>
+<button type="button" class="btn btn-success" id="applySearchBtn">
+<i class="fas fa-search"></i> Search
+</button>
+<button type="button" class="btn btn-secondary" id="clearSearchBtn">
+<i class="fas fa-times"></i> Clear All
+</button>
+<button type="button" class="btn btn-info" id="exportBtn" style="display:none;">
+<i class="fas fa-download"></i> Export CSV
+</button>
+</div>
+<div class="w3-row" style="margin-top: 16px;">
+<div class="w3-col s12 m7">
+<div id="statsInfo" class="stats-info">
+<i class="fas fa-info-circle"></i> Select session and click "Load Subjects"
+</div>
+</div>
+<div class="w3-col s12 m5 w3-right">
+<label class="auto-load-label">
+<input type="checkbox" id="autoLoadCheckbox" checked>
+Auto-load on change
+</label>
+</div>
+</div>
+</div>
+<!-- Loading -->
+<div id="loadingSpinner" class="card" style="display:none;">
+<div class="loading-container">
+<div class="spinner"></div>
+<div class="loading-text" id="loadingMessage">Loading subject data...</div>
+</div>
+</div>
+<!-- Error -->
+<div id="errorContainer" class="error-container" style="display:none;">
+<h4>
+<i class="fas fa-exclamation-triangle"></i>
+<span id="errorTitle">Error</span>
+</h4>
+<p id="errorMessage"></p>
+<div id="errorDetails" style="display:none; margin-top:16px;">
+<details>
+<summary>Technical Details</summary>
+<pre id="errorDetailsContent" style="background:#f8f8f8; padding:12px; border-radius:6px; overflow:auto; max-height:300px; font-size:13px;"></pre>
+</details>
+</div>
+<button type="button" class="btn btn-secondary" style="margin-top:12px; padding:6px 12px; font-size:12px;" onclick="hideError()">
+<i class="fas fa-times"></i> Dismiss
+</button>
+</div>
+<!-- Chart Card -->
+<div class="card" id="subjectsChartCard">
+<div class="card-header">
+<i class="fas fa-chart-bar"></i>
+<h3>Crowd Analysis Chart</h3>
+</div>
+<canvas id="subjectsChart" style="max-height:400px;"></canvas>
+</div>
+<!-- Subjects Table -->
+<div id="subjectsTableContainer" class="card">
+<div class="empty-state">
+<i class="fas fa-book"></i>
+<h4>Ready to Load Subjects</h4>
+<ol style="max-width:500px; margin:0 auto; text-align:left;">
+<li>Select an academic session and semester</li>
+<li>Click <strong>Load Subjects</strong> to fetch data</li>
+<li>Use search to filter by course code, name, or program</li>
+<li>Filter by faculty using the dropdown</li>
+<li>Click on any subject to view more details</li>
+</ol>
+<p class="w3-tiny" style="margin-top:20px;">
+<i class="fas fa-info-circle"></i> This is a public endpoint that doesn't require authentication.
+</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Subject Details Modal -->
+<div id="subjectDetailsModal" class="w3-modal">
+<div class="w3-modal-content w3-card-4 w3-animate-zoom" style="max-width:800px; margin: 30px auto;">
+<header class="w3-container w3-teal">
+<span onclick="closeSubjectModal()" class="w3-button w3-display-topright">&times;</span>
+<h3 id="modalTitle">Subject Details</h3>
+</header>
+<div class="w3-container" id="modalContent" style="padding:24px;">
+<p>Loading details...</p>
+</div>
+<footer class="w3-container w3-padding w3-light-gray" style="border-top:1px solid #eee;">
+<button type="button" class="btn btn-secondary" onclick="closeSubjectModal()">Close</button>
+</footer>
+</div>
+</div>
+<!-- Subject Analysis Modal -->
+<div id="analysisModal" class="w3-modal">
+<div class="w3-modal-content w3-card-4" style="max-width:900px; margin:40px auto;">
+<header class="w3-container w3-teal">
+<span onclick="closeAnalysisModal()" class="w3-button w3-display-topright">&times;</span>
+<h3 id="analysisTitle">Subject Analysis</h3>
+</header>
+<div class="w3-container" style="padding:20px;">
+<div style="height:320px;">
+<div id="sectionLegend" style="margin-bottom:10px; font-size:14px;">
+<div id="sectionSummary"
+style="margin-bottom:12px; font-size:14px; font-weight:600;">
+</div>
+<span style="color:#FFC107; font-weight:600;">🟡 Under-enrolled (≤ 20)</span> |
+<span style="color:#4CAF50; font-weight:600;">🟢 Optimal (21–40)</span> |
+<span style="color:#F44336; font-weight:600;">🔴 Over-capacity (> 40)</span>
+</div>
+<canvas id="sectionChart"></canvas>
+</div>
+<div id="lecturerLoadChartContainer"
+style="margin-top:40px; padding-top:20px; border-top:1px solid #eee;">
+<canvas id="lecturerLoadChart" style="max-height:300px;"></canvas>
+</div>
+<div id="lecturerNameAnalysis" class="info-card" style="margin-top:16px;"></div>
+<div id="lecturerAnalysis" class="info-card" style="margin-top:16px;"></div>
+</div>
+</div>
+</div>
+<!-- Timetable Modal -->
+<div id="timetableModal" class="w3-modal">
+<div class="w3-modal-content w3-card-4 w3-animate-zoom" style="max-width:900px; margin:40px auto;">
+<header class="w3-container w3-teal">
+<span onclick="closeTimetableModal()" class="w3-button w3-display-topright">&times;</span>
+<h3 id="timetableModalTitle">Timetable</h3>
+</header>
+<div class="w3-container" id="timetableModalContent" style="padding:24px;">
+<p>Loading timetable...</p>
+</div>
+<footer class="w3-container w3-light-gray w3-padding">
+<button class="btn btn-secondary" onclick="closeTimetableModal()">Close</button>
+</footer>
+</div>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script>
+// Sidebar
+function w3_open() {
+document.getElementById("mySidebar").style.display = "block";
+}
+// Auth check
+const rawSession = localStorage.getItem("TTMSFC_userSession");
+if (!rawSession) {
+alert("Please log in first.");
+window.location.replace("../index.html");
+}
+let user;
+try {
+user = JSON.parse(rawSession);
+} catch (e) {
+localStorage.removeItem("TTMSFC_userSession");
+window.location.replace("../index.html");
+}
+if (user.inferredRole !== "admin") {
+alert("Admin access required.");
+window.location.replace("../index.html");
+}
+document.getElementById("navLogout").onclick = function() {
+if (confirm("Are you sure you want to logout?")) {
+localStorage.removeItem("TTMSFC_userSession");
+localStorage.removeItem("TTMSFC_adminAuth");
+window.location.replace("../index.html");
+}
+};
+// Initialize
+$(document).ready(function() {
+initSubjectsPage();
+});
+let lecturerLoadChart = null;
+let subjectsChart;
+let sectionChart;
+let totalStudents = 1711;
+let currentRenderedSubjects = [];
+let currentSubjectsData = [];
+let allFaculties = new Set();
+const lecturerCache = {};
+function renderSubjectsBarChart(data) {
+const ctx = document.getElementById('subjectsChart').getContext('2d');
+// Filter only FSKSM subjects
+const fsksmSubjects = data.filter(s =>
+s.kod_subjek !== 'UBSS1032' &&
+s.bil_seksyen > 0 &&
+s.bil_pelajar > 0 &&
+s.bil_pensyarah > 0
+);
+if (!fsksmSubjects.length) {
+document.getElementById('subjectsChartCard').style.display = 'none';
+return;
+}
+document.getElementById('subjectsChartCard').style.display = 'block';
+const labels = fsksmSubjects.map(s => s.kod_subjek || 'N/A');
+const avgPerSectionValues = fsksmSubjects.map(s => Math.round(s.bil_pelajar / s.bil_seksyen));
+// Color coding based on average
+const colors = avgPerSectionValues.map(v => {
+if (v > 40) return 'rgb(204, 50, 50)';      // red → high
+else if (v > 20) return 'rgb(45, 201, 55)'; // green → medium
+else return 'rgb(231, 180, 22)';           // light green → low
+});
+if (subjectsChart) subjectsChart.destroy();
+subjectsChart = new Chart(ctx, {
+type: 'bar',
+data: {
+labels: labels,
+datasets: [{
+label: 'Avg Students per Section',
+data: avgPerSectionValues,
+backgroundColor: colors,
+borderColor: colors,
+borderWidth: 1
+}]
+},
+options: {
+responsive: true,
+maintainAspectRatio: false,
+onClick: async (evt, elements) => {
+if (!elements.length) return;
+const index = elements[0].index;
+const kodSubjek = subjectsChart.data.labels[index];
+const subject = currentRenderedSubjects.find(
+s => s.kod_subjek === kodSubjek
+);
+if (!subject) {
+console.warn('Subject not found for:', kodSubjek);
+return;
+}
+openSubjectAnalysis(subject);
+},
+scales: {
+y: {
+beginAtZero: true,
+title: { display: true, text: 'Average Students per Section' }
+},
+x: {
+title: { display: true, text: 'Course Code' },
+ticks: { autoSkip: false, maxRotation: 45, minRotation: 0 }
+}
+},
+plugins: {
+legend: { display: false },
+tooltip: {
+enabled: true,
+callbacks: {
+label: function(context) {
+const index = context.dataIndex;
+const subj = fsksmSubjects[index];
+const avg = avgPerSectionValues[index];
+return [
+`${subj.nama_subjek || 'N/A'}`,
+`────────────`,
+`Avg / Section: ${avg}`,
+`Total Sections: ${subj.bil_seksyen}`,
+`Total Students: ${subj.bil_pelajar}`,
+`Lecturers: ${subj.bil_pensyarah}`
+];
+}
+}
+},
+title: {
+display: true,
+text: 'FSKSM Subjects - Avg Students per Section',
+font: { size: 16, weight: 'bold' }
+}
+},
+}
+});
+// Add color hint/legend
+const chartCard = document.getElementById('subjectsChartCard');
+let hint = document.getElementById('colorHint');
+if (!hint) {
+hint = document.createElement('div');
+hint.id = 'colorHint';
+hint.style.display = 'flex';
+hint.style.gap = '16px';
+hint.style.marginTop = '8px';
+hint.style.alignItems = 'center';
+chartCard.appendChild(hint);
+}
+hint.innerHTML = `
+<div style="display:flex; align-items:center; gap:4px;">
+<div style="width:20px;height:20px;background-color:rgb(231, 180, 22); border:1px solid #999;"></div>
+<span style="font-size:12px;">Under-Enrolled</span>
+</div>
+<div style="display:flex; align-items:center; gap:4px;">
+<div style="width:20px;height:20px;background-color:rgb(45, 201, 55); border:1px solid #999;"></div>
+<span style="font-size:12px;">Optimal</span>
+</div>
+<div style="display:flex; align-items:center; gap:4px;">
+<div style="width:20px;height:20px;background-color:rgb(204, 50, 50); border:1px solid #999;"></div>
+<span style="font-size:12px;">Over-Capacity</span>
+</div>
+`;
+}
+function initSubjectsPage() {
+const currentYear = new Date().getFullYear();
+// Generate newest → oldest
+const academicYears = Array.from({ length: 7 }, (_, i) => {
+const y = currentYear - i;
+return `${y}/${y + 1}`;
+});
+const today = new Date();
+const year = today.getFullYear();
+const month = today.getMonth();
+const defaultSession = (month >= 9)
+? `${year}/${year + 1}`
+: `${year - 1}/${year}`;
+document.getElementById('sessionSelect').innerHTML = academicYears
+.map(y => `<option value="${y}" ${y === defaultSession ? 'selected' : ''}>${y}</option>`)
+.join('');
+// Event listeners
+document.getElementById('loadSubjectsBtn').onclick = fetchSubjectsData;
+document.getElementById('applySearchBtn').onclick = applySearch;
+document.getElementById('clearSearchBtn').onclick = clearAllFilters;
+document.getElementById('exportBtn').onclick = exportData;
+document.getElementById('facultyFilter').onchange = function () {
+applySearch();
+};
+document.getElementById('searchInput').onkeypress = e => {
+if (e.key === 'Enter') {
+e.preventDefault();
+applySearch();
+}
+};
+document.getElementById('sessionSelect').onchange =
+document.getElementById('semesterSelect').onchange = function() {
+if (document.getElementById('autoLoadCheckbox').checked) {
+fetchSubjectsData();
+}
+};
+// Fetch function
+async function fetchSubjectsData() {
+const sesi = document.getElementById('sessionSelect').value;
+const semester = document.getElementById('semesterSelect').value;
+if (!sesi || !semester) return showError("Input Error", "Select session and semester.");
+showLoading(true, `Loading subjects for ${sesi} Semester ${semester}...`);
+hideError();
+try {
+const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=subjek&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}`;
+const res = await fetch(url);
+if (!res.ok) throw new Error(`HTTP ${res.status}`);
+const text = await res.text();
+if (!text.trim().startsWith('[') && !text.trim().startsWith('{')) {
+throw new Error("TTMS returned non-JSON data (server busy)");
+}
+let data = JSON.parse(text);
+if (!Array.isArray(data)) {
+if (data && data.data && Array.isArray(data.data)) data = data.data;
+else if (data && data.subjek && Array.isArray(data.subjek)) data = data.subjek;
+else if (typeof data === 'object' && data !== null) data = Object.values(data);
+else throw new Error("Not an array");
+}
+currentSubjectsData = data;
+// Sort by highest to lowest students
+currentSubjectsData.sort(
+(a, b) => (b.bil_pelajar || 0) - (a.bil_pelajar || 0)
+);
+// Attach percentage
+currentSubjectsData = currentSubjectsData.map(s => ({
+...s,
+student_percentage: totalStudents
+? ((s.bil_pelajar || 0) / totalStudents * 100).toFixed(2)
+: "0.00"
+}));
+document.getElementById('statsInfo').innerHTML =
+`<i class="fas fa-check-circle" style="color:#4CAF50;"></i>
+Loaded <strong>${data.length}</strong> subjects •
+<strong>${totalStudents}</strong> students`;
+applySearch(); // Apply current filters
+document.getElementById('exportBtn').style.display = 'inline-block';
+} catch (err) {
+console.error(err);
+showError("Load Failed", err.message);
+document.getElementById('statsInfo').innerHTML = `<i class="fas fa-exclamation-triangle" style="color:#d32f2f;"></i> Failed to load subjects`;
+} finally {
+showLoading(false);
+}
+}
+function renderSubjectsTable(data, highlightTerm = '', highlightField = '') {
+const container = document.getElementById('subjectsTableContainer');
+if (!data.length) {
+container.innerHTML = `<div class="empty-state"><i class="fas fa-book-slash"></i><h4>No Subjects Found</h4><p>Try a different session or semester.</p></div>`;
+return;
+}
+const first = data[0];
+const hasCode = 'kod_subjek' in first;
+const hasName = 'nama_subjek' in first;
+const hasProgram = 'kod_program' in first;
+const hasFaculty = 'fakulti' in first;
+const hasLevel = 'peringkat' in first;
+let html = `<div class="table-wrapper"><table class="w3-table w3-striped w3-bordered"><thead><tr>
+<th>No</th>
+${hasCode ? '<th>Course Code</th>' : ''}
+${hasName ? '<th>Subject Name</th>' : ''}
+${hasProgram ? '<th>Program</th>' : ''}
+${hasFaculty ? '<th>Faculty</th>' : ''}
+${hasLevel ? '<th>Level</th>' : ''}
+<th>Credits</th>
+<th>Students</th>
+<th style="text-align:center; line-height:1.2;">
+Proportion of<br>
+<span style="font-size:13px; font-weight:500;margin-top:4px;">
+FC Students
+</span>
+</th>
+<th>Avg / Section</th>
+</tr></thead><tbody>`;
+data.forEach((s, i) => {
+const code = s.kod_subjek || 'N/A';
+const name = s.nama_subjek || 'N/A';
+// Extract credit from last character of course code
+let creditFromCode = 0;
+if (code && /\d$/.test(code)) {
+creditFromCode = parseInt(code.slice(-1), 10);
+}
+const prog = s.kod_program || 'N/A';
+const fac = s.fakulti || 'N/A';
+const level = s.peringkat || 'N/A';
+const term = highlightTerm.toLowerCase();
+const shouldHighlight = highlightTerm && (
+(highlightField === 'all' && [code, name, prog, level].some(x => x.toLowerCase().includes(term))) ||
+(highlightField === 'code' && code.toLowerCase().includes(term)) ||
+(highlightField === 'name' && name.toLowerCase().includes(term)) ||
+(highlightField === 'program' && prog.toLowerCase().includes(term)) ||
+(highlightField === 'level' && level.toLowerCase().includes(term))
+);
+const sections = s.bil_seksyen || 0;
+const students = s.bil_pelajar || 0;
+const avgPerSection = sections > 0
+? Math.round(students / sections)
+: 0;
+html += `<tr ${shouldHighlight ? 'style="background-color:#fff9c4;"' : ''} onclick="viewSubjectDetails(${i},true)">
+<td>${i + 1}</td>
+${hasCode ? `<td><strong>${code}</strong></td>` : ''}
+${hasName ? `<td>${name}</td>` : ''}
+${hasProgram ? `<td>${prog}</td>` : ''}
+${hasFaculty ? `<td>${fac}</td>` : ''}
+${hasLevel ? `<td>${level}</td>` : ''}
+<td class="w3-center">${creditFromCode}</td>
+<td class="w3-center">${students}</td>
+<td class="percent-cell" style="text-align:center;">
+<div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
+<strong>${s.student_percentage}%</strong>
+<div class="percent-bar">
+<div
+class="percent-joined"
+style="width:${s.student_percentage}%"
+title="Joined: ${s.student_percentage}%"
+></div>
+<div
+class="percent-not-joined"
+style="width:${100 - s.student_percentage}%"
+title="Not Joined: ${100 - s.student_percentage}%"
+></div>
+</div>
+</div>
+</td>
+<td class="w3-center">
+<strong>${avgPerSection}</strong>
+<div class="w3-tiny" style="color:#6b7280;">
+${sections} sections
+</div>
+</td>
+</tr>`;
+});
+html += `</tbody></table></div>`;
+const totalCredits = data.reduce((sum, s) => sum + (parseInt(s.kredit) || 0), 0);
+html += `<div class="summary-card">
+<p><i class="fas fa-database"></i> <strong>Total Subjects:</strong> ${data.length}</p>
+</div>`;
+container.innerHTML = html;
+}
+function applySearch() {
+const term = document.getElementById('searchInput').value.trim();
+const by = document.getElementById('searchBySelect').value;
+const fac = document.getElementById('facultyFilter').value;
+applyFilters(term, by, fac);
+}
+function applyFilters(searchTerm, searchBy, facultyFilter) {
+if (!currentSubjectsData.length) return;
+// Always read latest UI values
+searchTerm = searchTerm ?? document.getElementById('searchInput').value.trim();
+searchBy = searchBy ?? document.getElementById('searchBySelect').value;
+facultyFilter = facultyFilter ?? document.getElementById('facultyFilter').value;
+let filtered = currentSubjectsData;
+// Faculty filter logic
+if (facultyFilter === 'all') {
+filtered = filtered.filter(s =>
+(s.bil_seksyen || 0) > 0 &&
+(s.bil_pelajar || 0) > 0
+);
+}
+else if (facultyFilter === 'fsksm') {
+filtered = filtered.filter(s =>
+s.kod_subjek !== 'UBSS1032' &&
+(s.bil_seksyen || 0) > 0 &&
+(s.bil_pelajar || 0) > 0 &&
+(s.bil_pensyarah || 0) > 0
+);
+}
+else if (facultyFilter === 'other') {
+filtered = filtered.filter(s =>
+(s.bil_seksyen || 0) > 0 &&
+(s.bil_pelajar || 0) > 0 &&
+(
+s.kod_subjek === 'UBSS1032' ||
+!s.bil_pensyarah ||
+s.bil_pensyarah === 0
+)
+);
+}
+// Search filter
+if (searchTerm) {
+const term = searchTerm.toLowerCase();
+filtered = filtered.filter(s => {
+const code = (s.kod_subjek || '').toLowerCase();
+const name = (s.nama_subjek || '').toLowerCase();
+switch (searchBy) {
+case 'code':
+return code.includes(term);
+case 'name':
+return name.includes(term);
+default:
+return code.includes(term) || name.includes(term);
+}
+});
+}
+currentRenderedSubjects = filtered;
+renderSubjectsTable(filtered, searchTerm, searchBy);
+renderSubjectsBarChart(filtered);
+updateStats(filtered, searchTerm || facultyFilter);
+}
+function clearAllFilters() {
+document.getElementById('searchInput').value = '';
+document.getElementById('facultyFilter').value = 'all';
+document.getElementById('searchBySelect').value = 'all';
+if (currentSubjectsData.length) {
+currentRenderedSubjects = currentSubjectsData;
+renderSubjectsTable(currentSubjectsData);
+renderSubjectsBarChart(currentSubjectsData);
+updateStats(currentSubjectsData);
+}
+}
+function updateStats(data, filterText = '') {
+let html = `<i class="fas fa-chart-bar"></i> `;
+if (filterText) {
+html += `Showing <strong>${data.length}</strong> subjects (filtered)`;
+} else {
+html += `Loaded <strong>${data.length}</strong> subjects`;
+}
+document.getElementById('statsInfo').innerHTML =
+`${html} • <strong>${totalStudents}</strong> students`;
+}
+function exportData() {
+const exportDataSource = currentRenderedSubjects.length
+? currentRenderedSubjects
+: currentSubjectsData;
+if (!exportDataSource.length) {
+alert("No data to export!");
+return;
+}
+try {
+const headers = Object.keys(exportDataSource[0]);
+const csvRows = [];
+csvRows.push(headers.join(','));
+exportDataSource.forEach(subject => {
+const row = headers.map(h => {
+const val = subject[h] == null ? '' : String(subject[h]);
+return `"${val.replace(/"/g, '""')}"`;
+});
+csvRows.push(row.join(','));
+});
+const csvContent = csvRows.join('\n');
+const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+const url = URL.createObjectURL(blob);
+const a = document.createElement('a');
+const sesi = document.getElementById('sessionSelect').value.replace('/', '-');
+const semester = document.getElementById('semesterSelect').value;
+a.href = url;
+a.download = `subjects_${sesi}_sem${semester}.csv`;
+document.body.appendChild(a);
+a.click();
+document.body.removeChild(a);
+URL.revokeObjectURL(url);
+alert(`✅ Exported ${exportDataSource.length} subjects`);
+} catch (err) {
+alert("Export failed: " + err.message);
+}
+}
+window.viewSubjectDetails = async function(index, fromFiltered = false) {
+const data = fromFiltered
+? currentRenderedSubjects[index]
+: currentSubjectsData[index];
+if (!data) return;
+const kod = data.kod_subjek;
+// Extract credit from course code (last digit)
+let creditFromCode = 0;
+if (kod && /\d$/.test(kod)) {
+creditFromCode = parseInt(kod.slice(-1), 10);
+}
+const sesi = document.getElementById('sessionSelect').value;
+const semester = document.getElementById('semesterSelect').value;
+if (!kod) return;
+const modal = document.getElementById('subjectDetailsModal');
+document.getElementById('modalTitle').textContent = `Loading: ${kod}`;
+document.getElementById('modalContent').innerHTML = '<div class="loading-container"><div class="spinner"></div><p>Loading...</p></div>';
+modal.style.display = 'block';
+try {
+const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=subjek_seksyen&sesi=${encodeURIComponent(sesi)}&semester=${encodeURIComponent(semester)}&kod_subjek=${encodeURIComponent(kod)}`;
+const res = await fetch(url);
+const text = await res.text();
+if (!text.trim()) throw new Error("Empty response");
+let sectData = JSON.parse(text);
+if (!Array.isArray(sectData) && sectData.seksyen_list) {
+// OK, keep as-is
+} else if (Array.isArray(sectData)) {
+sectData = { kod_subjek: kod, nama_subjek: data.nama_subjek, seksyen_list: sectData, bil_seksyen: sectData.length };
+} else {
+throw new Error("Bad format");
+}
+const allSections = sectData.seksyen_list || [];
+const bilSeksyen = data.bil_seksyen ?? allSections.length;
+const displayedSections = allSections.filter(
+s => s.seksyen && s.seksyen.trim() !== ''
+);
+const totalStud = displayedSections.reduce(
+(sum, s) => sum + (parseInt(s.bil_pelajar) || 0), 0);
+let html = `
+<div class="info-card" style="padding:14px;">
+<h4 style="
+margin:0 0 10px 0;
+font-size:16.5px;
+font-weight:600;
+color:#111827;
+padding-bottom:6px;
+border-bottom:3px solid #e5e7eb;
+">
+${sectData.nama_subjek || kod}
+</h4>
+<div style="
+font-size:13.5px;
+line-height:1.6;
+">
+<div style="margin-bottom:4px;">
+<span style="color:#6b7280;">Code:</span>
+<strong>${kod}</strong>
+</div>
+<div style="margin-bottom:4px;">
+<span style="color:#6b7280;">Credit:</span>
+<strong>${creditFromCode}</strong>
+</div>
+<div style="margin-bottom:4px;">
+<span style="color:#6b7280;">Total Sections:</span>
+<strong>${bilSeksyen}</strong>
+</div>
+<div>
+<span style="color:#6b7280;">Total Students:</span>
+<strong>${data.bil_pelajar ?? 0}</strong>
+</div>
+</div>
+</div>
+`;
+if (displayedSections.length) {
+html += `<p><strong>Sections with lecturers:</strong></p><div class="table-wrapper"><table class="w3-table w3-bordered w3-striped"><thead><tr class="w3-teal"><th>Section</th><th>Lecturer</th><th>Students</th></tr></thead><tbody>`;
+displayedSections.forEach(s => {
+html += `<tr><td>${s.seksyen}</td><td>${s.pensyarah ? s.pensyarah : '<span style="color:#999;">Not Assigned</span>'}</td><td class="w3-center">${s.bil_pelajar || 0}</td></tr>`;
+});
+html += `</tbody></table></div>`;
+html += `<div class="summary-card" style="margin-top:12px;"><p><i class="fas fa-users"></i> <strong>Total Students:</strong> ${totalStud}</p></div>`;
+} else if (bilSeksyen > 0) {
+html += `
+<div style="
+padding:14px;
+background:rgba(13,148,136,0.06);
+border-radius:8px;
+margin-top:14px;
+">
+<div style="
+display:flex;
+align-items:center;
+gap:8px;
+color:#0f766e;
+font-weight:500;
+margin-bottom:10px;
+">
+<i class="fas fa-layer-group" style="opacity:0.8;"></i>
+<span>Sections</span>
+</div>
+<div style="display:flex; gap:8px; flex-wrap:wrap;">
+${Array.from({ length: bilSeksyen }, (_, i) =>
+`<button
+class="btn btn-secondary action-btn"
+onclick="openTimetable('${kod}', '${i + 1}')">
+Section ${i + 1}
+</button>`
+).join('')}
+</div>
+</div>
+`;
+}
+else {
+html += `
+<div class="empty-state" style="padding:12px;">
+<i class="fas fa-info-circle"></i> No sections available
+</div>
+`;
+}
+document.getElementById('modalTitle').textContent = `Subject Details: ${kod}`;
+document.getElementById('modalContent').innerHTML = html;
+window.currentSubjectForCopy = sectData;
+} catch (err) {
+document.getElementById('modalContent').innerHTML = `<div class="error-container"><h4>Error</h4><p>${err.message}</p></div>`;
+}
+};
+window.closeSubjectModal = () => {
+document.getElementById('subjectDetailsModal').style.display = 'none';
+};
+window.copySubjectDetails = () => {
+if (window.currentSubjectForCopy) {
+navigator.clipboard.writeText(JSON.stringify(window.currentSubjectForCopy, null, 2))
+.then(() => alert("Copied to clipboard!"));
+}
+};
+function showLoading(show, msg = '') {
+document.getElementById('loadingSpinner').style.display = show ? 'flex' : 'none';
+if (msg) document.getElementById('loadingMessage').textContent = msg;
+document.getElementById('loadSubjectsBtn').disabled = show;
+}
+function showError(title, msg) {
+document.getElementById('errorTitle').textContent = title;
+document.getElementById('errorMessage').textContent = msg;
+document.getElementById('errorContainer').style.display = 'block';
+}
+window.hideError = function() {
+document.getElementById('errorContainer').style.display = 'none';
+};
+}
+// ===== TIMETABLE HELPERS =====
+const hariMap = {
+1: "Ahad",
+2: "Isnin",
+3: "Selasa",
+4: "Rabu",
+5: "Khamis",
+6: "Jumaat",
+7: "Sabtu"
+};
+const masaMap = {
+2: "08:00 - 09:00",
+3: "09:00 - 10:00",
+4: "10:00 - 11:00",
+5: "11:00 - 12:00",
+6: "12:00 - 13:00",
+7: "13:00 - 14:00",
+8: "14:00 - 15:00",
+9: "15:00 - 16:00",
+10: "16:00 - 17:00",
+11: "17:00 - 18:00"
+};
+function groupTimetable(data) {
+data.sort((a, b) => a.hari - b.hari || a.masa - b.masa);
+const grouped = [];
+data.forEach(item => {
+const last = grouped[grouped.length - 1];
+if (
+last &&
+last.hari === item.hari &&
+last.endMasa + 1 === item.masa &&
+last.ruang.kod_ruang === item.ruang.kod_ruang
+) {
+last.endMasa = item.masa;
+} else {
+grouped.push({
+hari: item.hari,
+startMasa: item.masa,
+endMasa: item.masa,
+ruang: item.ruang
+});
+}
+});
+return grouped;
+}
+const daysOrder = [2, 3, 4, 5, 6]; // Mon → Fri
+const dayNames = {
+2: 'Monday',
+3: 'Tuesday',
+4: 'Wednesday',
+5: 'Thursday',
+6: 'Friday'
+};
+const timeSlots = [
+{ key: 2, label: '08:00 - 09:00' },
+{ key: 3, label: '09:00 - 10:00' },
+{ key: 4, label: '10:00 - 11:00' },
+{ key: 5, label: '11:00 - 12:00' },
+{ key: 6, label: '12:00 - 13:00' },
+{ key: 7, label: '13:00 - 14:00' },
+{ key: 8, label: '14:00 - 15:00' },
+{ key: 9, label: '15:00 - 16:00' },
+{ key: 10, label: '16:00 - 17:00' },
+{ key: 11, label: '17:00 - 18:00' }
+];
+function renderTimetable(jsonData) {
+// ===== CHECK IF hari & masa EXIST =====
+const hasTimeAndDay = jsonData.some(
+item => item.hari !== undefined && item.masa !== undefined
+);
+// ===== FALLBACK (KEEP OLD BEHAVIOUR) =====
+if (!hasTimeAndDay) {
+let html = `
+<div class="info-card">
+<strong>Available Timetable Information</strong>
+<div style="margin-top:8px; font-size:13.5px; line-height:1.6;">
+`;
+jsonData.forEach(item => {
+html += `
+<div style="padding:8px 0; border-bottom:1px dashed #e5e7eb;">
+${item.ruang?.nama_ruang ? `<div><strong>Room:</strong> ${item.ruang.nama_ruang}</div>` : ''}
+${item.ruang?.kod_ruang ? `<div><strong>Room Code:</strong> ${item.ruang.kod_ruang}</div>` : ''}
+${item.ruang?.nama_ruang_singkatan ? `<div><strong>Short:</strong> ${item.ruang.nama_ruang_singkatan}</div>` : ''}
+</div>
+`;
+});
+html += `
+</div>
+<div style="margin-top:8px; font-size:12px; color:#6b7280;">
+Day and time information is not available for this section.
+</div>
+</div>
+`;
+document.getElementById('timetableModalContent').innerHTML = html;
+return; // ⛔ STOP here
+}
+// ===== GROUP SESSIONS (YOUR ORIGINAL LOGIC) =====
+const grouped = groupTimetable(jsonData);
+// ===== FULL ANALYSIS (UNCHANGED) =====
+let totalHours = 0;
+const daysSet = new Set();
+grouped.forEach(item => {
+const hours = item.endMasa - item.startMasa + 1;
+totalHours += hours;
+daysSet.add(item.hari);
+});
+const totalDays = daysSet.size;
+const totalSessions = grouped.length;
+const analysisHtml = `
+<div class="info-card" style="margin-bottom:16px;">
+<strong>Weekly Timetable Summary</strong>
+<div style="margin-top:6px; font-size:13.5px; line-height:1.6;">
+🕒 <strong>${totalHours}</strong> teaching hours / week<br>
+📅 <strong>${totalDays}</strong> teaching days<br>
+📚 <strong>${totalSessions}</strong> teaching sessions
+</div>
+</div>
+`;
+// ===== MAP SLOT DATA =====
+const slotMap = {};
+jsonData.forEach(item => {
+slotMap[`${item.hari}-${item.masa}`] = item;
+});
+// ===== GRID TABLE =====
+let tableHtml = `
+<div class="table-wrapper" style="max-height:420px; overflow:auto;">
+<table class="w3-table w3-bordered timetable-grid">
+<thead class="w3-teal">
+<tr>
+<th style="width:130px;">Time</th>
+${daysOrder.map(d => `<th>${dayNames[d]}</th>`).join('')}
+</tr>
+</thead>
+<tbody>
+`;
+timeSlots.forEach(slot => {
+tableHtml += `<tr><td><strong>${slot.label}</strong></td>`;
+daysOrder.forEach(day => {
+const cell = slotMap[`${day}-${slot.key}`];
+tableHtml += `
+<td>
+${cell ? `
+<div class="timetable-cell">
+<strong>${cell.ruang.nama_ruang_singkatan}</strong><br>
+<span style="font-size:11px;">${cell.ruang.nama_ruang}</span><br>
+<span style="font-size:10px;color:#6b7280;">
+${cell.ruang.kod_ruang}
+</span>
+</div>
+` : ''}
+</td>
+`;
+});
+tableHtml += `</tr>`;
+});
+tableHtml += `
+</tbody>
+</table>
+</div>
+`;
+// ===== FINAL RENDER =====
+document.getElementById('timetableModalContent').innerHTML =
+analysisHtml + tableHtml;
+}
+async function openTimetable(kodSubjek, seksyen) {
+const sesi = document.getElementById('sessionSelect').value;
+const semester = document.getElementById('semesterSelect').value;
+const modal = document.getElementById('timetableModal');
+const subjectInfo = currentSubjectsData.find(
+s => s.kod_subjek === kodSubjek
+);
+const subjectName = subjectInfo?.nama_subjek || 'Unknown Subject';
+document.getElementById('timetableModalTitle').textContent =
+`${kodSubjek} – ${subjectName} (Section ${seksyen})`;
+document.getElementById('timetableModalContent').innerHTML = `
+<p>Loading timetable...</p>
+`;
+modal.style.display = 'block';
+try {
+const url =
+`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi` +
+`?entity=jadual_subjek` +
+`&sesi=${encodeURIComponent(sesi)}` +
+`&semester=${encodeURIComponent(semester)}` +
+`&kod_subjek=${encodeURIComponent(kodSubjek)}` +
+`&seksyen=${encodeURIComponent(seksyen)}`;
+const res = await fetch(url);
+const text = await res.text();
+if (!text.trim()) throw new Error("Empty timetable data");
+const json = JSON.parse(text);
+if (!Array.isArray(json) || json.length === 0) {
+throw new Error("No timetable found for this section");
+}
+renderTimetable(json);
+} catch (err) {
+document.getElementById('timetableModalContent').innerHTML = `
+<div class="error-container">
+<h4>Error</h4>
+<p>${err.message}</p>
+</div>
+`;
+}
+}
+function closeTimetableModal() {
+document.getElementById('timetableModal').style.display = 'none';
+}
+async function openSubjectAnalysis(subject) {
+const sesi = document.getElementById('sessionSelect').value;
+const semester = document.getElementById('semesterSelect').value;
+document.getElementById('analysisTitle').textContent =
+`Analysis • ${subject.kod_subjek} – ${subject.nama_subjek || 'N/A'}`;
+document.getElementById('analysisModal').style.display = 'block';
+const url =
+`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi` +
+`?entity=subjek_seksyen` +
+`&sesi=${encodeURIComponent(sesi)}` +
+`&semester=${encodeURIComponent(semester)}` +
+`&kod_subjek=${encodeURIComponent(subject.kod_subjek)}`;
+const res = await fetch(url);
+const text = await res.text();
+const raw = JSON.parse(text);
+lecturerCache[subject.kod_subjek] = raw;
+// ✅ FIX STARTS HERE
+let subjectData = null;
+if (Array.isArray(raw)) {
+subjectData = raw.find(
+s => s.kod_subjek === subject.kod_subjek
+);
+} else if (raw && raw.kod_subjek === subject.kod_subjek) {
+subjectData = raw;
+}
+if (!subjectData) {
+console.warn('Subject not found:', subject.kod_subjek);
+renderNoSection();
+return;
+}
+const sections = (subjectData.seksyen_list || []).sort(
+(a, b) => Number(a.seksyen) - Number(b.seksyen)
+);
+if (!sections.length) {
+renderNoSection();
+return;
+}
+// ✅ FIX ENDS HERE
+analyzeLecturerLoad(sections);
+renderSectionSummary(sections);
+renderSectionChart(sections);
+renderLecturerAnalysis(subjectData);
+}
+function renderNoSection() {
+document.getElementById('sectionChartContainer').innerHTML =
+`<div class="empty-state">No section data available</div>`;
+}
+function getStudentColor(count) {
+if (count <= 20) return '#FFC107';   // yellow
+if (count <= 40) return '#4CAF50';   // green
+return '#F44336';                    // red
+}
+function renderSectionChart(sections) {
+if (!sections.length) {
+console.warn('No sections to render');
+return;
+}
+const ctx = document.getElementById('sectionChart').getContext('2d');
+// destroy old chart safely
+if (window.sectionChart instanceof Chart) {
+window.sectionChart.destroy();
+}
+const labels = sections.map(s => `Section ${s.seksyen}`);
+const data = sections.map(s => s.bil_pelajar);
+const colors = sections.map(s => getStudentColor(s.bil_pelajar));
+window.sectionChart = new Chart(ctx, {
+type: 'bar',
+data: {
+labels,
+datasets: [{
+label: 'Number of Students',
+data,
+backgroundColor: colors
+}]
+},
+options: {
+responsive: true,
+maintainAspectRatio: false,
+onClick: (evt, elements) => {
+if (!elements.length) return;
+const index = elements[0].index;
+const section = sections[index];
+// Uses your EXISTING function
+openTimetable(
+document.getElementById('analysisTitle')
+.textContent
+.split('•')[1]
+.split('–')[0]
+.trim(),   // kod_subjek
+section.seksyen
+);
+},
+scales: {
+y: {
+beginAtZero: true,
+title: { display: true, text: 'Number of Students' }
+}
+},
+plugins: {
+tooltip: {
+callbacks: {
+title: (items) => {
+return items[0].label;
+},
+label: (item) => {
+const section = sections[item.dataIndex];
+const count = section.bil_pelajar;
+let status = 'Optimal';
+if (count <= 20) status = 'Under-enrolled';
+else if (count > 40) status = 'Over-capacity';
+return [
+`Students: ${count}`,
+`Lecturer: ${section.pensyarah || 'N/A'}`,
+`Status: ${status}`
+];
+}
+}
+},
+legend: {
+display: false
+}
+},
+scales: {
+y: {
+beginAtZero: true,
+title: {
+display: true,
+text: 'Number of Students'
+}
+},
+x: {
+title: {
+display: true,
+text: 'Section'
+}
+}
+}
+}
+});
+}
+function analyzeLecturerLoad(sections) {
+const lecturerMap = {};
+sections.forEach(s => {
+const name = s.pensyarah?.trim();
+if (!name) return;
+if (!lecturerMap[name]) {
+lecturerMap[name] = {
+sections: [],
+totalStudents: 0
+};
+}
+lecturerMap[name].sections.push({
+seksyen: s.seksyen,
+students: parseInt(s.bil_pelajar) || 0
+});
+lecturerMap[name].totalStudents += parseInt(s.bil_pelajar) || 0;
+});
+renderLecturerLoadChart(lecturerMap);
+renderLecturerNameAnalysis(lecturerMap);
+}
+function renderLecturerLoadChart(lecturerMap) {
+const ctx = document.getElementById('lecturerLoadChart').getContext('2d');
+const labels = Object.keys(lecturerMap);
+const values = labels.map(l => lecturerMap[l].totalStudents);
+if (lecturerLoadChart) lecturerLoadChart.destroy();
+lecturerLoadChart = new Chart(ctx, {
+type: 'bar',
+data: {
+labels,
+datasets: [{
+label: 'Total Students Handled',
+data: values,
+borderWidth: 1
+}]
+},
+options: {
+responsive: true,
+scales: {
+y: { beginAtZero: true }
+},
+plugins: {
+title: {
+display: true,
+text: 'Lecturer Load by Total Students'
+},
+tooltip: {
+callbacks: {
+title: (items) => items[0].label,
+label: (item) => {
+const lecturer = item.label;
+const info = lecturerMap[lecturer];
+const lines = info.sections.map(
+s => `Section ${s.seksyen}: ${s.students} students`
+);
+lines.push(`Total: ${info.totalStudents} students`);
+return lines;
+}
+}
+}
+}
+}
+});
+}
+function renderLecturerNameAnalysis(lecturerMap) {
+let html = `<strong>Lecturer Workload Analysis</strong><div style="margin-top:8px;">`;
+let overloadFound = false;
+Object.entries(lecturerMap).forEach(([name, info]) => {
+const sectionCount = info.sections.length;     // ✅ FIX
+const studentCount = info.totalStudents;       // ✅ FIX
+const overloaded = sectionCount > 2;
+if (overloaded) overloadFound = true;
+html += `
+<div style="margin-bottom:6px; color:${overloaded ? '#b91c1c' : '#15803d'};">
+👨‍🏫 <strong>${name}</strong> —
+${sectionCount} sections,
+${studentCount} students
+${overloaded ? '⚠️ Overloaded' : '✅ Balanced'}
+</div>
+`;
+});
+if (!overloadFound) {
+html += `
+<div style="margin-top:8px; font-weight:600; color:#15803d;">
+✅ No lecturer is assigned to more than 2 sections
+</div>
+`;
+}
+html += `</div>`;
+document.getElementById('lecturerNameAnalysis').innerHTML = html;
+}
+function closeAnalysisModal() {
+document.getElementById('analysisModal').style.display = 'none';
+}
+function renderSectionSummary(sections) {
+const totalSections = sections.length;
+const totalStudents = sections.reduce(
+(sum, s) => sum + (parseInt(s.bil_pelajar) || 0), 0
+);
+const lecturers = new Set(
+sections
+.map(s => s.pensyarah?.trim())
+.filter(Boolean)
+);
+document.getElementById('sectionSummary').innerHTML = `
+📊 ${totalSections} Sections |
+👨‍🎓 ${totalStudents} Students |
+👨‍🏫 ${lecturers.size} Lecturers
+`;
+}
+</script>
 </body>
 </html>
